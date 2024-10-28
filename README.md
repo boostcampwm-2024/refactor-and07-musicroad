@@ -4,11 +4,10 @@
 
 ## 👨‍👩‍👧‍👦 팀원 소개
 
-| 코드      | K002                                          | K009                                          | K018                                          | K050                                          |
-|-----------|-----------------------------------------------|-----------------------------------------------|-----------------------------------------------|-----------------------------------------------|
-| 이름      | 강민주                                       | 김승규                                       | 김희준                                       | 주윤겸                                       |
-| 아바타 링크 | ![Avatar](https://avatars.githubusercontent.com/u/88606886?v=4) | ![Avatar](https://avatars.githubusercontent.com/u/31722615?v=4) | ![Avatar](https://avatars.githubusercontent.com/u/69344306?v=4) | ![Avatar](https://avatars.githubusercontent.com/u/30407907?v=4) |
-| GitHub ID | @meanjoo                                     | @miler198                                    | @Heejun-0219                                 | @yuni-ju                                     |
+|K002 강민주|K009 김승규|K018 김희준|K050 주윤겸|
+|:---:|:---:|:---:|:---:|
+|<img src="https://avatars.githubusercontent.com/u/88606886?v=4" width="300">|<img src="https://avatars.githubusercontent.com/u/31722615?v=4" width="300">|<img src="https://avatars.githubusercontent.com/u/69344306?v=4" width="300">|<img src="https://avatars.githubusercontent.com/u/30407907?v=4" width="300">|
+|[@meanjoo](https://github.com/meanjoo)|[@miler198](https://github.com/miller198)|[@Heejun-0219](https://github.com/Heejun-0219)|[@yuni-ju](https://github.com/yuni-ju)|
 
 ## 📜 그라운드룰
 
