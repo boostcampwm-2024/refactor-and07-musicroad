@@ -17,6 +17,8 @@ import javax.inject.Singleton
 @InstallIn(SingletonComponent::class)
 internal object ApiModule {
 
+    private const val BASE_URL = ""
+
     @Provides
     @Singleton
     fun provideOkhttpClient(): OkHttpClient = OkHttpClient.Builder().build()
@@ -48,6 +50,4 @@ internal object ApiModule {
         ignoreUnknownKeys = true
         coerceInputValues = true
     }
-
-    private const val BASE_URL = ""
 }
