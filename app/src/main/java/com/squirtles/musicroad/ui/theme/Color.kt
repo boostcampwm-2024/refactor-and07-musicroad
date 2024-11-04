@@ -6,7 +6,7 @@ val Primary = Color(0xFFFF5F61)
 val Blue = Color(0xFF6B84FF)
 
 val Purple = Color(0xFFBB8280)
-val Purple_15 = Color(0x26BB8280)
+val Purple15 = Color(0x26BB8280)
 val PurpleGrey = Color(0xFFB4AEAE)
 
 val Black = Color(0xFF000000)
