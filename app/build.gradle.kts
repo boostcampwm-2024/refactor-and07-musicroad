@@ -35,7 +35,10 @@ android {
     buildTypes {
         release {
             isMinifyEnabled = false
-            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro"
+            )
         }
     }
     compileOptions {
@@ -60,8 +63,6 @@ android {
 }
 
 dependencies {
-    implementation("com.naver.maps:map-sdk:3.19.1")
-
     implementation(projects.domain)
     implementation(projects.data)
 
@@ -88,4 +89,6 @@ dependencies {
 
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.analytics)
+
+    implementation(libs.map.sdk)
 }
