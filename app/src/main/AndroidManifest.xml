@@ -18,7 +18,7 @@
             android:value="${NAVERMAP_CLIENT_ID}" />
 
         <activity
-            android:name=".MainActivity"
+            android:name=".main.MainActivity"
             android:exported="true"
             android:label="@string/app_name"
             android:theme="@style/Theme.AppCompat.NoActionBar">
