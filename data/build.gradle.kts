@@ -42,13 +42,19 @@ dependencies {
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
 
+    // Hilt
     implementation(libs.hilt.android)
     ksp(libs.hilt.android.compiler)
     androidTestImplementation(libs.hilt.android.testing)
     kspAndroidTest(libs.hilt.android.compiler)
 
+    // OkHttp
+    implementation(libs.okhttp.logging)
+
+    // Retrofit
     implementation(libs.retrofit.core)
     implementation(libs.retrofit.kotlin.serialization)
-    implementation(libs.okhttp.logging)
+
+    // Kotlinx Serialization
     implementation(libs.kotlinx.serialization.json)
 }
