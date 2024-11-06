@@ -1,6 +1,8 @@
 [versions]
 agp = "8.5.1"
 firebaseBom = "33.5.1"
+firebaseDynamicModuleSupportVersion = "16.0.0-beta03"
+geofireAndroidCommon = "3.2.0"
 kotlin = "1.9.0"
 coreKtx = "1.13.1"
 junit = "4.13.2"
@@ -23,6 +25,7 @@ googleServices = "4.4.2"
 constraintlayout = "2.2.0"
 uiViewbinding = "1.7.5"
 playServicesLocation = "21.3.0"
+firebaseFirestoreKtx = "25.1.1"
 
 [libraries]
 # AndroidX
@@ -45,8 +48,12 @@ androidx-navigation-compose = { module = "androidx.navigation:navigation-compose
 # Firebase
 firebase-analytics = { module = "com.google.firebase:firebase-analytics" }
 firebase-bom = { module = "com.google.firebase:firebase-bom", version.ref = "firebaseBom" }
+firebase-firestore-ktx = { group = "com.google.firebase", name = "firebase-firestore-ktx", version.ref = "firebaseFirestoreKtx" }
+
 
 # Test
+geofire-android-common = { module = "com.firebase:geofire-android-common", version.ref = "geofireAndroidCommon" }
+google-firebase-dynamic-module-support = { module = "com.google.firebase:firebase-dynamic-module-support", version.ref = "firebaseDynamicModuleSupportVersion" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 
 # Map
