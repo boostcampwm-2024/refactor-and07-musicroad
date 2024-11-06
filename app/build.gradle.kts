@@ -98,4 +98,5 @@ dependencies {
 
     // Map
     implementation(libs.map.sdk)
+    implementation(libs.play.services.location)
 }
