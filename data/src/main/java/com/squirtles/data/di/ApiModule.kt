@@ -1,6 +1,8 @@
 package com.squirtles.data.di
 
+import com.squirtles.data.datasource.remote.api.SpotifyApi
 import com.squirtles.data.datasource.remote.api.TempApi
+import com.squirtles.data.datasource.remote.api.TokenApi
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -18,6 +20,8 @@ import javax.inject.Singleton
 internal object ApiModule {
 
     private const val BASE_URL = ""
+    private const val BASE_SPOTIFY_URL = "https://api.spotify.com/"
+    private const val BASE_TOKEN_URL = "https://accounts.spotify.com/"
 
     @Provides
     @Singleton
@@ -42,6 +46,32 @@ internal object ApiModule {
             .addConverterFactory(converterFactory)
             .client(okHttpClient).build()
             .create(TempApi::class.java)
+    }
+
+    @Provides
+    @Singleton
+    fun provideTokenApi(
+        okHttpClient: OkHttpClient,
+        converterFactory: Converter.Factory,
+    ): TokenApi {
+        return Retrofit.Builder()
+            .baseUrl(BASE_TOKEN_URL)
+            .addConverterFactory(converterFactory)
+            .client(okHttpClient).build()
+            .create(TokenApi::class.java)
+    }
+
+    @Provides
+    @Singleton
+    fun provideSpotifyApi(
+        okHttpClient: OkHttpClient,
+        converterFactory: Converter.Factory,
+    ): SpotifyApi {
+        return Retrofit.Builder()
+            .baseUrl(BASE_SPOTIFY_URL)
+            .addConverterFactory(converterFactory)
+            .client(okHttpClient).build()
+            .create(SpotifyApi::class.java)
     }
 
     @Provides
