@@ -59,6 +59,7 @@ class MapFragment : Fragment(), OnMapReadyCallback {
     override fun onMapReady(naverMap: NaverMap) {
         this.naverMap = naverMap
         initLocationOverlay()
+        setCameraZoomLimit()
         setInitLocation()
         setLocationChangeListener()
     }
@@ -75,9 +76,16 @@ class MapFragment : Fragment(), OnMapReadyCallback {
         }
     }
 
+    private fun setCameraZoomLimit() {
+        naverMap.minZoom = 6.0
+        naverMap.maxZoom = 18.0
+    }
+
     private fun initLocationOverlay() {
         naverMap.locationSource = locationSource
         naverMap.uiSettings.isLocationButtonEnabled = true
+        naverMap.uiSettings.isZoomControlEnabled = false
+        naverMap.uiSettings.isTiltGesturesEnabled = false
         naverMap.locationTrackingMode = LocationTrackingMode.Follow
 
         locationOverlay = naverMap.locationOverlay
