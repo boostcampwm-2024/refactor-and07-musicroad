@@ -7,6 +7,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.squirtles.musicroad.favorite.FavoriteScreen
 import com.squirtles.musicroad.map.MapScreen
+import com.squirtles.musicroad.setting.SettingScreen
 
 @Composable
 fun MainNavGraph(
@@ -21,11 +22,18 @@ fun MainNavGraph(
         modifier = modifier
     ) {
         composable(MainDestinations.MAIN_ROUTE) {
-            MapScreen()
+            MapScreen(
+                onFavoriteClick = navigationActions.navigateToFavorite,
+                onSettingClick = navigationActions.navigateToSetting
+            )
         }
 
         composable(MainDestinations.FAVORITE_ROUTE) {
             FavoriteScreen()
+        }
+
+        composable(MainDestinations.SETTING_ROUTE) {
+            SettingScreen()
         }
     }
 }

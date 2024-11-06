@@ -3,4 +3,9 @@
 
     <!-- Main -->
     <string name="main_permission_deny_message">설정에서 위치 권한을 허용해 주세요.</string>
+
+    <!-- Map -->
+    <string name="map_navigation_favorite_icon_description">픽 보관함 이동 버튼 아이콘</string>
+    <string name="map_navigation_setting_icon_description">설정 이동 버튼 아이콘</string>
+    <string name="map_navigation_center_icon_description">내비게이션 중앙 버튼 아이콘</string>
 </resources>
