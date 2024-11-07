@@ -1,7 +1,6 @@
 package com.squirtles.data.di
 
 import com.squirtles.data.datasource.remote.api.SpotifyApi
-import com.squirtles.data.datasource.remote.api.TempApi
 import com.squirtles.data.datasource.remote.api.TokenApi
 import dagger.Module
 import dagger.Provides
@@ -33,19 +32,6 @@ internal object ApiModule {
         json: Json,
     ): Converter.Factory {
         return json.asConverterFactory("application/json".toMediaType())
-    }
-
-    @Provides
-    @Singleton
-    fun provideTempApi(
-        okHttpClient: OkHttpClient,
-        converterFactory: Converter.Factory,
-    ): TempApi {
-        return Retrofit.Builder()
-            .baseUrl(BASE_URL)
-            .addConverterFactory(converterFactory)
-            .client(okHttpClient).build()
-            .create(TempApi::class.java)
     }
 
     @Provides

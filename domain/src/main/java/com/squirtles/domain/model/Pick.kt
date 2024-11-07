@@ -1,7 +1,5 @@
 package com.squirtles.domain.model
 
-import java.time.LocalDateTime
-
 /**
  * 앱에서 사용하기 위한 Pick 정보 데이터클래스
  */

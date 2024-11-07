@@ -5,9 +5,9 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import com.squirtles.musicroad.MapViewModel
 import com.squirtles.musicroad.favorite.FavoriteScreen
 import com.squirtles.musicroad.map.MapScreen
+import com.squirtles.musicroad.map.MapViewModel
 import com.squirtles.musicroad.setting.SettingScreen
 
 @Composable

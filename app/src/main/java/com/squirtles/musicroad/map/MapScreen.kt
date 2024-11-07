@@ -31,7 +31,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.fragment.app.FragmentActivity
 import androidx.fragment.app.FragmentContainerView
-import com.squirtles.musicroad.MapViewModel
 import com.squirtles.musicroad.R
 import com.squirtles.musicroad.ui.theme.MusicRoadTheme
 

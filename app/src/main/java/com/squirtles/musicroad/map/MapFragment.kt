@@ -23,7 +23,6 @@ import com.naver.maps.map.overlay.CircleOverlay
 import com.naver.maps.map.overlay.LocationOverlay
 import com.naver.maps.map.overlay.OverlayImage
 import com.naver.maps.map.util.FusedLocationSource
-import com.squirtles.musicroad.MapViewModel
 import com.squirtles.musicroad.R
 import com.squirtles.musicroad.databinding.FragmentMapBinding
 import com.squirtles.musicroad.ui.theme.Primary
@@ -68,8 +67,11 @@ class MapFragment : Fragment(), OnMapReadyCallback {
         setCameraZoomLimit()
         setInitLocation()
         setLocationChangeListener()
-        mapViewModel.fetchPick("1PJY507YTSR8vlX7VH5w")
+//        mapViewModel.fetchPick("1PJY507YTSR8vlX7VH5w")
 //        mapViewModel.fetchPick("1aDOLBPkTYqPyZJOvpBy")
+
+        // 테스트 : 네이버커넥트 기준 주변 5km 내 픽 정보 불러오기
+        mapViewModel.fetchPickInArea(37.380324, 127.115282, 5.0 * 1000.0)
     }
 
     private fun setInitLocation() {
