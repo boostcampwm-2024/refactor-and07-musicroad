@@ -72,10 +72,12 @@ class FirebaseDataSourceImpl @Inject constructor(
                 .startAt(bound.startHash)
                 .endAt(bound.endHash)
             queries.add(query)
-            tasks.add(query.get())
         }
 
         try {
+            queries.forEach { query ->
+                tasks.add(query.get())
+            }
             Tasks.whenAllComplete(tasks).await()
         } catch (exception: Exception) {
             Log.e("FirebaseDataSourceImpl", "Failed to fetch picks", exception)
@@ -84,7 +86,7 @@ class FirebaseDataSourceImpl @Inject constructor(
 
         tasks.forEach { task ->
             val snap = task.result
-            for (doc in snap.documents) {
+            snap.documents.forEach { doc ->
                 if (isAccurate(doc, center, radiusInM)) {
                     doc.toObject<FirebasePick>()?.run {
                         matchingPicks.add(this.toPick().copy(id = doc.id))
