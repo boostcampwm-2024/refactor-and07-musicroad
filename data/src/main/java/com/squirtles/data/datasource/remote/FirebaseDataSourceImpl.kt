@@ -9,6 +9,7 @@ import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
 import com.google.firebase.firestore.QuerySnapshot
+import com.google.firebase.firestore.toObject
 import com.squirtles.data.datasource.remote.model.firebase.FirebasePick
 import com.squirtles.data.mapper.toPick
 import com.squirtles.domain.datasource.FirebaseRemoteDataSource
@@ -32,7 +33,7 @@ class FirebaseDataSourceImpl @Inject constructor(
 
         db.collection("picks").document(pickID).get()
             .addOnSuccessListener { document ->
-                val firestorePick = document.toObject(FirebasePick::class.java)?.copy(id = pickID)
+                val firestorePick = document.toObject<FirebasePick>()?.copy(id = pickID)
                 Log.d("FirebaseDataSourceImpl", firestorePick.toString())
                 resultPick = firestorePick?.toPick()
             }
@@ -85,7 +86,7 @@ class FirebaseDataSourceImpl @Inject constructor(
             val snap = task.result
             for (doc in snap.documents) {
                 if (isAccurate(doc, center, radiusInM)) {
-                    doc.toObject(FirebasePick::class.java)?.run {
+                    doc.toObject<FirebasePick>()?.run {
                         matchingPicks.add(this.toPick().copy(id = doc.id))
                     }
                 }
