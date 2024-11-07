@@ -27,15 +27,21 @@ class FirebaseDataSourceImpl @Inject constructor(
      * @return  The fetched pick, or null if the pick does not exist on firestore.
      */
     override suspend fun fetchPick(pickID: String): Pick? {
-        return try {
-            val document = db.collection("picks").document(pickID).get().await()
-            val firestorePick = document.toObject(FirebasePick::class.java)?.copy(id = pickID)
-            Log.d("FirebaseDataSourceImpl", firestorePick.toString())
-            firestorePick?.toPick()
-        } catch (exception: Exception) {
-            // TODO: Error handling
-            throw exception
-        }
+        var resultPick: Pick? = null
+
+        val document = db.collection("picks").document(pickID).get()
+            .addOnSuccessListener { document ->
+                val firestorePick = document.toObject(FirebasePick::class.java)?.copy(id = pickID)
+                Log.d("FirebaseDataSourceImpl", firestorePick.toString())
+                resultPick = firestorePick?.toPick()
+            }
+            .addOnFailureListener { exception ->
+                // TODO: Error handling
+                throw exception
+            }
+            .await()
+
+        return resultPick
     }
 
     /**
@@ -50,7 +56,6 @@ class FirebaseDataSourceImpl @Inject constructor(
         lng: Double,
         radiusInM: Double
     ): List<Pick> {
-
         val center = GeoLocation(lat, lng)
         val bounds = GeoFireUtils.getGeoHashQueryBounds(center, radiusInM)
 
