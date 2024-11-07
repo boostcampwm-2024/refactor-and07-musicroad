@@ -1,5 +1,6 @@
 package com.squirtles.data.datasource.remote
 
+import android.util.Log
 import com.firebase.geofire.GeoFireUtils
 import com.firebase.geofire.GeoLocation
 import com.google.android.gms.tasks.Task
@@ -26,10 +27,10 @@ class FirebaseDataSourceImpl @Inject constructor(
      * @return  The fetched pick, or null if the pick does not exist on firestore.
      */
     override suspend fun fetchPick(pickID: String): Pick? {
-
         return try {
             val document = db.collection("picks").document(pickID).get().await()
-            val firestorePick = document.toObject(FirebasePick::class.java)
+            val firestorePick = document.toObject(FirebasePick::class.java)?.copy(id = pickID)
+            Log.d("FirebaseDataSourceImpl", firestorePick.toString())
             firestorePick?.toPick()
         } catch (exception: Exception) {
             // TODO: Error handling
@@ -52,6 +53,7 @@ class FirebaseDataSourceImpl @Inject constructor(
 
         val center = GeoLocation(lat, lng)
         val bounds = GeoFireUtils.getGeoHashQueryBounds(center, radiusInM)
+
         val tasks: MutableList<Task<QuerySnapshot>> = ArrayList()
         val matchingPicks: MutableList<FirebasePick> = ArrayList()
 

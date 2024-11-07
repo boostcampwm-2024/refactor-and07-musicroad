@@ -12,11 +12,11 @@ data class Pick(
     val songTitle: String,
     val location: GeoPoint,
     val comment: String,
-    val createdAt: LocalDateTime,
+    val createdAt: Long,
     val createdBy: String,
     val favoriteCount: Int = 0,
     val imageUrl: String,
-    val previewUrl: String? = null,
+    val previewUrl: String,
     val externalUrl: String,
 )
 
