@@ -1,5 +1,6 @@
-package com.squirtles.data.repository.firebase
+package com.squirtles.data.repository
 
+import com.squirtles.data.exception.FirebaseRepositoryException
 import com.squirtles.domain.datasource.FirebaseRemoteDataSource
 import com.squirtles.domain.model.Pick
 import com.squirtles.domain.repository.FirebaseRepository

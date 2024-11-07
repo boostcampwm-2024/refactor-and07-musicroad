@@ -1,4 +1,4 @@
-package com.squirtles.data.repository
+package com.squirtles.data.exception
 
 sealed class FirebaseRepositoryException(override val message: String) : Exception() {
     data class NoSuchPickException(override val message: String = "No such pick") :
