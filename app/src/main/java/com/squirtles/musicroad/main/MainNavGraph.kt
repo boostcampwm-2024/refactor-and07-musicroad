@@ -5,12 +5,14 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import com.squirtles.musicroad.MapViewModel
 import com.squirtles.musicroad.favorite.FavoriteScreen
 import com.squirtles.musicroad.map.MapScreen
 import com.squirtles.musicroad.setting.SettingScreen
 
 @Composable
 fun MainNavGraph(
+    mapViewModel: MapViewModel,
     navController: NavHostController,
     navigationActions: MainNavigationActions,
     modifier: Modifier = Modifier,
@@ -23,6 +25,7 @@ fun MainNavGraph(
     ) {
         composable(MainDestinations.MAIN_ROUTE) {
             MapScreen(
+                mapViewModel = mapViewModel,
                 onFavoriteClick = navigationActions.navigateToFavorite,
                 onSettingClick = navigationActions.navigateToSetting
             )

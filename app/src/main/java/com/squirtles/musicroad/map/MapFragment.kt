@@ -3,12 +3,14 @@ package com.squirtles.musicroad.map
 import android.Manifest
 import android.location.Location
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.compose.ui.graphics.toArgb
 import androidx.core.content.PermissionChecker
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import com.naver.maps.geometry.LatLng
@@ -21,6 +23,7 @@ import com.naver.maps.map.overlay.CircleOverlay
 import com.naver.maps.map.overlay.LocationOverlay
 import com.naver.maps.map.overlay.OverlayImage
 import com.naver.maps.map.util.FusedLocationSource
+import com.squirtles.musicroad.MapViewModel
 import com.squirtles.musicroad.R
 import com.squirtles.musicroad.databinding.FragmentMapBinding
 import com.squirtles.musicroad.ui.theme.Primary
@@ -35,6 +38,8 @@ class MapFragment : Fragment(), OnMapReadyCallback {
     private lateinit var locationOverlay: LocationOverlay
     private val circleOverlay = CircleOverlay()
 
+    private val mapViewModel: MapViewModel by activityViewModels()
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -47,6 +52,7 @@ class MapFragment : Fragment(), OnMapReadyCallback {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        Log.d("MapFragment", mapViewModel.toString())
         val mapView = binding.containerMap.getFragment<MapFragment>()
         mapView.getMapAsync(this)
     }
@@ -62,6 +68,8 @@ class MapFragment : Fragment(), OnMapReadyCallback {
         setCameraZoomLimit()
         setInitLocation()
         setLocationChangeListener()
+        mapViewModel.fetchPick("1PJY507YTSR8vlX7VH5w")
+//        mapViewModel.fetchPick("1aDOLBPkTYqPyZJOvpBy")
     }
 
     private fun setInitLocation() {
