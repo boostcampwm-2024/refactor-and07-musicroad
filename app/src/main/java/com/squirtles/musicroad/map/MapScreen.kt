@@ -89,7 +89,7 @@ fun BottomNavigation(
             modifier = Modifier
                 .size(245.dp, 50.dp)
                 .clip(CircleShape)
-                .background(color = MaterialTheme.colorScheme.onPrimary)
+                .background(color = MaterialTheme.colorScheme.surface)
         ) {
             // 왼쪽 버튼
             Box(

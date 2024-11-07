@@ -102,4 +102,8 @@ dependencies {
     // Map
     implementation(libs.map.sdk)
     implementation(libs.play.services.location)
+
+    // Coil
+    implementation(libs.coil.compose)
+    implementation(libs.coil.network.okhttp)
 }
