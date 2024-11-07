@@ -11,15 +11,15 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.runtime.remember
 import androidx.core.content.PermissionChecker
 import androidx.navigation.compose.rememberNavController
-import com.squirtles.musicroad.MapViewModel
 import com.squirtles.musicroad.R
+import com.squirtles.musicroad.map.MapViewModel
 import com.squirtles.musicroad.ui.theme.MusicRoadTheme
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
 
-    private val mapViewModel : MapViewModel by viewModels()
+    private val mapViewModel: MapViewModel by viewModels()
 
     private val permissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()
@@ -28,7 +28,11 @@ class MainActivity : AppCompatActivity() {
         if (allPermissionsGranted) {
             startMainScreen()
         } else {
-            Toast.makeText(this, getString(R.string.main_permission_deny_message), Toast.LENGTH_LONG).show()
+            Toast.makeText(
+                this,
+                getString(R.string.main_permission_deny_message),
+                Toast.LENGTH_LONG
+            ).show()
             finish()
         }
     }
