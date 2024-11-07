@@ -63,7 +63,7 @@ class FirebaseDataSourceImpl @Inject constructor(
 
         val queries: MutableList<Query> = ArrayList()
         val tasks: MutableList<Task<QuerySnapshot>> = ArrayList()
-        val matchingPicks: MutableList<FirebasePick> = ArrayList()
+        val matchingPicks: MutableList<Pick> = ArrayList()
 
         bounds.forEach { bound ->
             val query = db.collection("picks")
@@ -86,13 +86,13 @@ class FirebaseDataSourceImpl @Inject constructor(
             for (doc in snap.documents) {
                 if (isAccurate(doc, center, radiusInM)) {
                     doc.toObject(FirebasePick::class.java)?.run {
-                        matchingPicks.add(this.copy(id = doc.id))
+                        matchingPicks.add(this.toPick().copy(id = doc.id))
                     }
                 }
             }
         }
 
-        return matchingPicks.map { it.toPick() }
+        return matchingPicks
     }
 
     /**
