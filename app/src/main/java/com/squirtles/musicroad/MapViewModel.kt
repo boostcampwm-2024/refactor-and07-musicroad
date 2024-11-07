@@ -21,7 +21,29 @@ class MapViewModel @Inject constructor(
     fun fetchPick(pickId: String){
         viewModelScope.launch {
             val pick = fetchPickUseCase(pickId)
+            pick.onSuccess {
+                // TODO: UiState 등 사용할 수 도?
+            }
+            pick.onFailure {
+                // TODO
+            }
+
             Log.d("MapViewModel", pick.toString())
+        }
+    }
+
+    fun fetchPickInArea(lat: Double, lng: Double, radiusInM: Double){
+        viewModelScope.launch {
+            val picks = fetchPickInAreaUseCase(lat, lng, radiusInM)
+
+            picks.onSuccess {
+                // TODO
+            }
+            picks.onFailure {
+                // TODO
+            }
+
+            Log.d("MapViewModel", picks.toString())
         }
     }
 }

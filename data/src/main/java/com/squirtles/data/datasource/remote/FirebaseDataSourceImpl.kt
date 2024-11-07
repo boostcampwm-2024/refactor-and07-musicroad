@@ -7,6 +7,7 @@ import com.google.android.gms.tasks.Task
 import com.google.android.gms.tasks.Tasks
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.Query
 import com.google.firebase.firestore.QuerySnapshot
 import com.squirtles.data.datasource.remote.model.firebase.FirebasePick
 import com.squirtles.data.mapper.toPick
@@ -29,7 +30,7 @@ class FirebaseDataSourceImpl @Inject constructor(
     override suspend fun fetchPick(pickID: String): Pick? {
         var resultPick: Pick? = null
 
-        val document = db.collection("picks").document(pickID).get()
+        db.collection("picks").document(pickID).get()
             .addOnSuccessListener { document ->
                 val firestorePick = document.toObject(FirebasePick::class.java)?.copy(id = pickID)
                 Log.d("FirebaseDataSourceImpl", firestorePick.toString())
@@ -37,6 +38,7 @@ class FirebaseDataSourceImpl @Inject constructor(
             }
             .addOnFailureListener { exception ->
                 // TODO: Error handling
+                Log.e("FirebaseDataSourceImpl", "Failed to fetch a pick", exception)
                 throw exception
             }
             .await()
@@ -59,33 +61,36 @@ class FirebaseDataSourceImpl @Inject constructor(
         val center = GeoLocation(lat, lng)
         val bounds = GeoFireUtils.getGeoHashQueryBounds(center, radiusInM)
 
+        val queries: MutableList<Query> = ArrayList()
         val tasks: MutableList<Task<QuerySnapshot>> = ArrayList()
         val matchingPicks: MutableList<FirebasePick> = ArrayList()
 
         bounds.forEach { bound ->
-            val query = db.collection("picks").orderBy("geoHash").startAt(bound.startHash)
+            val query = db.collection("picks")
+                .orderBy("geoHash")
+                .startAt(bound.startHash)
                 .endAt(bound.endHash)
+            queries.add(query)
             tasks.add(query.get())
         }
 
-        // Collect all the query results together into a single list
-        Tasks.whenAllComplete(tasks)
-            .addOnCompleteListener {
-                tasks.forEach { task ->
-                    val snap = task.result
-                    for (doc in snap.documents) {
-                        if (isAccurate(doc, center, radiusInM)) {
-                            doc.toObject(FirebasePick::class.java)?.run {
-                                matchingPicks.add(this)
-                            }
-                        }
+        try {
+            Tasks.whenAllComplete(tasks).await()
+        } catch (exception: Exception) {
+            Log.e("FirebaseDataSourceImpl", "Failed to fetch picks", exception)
+            throw exception
+        }
+
+        tasks.forEach { task ->
+            val snap = task.result
+            for (doc in snap.documents) {
+                if (isAccurate(doc, center, radiusInM)) {
+                    doc.toObject(FirebasePick::class.java)?.run {
+                        matchingPicks.add(this.copy(id = doc.id))
                     }
                 }
             }
-            .addOnFailureListener { exception ->
-                // TODO: Error handling
-                throw exception
-            }
+        }
 
         return matchingPicks.map { it.toPick() }
     }

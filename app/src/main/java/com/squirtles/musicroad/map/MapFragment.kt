@@ -68,8 +68,11 @@ class MapFragment : Fragment(), OnMapReadyCallback {
         setCameraZoomLimit()
         setInitLocation()
         setLocationChangeListener()
-        mapViewModel.fetchPick("1PJY507YTSR8vlX7VH5w")
+//        mapViewModel.fetchPick("1PJY507YTSR8vlX7VH5w")
 //        mapViewModel.fetchPick("1aDOLBPkTYqPyZJOvpBy")
+
+        // 테스트 : 네이버커넥트 기준 주변 5km 내 픽 정보 불러오기
+        mapViewModel.fetchPickInArea(37.380324, 127.115282, 5.0 * 1000.0)
     }
 
     private fun setInitLocation() {
