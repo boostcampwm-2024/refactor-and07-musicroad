@@ -40,15 +40,8 @@ class FirebaseRepositoryImpl @Inject constructor(
         firebaseRepositoryException: FirebaseRepositoryException,
         call: suspend () -> T?
     ): Result<T> {
-        return try {
-            val response = call()
-            if (response != null) {
-                Result.success(response)
-            } else {
-                Result.failure(firebaseRepositoryException)
-            }
-        } catch (e: Exception) {
-            Result.failure(exception = e)
+        return runCatching {
+            call() ?: throw firebaseRepositoryException
         }
     }
 }
