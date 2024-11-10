@@ -25,7 +25,7 @@
             android:name=".main.MainActivity"
             android:exported="true"
             android:label="@string/app_name"
-            android:theme="@style/Theme.AppCompat.NoActionBar">
+            android:theme="@style/Theme.MusicRoad.Splash">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
