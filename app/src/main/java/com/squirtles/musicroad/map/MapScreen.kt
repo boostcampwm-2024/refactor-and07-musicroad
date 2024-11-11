@@ -68,6 +68,7 @@ fun MapScreen(
                     .align(Alignment.BottomCenter)
                     .padding(bottom = 16.dp),
                 onFavoriteClick = onFavoriteClick,
+                onCenterClick = { mapViewModel.createMarker() },
                 onSettingClick = onSettingClick
             )
         }
@@ -78,6 +79,7 @@ fun MapScreen(
 fun BottomNavigation(
     modifier: Modifier = Modifier,
     onFavoriteClick: () -> Unit,
+    onCenterClick: () -> Unit,
     onSettingClick: () -> Unit
 ) {
     Box(
@@ -129,7 +131,7 @@ fun BottomNavigation(
                 .size(82.dp)
                 .clip(CircleShape)
                 .background(color = MaterialTheme.colorScheme.primary)
-                .clickable { /* TODO: 픽 등록 이동 */ },
+                .clickable { onCenterClick() }, // TODO: 픽 등록 이동으로 변경하기
             contentAlignment = Alignment.Center
         ) {
             Icon(
@@ -148,6 +150,7 @@ fun BottomNavigationLightPreview() {
     MusicRoadTheme {
         BottomNavigation(
             onFavoriteClick = {},
+            onCenterClick = {},
             onSettingClick = {}
         )
     }
@@ -159,6 +162,7 @@ fun BottomNavigationDarkPreview() {
     MusicRoadTheme {
         BottomNavigation(
             onFavoriteClick = {},
+            onCenterClick = {},
             onSettingClick = {}
         )
     }
