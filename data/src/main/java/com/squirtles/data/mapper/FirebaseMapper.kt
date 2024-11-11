@@ -1,6 +1,6 @@
 package com.squirtles.data.mapper
 
-import com.squirtles.data.datasource.remote.model.firebase.FirebasePick
+import com.squirtles.data.datasource.remote.firebase.model.FirebasePick
 import com.squirtles.domain.model.GeoPoint
 import com.squirtles.domain.model.Pick
 

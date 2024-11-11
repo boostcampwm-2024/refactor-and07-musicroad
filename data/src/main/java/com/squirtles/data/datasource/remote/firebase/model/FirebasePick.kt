@@ -1,9 +1,7 @@
-package com.squirtles.data.datasource.remote.model.firebase
+package com.squirtles.data.datasource.remote.firebase.model
 
 import com.google.firebase.Timestamp
 import com.google.firebase.firestore.GeoPoint
-import com.google.firebase.firestore.PropertyName
-import java.time.LocalDateTime
 
 /**
  * Firestore에 저장된 pick document를 불러와 변환하기위한 데이터 클래스

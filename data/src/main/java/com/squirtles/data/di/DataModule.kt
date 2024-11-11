@@ -1,7 +1,7 @@
 package com.squirtles.data.di
 
 import com.google.firebase.firestore.FirebaseFirestore
-import com.squirtles.data.datasource.remote.FirebaseDataSourceImpl
+import com.squirtles.data.datasource.remote.firebase.FirebaseDataSourceImpl
 import com.squirtles.data.repository.FirebaseRepositoryImpl
 import com.squirtles.domain.datasource.FirebaseRemoteDataSource
 import com.squirtles.domain.repository.FirebaseRepository
