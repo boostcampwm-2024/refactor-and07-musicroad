@@ -1,7 +1,7 @@
 package com.squirtles.data.datasource.remote.applemusic.api
 
-import com.example.spotifyapitest.data.MusicVideoResponse
-import com.example.spotifyapitest.data.SearchResponse
+import com.squirtles.data.datasource.remote.applemusic.model.MusicVideoResponse
+import com.squirtles.data.datasource.remote.applemusic.model.SearchResponse
 import retrofit2.Response
 import retrofit2.http.GET
 import retrofit2.http.Path
