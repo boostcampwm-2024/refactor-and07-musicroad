@@ -40,12 +40,28 @@ class MarkerIconView(
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
 
-        canvas.drawRect((width - STROKE_WIDTH) / 2f, width / 2f, (width + STROKE_WIDTH) / 2f, height.toFloat(), fillPaint)
+        canvas.drawRect(
+            (width - STROKE_WIDTH) / 2f,
+            width / 2f,
+            (width + STROKE_WIDTH) / 2f,
+            height.toFloat(),
+            fillPaint
+        )
         bitmap?.let {
             bitmapRect.set(0, 0, width, width)
             canvas.drawBitmap(it, null, bitmapRect, null)
-            canvas.drawCircle(width / 2f, width / 2f, (width - STROKE_WIDTH) / 2f, strokePaint) // bitmap 테두리 그리기
-        } ?: canvas.drawCircle(width / 2f, width / 2f, width / 2f, fillPaint) // bitmap이 null이면 이미지 없이 원만 그려지도록
+            canvas.drawCircle(
+                width / 2f,
+                width / 2f,
+                (width - STROKE_WIDTH) / 2f,
+                strokePaint
+            ) // bitmap 테두리 그리기
+        } ?: canvas.drawCircle(
+            width / 2f,
+            width / 2f,
+            width / 2f,
+            fillPaint
+        ) // bitmap이 null이면 이미지 없이 원만 그려지도록
     }
 
     fun setPaintColor(@ColorInt color: Int) {
