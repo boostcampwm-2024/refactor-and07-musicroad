@@ -1,7 +1,7 @@
 package com.squirtles.data.di
 
-import com.squirtles.data.datasource.remote.api.SpotifyApi
-import com.squirtles.data.datasource.remote.api.TokenApi
+import com.squirtles.data.BuildConfig
+import com.squirtles.data.datasource.remote.applemusic.api.AppleMusicApi
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -19,12 +19,20 @@ import javax.inject.Singleton
 internal object ApiModule {
 
     private const val BASE_URL = ""
-    private const val BASE_SPOTIFY_URL = "https://api.spotify.com/"
-    private const val BASE_TOKEN_URL = "https://accounts.spotify.com/"
+    private const val BASE_APPLE_MUSIC_URL = "https://api.music.apple.com/"
 
     @Provides
     @Singleton
-    fun provideOkhttpClient(): OkHttpClient = OkHttpClient.Builder().build()
+    fun provideAppleOkhttpClient(): OkHttpClient {
+        return OkHttpClient.Builder()
+            .addInterceptor { chain ->
+                val newRequest = chain.request().newBuilder()
+                    .addHeader("Authorization", "Bearer ${BuildConfig.APPLE_MUSIC_API_TOKEN}")
+                    .build()
+                chain.proceed(newRequest)
+            }
+            .build()
+    }
 
     @Provides
     @Singleton
@@ -36,28 +44,16 @@ internal object ApiModule {
 
     @Provides
     @Singleton
-    fun provideTokenApi(
-        okHttpClient: OkHttpClient,
+    fun provideAppleMusicApi(
+        appleOkHttpClient: OkHttpClient,
         converterFactory: Converter.Factory,
-    ): TokenApi {
+    ): AppleMusicApi {
         return Retrofit.Builder()
-            .baseUrl(BASE_TOKEN_URL)
+            .baseUrl(BASE_APPLE_MUSIC_URL)
             .addConverterFactory(converterFactory)
-            .client(okHttpClient).build()
-            .create(TokenApi::class.java)
-    }
-
-    @Provides
-    @Singleton
-    fun provideSpotifyApi(
-        okHttpClient: OkHttpClient,
-        converterFactory: Converter.Factory,
-    ): SpotifyApi {
-        return Retrofit.Builder()
-            .baseUrl(BASE_SPOTIFY_URL)
-            .addConverterFactory(converterFactory)
-            .client(okHttpClient).build()
-            .create(SpotifyApi::class.java)
+            .client(appleOkHttpClient)
+            .build()
+            .create(AppleMusicApi::class.java)
     }
 
     @Provides

@@ -1,4 +1,4 @@
-package com.squirtles.data.datasource.remote
+package com.squirtles.data.datasource.remote.firebase
 
 import android.util.Log
 import com.firebase.geofire.GeoFireUtils
@@ -10,7 +10,7 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
 import com.google.firebase.firestore.QuerySnapshot
 import com.google.firebase.firestore.toObject
-import com.squirtles.data.datasource.remote.model.firebase.FirebasePick
+import com.squirtles.data.datasource.remote.firebase.model.FirebasePick
 import com.squirtles.data.mapper.toPick
 import com.squirtles.domain.datasource.FirebaseRemoteDataSource
 import com.squirtles.domain.model.Pick
