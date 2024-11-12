@@ -8,7 +8,6 @@ import androidx.navigation.compose.composable
 import com.squirtles.musicroad.favorite.FavoriteScreen
 import com.squirtles.musicroad.map.MapScreen
 import com.squirtles.musicroad.map.MapViewModel
-import com.squirtles.musicroad.search2.SearchMusicScreen
 import com.squirtles.musicroad.setting.SettingScreen
 
 @Composable
@@ -29,7 +28,8 @@ fun MainNavGraph(
                 mapViewModel = mapViewModel,
                 onFavoriteClick = navigationActions.navigateToFavorite,
                 onSettingClick = navigationActions.navigateToSetting,
-                onCenterClick = navigationActions.navigateToSearch
+                onCenterClick = { navController.navigate(CreatePickDestinations.CREATE_ROUTE) },
+                onSettingClick = navigationActions.navigateToSetting
             )
         }
 
@@ -41,8 +41,16 @@ fun MainNavGraph(
             SettingScreen()
         }
 
-        composable(MainDestinations.SEARCH_ROUTE) {
-            SearchMusicScreen()
+        navigation(
+            startDestination = CreatePickDestinations.SEARCH_MUSIC_ROUTE,
+            route = CreatePickDestinations.CREATE_ROUTE
+        ) {
+            composable(CreatePickDestinations.SEARCH_MUSIC_ROUTE) {
+                SearchMusicScreen()
+            }
+            composable(CreatePickDestinations.CREATE_PICK_ROUTE) {
+
+            }
         }
     }
 }

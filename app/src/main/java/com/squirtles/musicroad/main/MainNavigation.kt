@@ -10,6 +10,12 @@ object MainDestinations {
     const val SEARCH_ROUTE = "search"
 }
 
+object CreatePickDestinations {
+    const val CREATE_ROUTE = "create"
+    const val SEARCH_MUSIC_ROUTE = "search_music"
+    const val CREATE_PICK_ROUTE = "create_pick"
+}
+
 class MainNavigationActions(navController: NavHostController) {
     val navigateToFavorite: () -> Unit = {
         navController.navigate(MainDestinations.FAVORITE_ROUTE) {

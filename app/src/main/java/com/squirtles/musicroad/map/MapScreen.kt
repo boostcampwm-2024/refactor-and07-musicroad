@@ -38,8 +38,8 @@ import com.squirtles.musicroad.ui.theme.MusicRoadTheme
 fun MapScreen(
     mapViewModel: MapViewModel,
     onFavoriteClick: () -> Unit,
-    onSettingClick: () -> Unit,
-    onCenterClick: () -> Unit
+    onCenterClick: () -> Unit,
+    onSettingClick: () -> Unit
 ) {
     Log.d("MapScreen", mapViewModel.toString())
 
@@ -69,8 +69,8 @@ fun MapScreen(
                     .align(Alignment.BottomCenter)
                     .padding(bottom = 16.dp),
                 onFavoriteClick = onFavoriteClick,
-                onSettingClick = onSettingClick,
-                onCenterClick = onCenterClick
+                onCenterClick = onCenterClick,
+                onSettingClick = onSettingClick
             )
         }
     }
@@ -80,8 +80,8 @@ fun MapScreen(
 fun BottomNavigation(
     modifier: Modifier = Modifier,
     onFavoriteClick: () -> Unit,
-    onSettingClick: () -> Unit,
     onCenterClick: () -> Unit,
+    onSettingClick: () -> Unit
 ) {
     Box(
         modifier = modifier,
@@ -151,8 +151,8 @@ fun BottomNavigationLightPreview() {
     MusicRoadTheme {
         BottomNavigation(
             onFavoriteClick = {},
-            onSettingClick = {},
             onCenterClick = {},
+            onSettingClick = {}
         )
     }
 }
@@ -163,8 +163,8 @@ fun BottomNavigationDarkPreview() {
     MusicRoadTheme {
         BottomNavigation(
             onFavoriteClick = {},
-            onSettingClick = {},
             onCenterClick = {},
+            onSettingClick = {}
         )
     }
 }
