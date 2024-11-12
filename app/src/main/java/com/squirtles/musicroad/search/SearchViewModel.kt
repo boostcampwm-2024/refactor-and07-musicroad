@@ -4,6 +4,7 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.squirtles.domain.model.Song
+import com.squirtles.domain.usecase.SearchMusicVideoUseCase
 import com.squirtles.domain.usecase.SearchSongsUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -15,7 +16,8 @@ import javax.inject.Inject
 
 @HiltViewModel
 class SearchViewModel @Inject constructor(
-    private val searchSongsUseCase: SearchSongsUseCase
+    private val searchSongsUseCase: SearchSongsUseCase,
+    private val searchMusicVideoUseCase: SearchMusicVideoUseCase
 ) : ViewModel() {
 
     private val _searchText = MutableStateFlow<String>("")
@@ -44,6 +46,17 @@ class SearchViewModel @Inject constructor(
     fun onSearchTextChange(text: String) {
         viewModelScope.launch {
             _searchText.emit(text)
+        }
+    }
+
+    fun searchMusicVideoById(songId: String) {
+        viewModelScope.launch {
+            val result = searchMusicVideoUseCase(songId)
+            if (result.isSuccess) {
+                /* TODO */
+            } else {
+                /* TODO */
+            }
         }
     }
 }

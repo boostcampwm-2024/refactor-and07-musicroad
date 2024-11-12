@@ -22,7 +22,9 @@ class AppleMusicRepositoryImpl @Inject constructor(
     }
 
     override suspend fun searchMusicVideoById(songId: String): Result<List<MusicVideo>> {
-        TODO("Not yet implemented")
+        return handleResult(AppleMusicException.NotFoundException()) {
+            appleMusicDataSource.searchMusicVideoById(songId).ifEmpty { null }
+        }
     }
 
 
