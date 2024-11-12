@@ -1,6 +1,6 @@
 package com.squirtles.data.repository
 
-import com.squirtles.data.exception.FirebaseRepositoryException
+import com.squirtles.data.exception.FirebaseException
 import com.squirtles.domain.datasource.FirebaseRemoteDataSource
 import com.squirtles.domain.model.Pick
 import com.squirtles.domain.repository.FirebaseRepository
@@ -13,7 +13,7 @@ class FirebaseRepositoryImpl @Inject constructor(
 ) : FirebaseRepository {
 
     override suspend fun fetchPick(pickID: String): Result<Pick> {
-        return handleResult(FirebaseRepositoryException.NoSuchPickException()) {
+        return handleResult(FirebaseException.NoSuchPickException()) {
             firebaseRemoteDataSource.fetchPick(pickID)
         }
     }
@@ -24,7 +24,7 @@ class FirebaseRepositoryImpl @Inject constructor(
         radiusInM: Double
     ): Result<List<Pick>> {
         val pickList = firebaseRemoteDataSource.fetchPicksInArea(lat, lng, radiusInM)
-        return handleResult(FirebaseRepositoryException.NoSuchPickInRadiusException()) {
+        return handleResult(FirebaseException.NoSuchPickInRadiusException()) {
             pickList.ifEmpty { null }
         }
     }
@@ -38,7 +38,7 @@ class FirebaseRepositoryImpl @Inject constructor(
     }
 
     private suspend fun <T> handleResult(
-        firebaseRepositoryException: FirebaseRepositoryException,
+        firebaseRepositoryException: FirebaseException,
         call: suspend () -> T?
     ): Result<T> {
         return runCatching {
