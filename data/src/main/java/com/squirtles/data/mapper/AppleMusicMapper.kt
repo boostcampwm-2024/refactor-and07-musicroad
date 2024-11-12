@@ -1,5 +1,6 @@
 package com.squirtles.data.mapper
 
+import androidx.core.graphics.toColorInt
 import com.squirtles.data.datasource.remote.applemusic.model.Data
 import com.squirtles.domain.model.Song
 import java.time.LocalDate
@@ -13,7 +14,7 @@ fun Data.toSong(): Song = Song(
     artwork = this.attributes.artwork.url,
     releaseDate = this.attributes.releaseDate.toLocalDate(),
     genreNames = this.attributes.genreNames,
-    bgColor = this.attributes.artwork.bgColor,
+    bgColor = "#${this.attributes.artwork.bgColor}".toColorInt(),
     externalUrl = this.attributes.externalUrl,
     previewUrl = this.attributes.previews[0].url.toString(),
 )
@@ -22,6 +23,4 @@ private fun String.toLocalDate(): LocalDate {
     val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
     return LocalDate.parse(this, formatter)
 }
-
-
 

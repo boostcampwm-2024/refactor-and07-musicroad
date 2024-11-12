@@ -1,5 +1,6 @@
 package com.squirtles.domain.model
 
+import androidx.annotation.ColorInt
 import java.time.LocalDate
 
 /**
@@ -13,8 +14,7 @@ data class Song(
     val artwork: String,
     val releaseDate: LocalDate,
     val genreNames: List<String>,
-    val bgColor: String,
+    @ColorInt val bgColor: Int,
     val externalUrl: String,
     val previewUrl: String,
 )
-
