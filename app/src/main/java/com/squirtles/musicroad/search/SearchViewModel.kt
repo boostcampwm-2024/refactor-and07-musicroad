@@ -25,8 +25,7 @@ class SearchViewModel @Inject constructor(
 
     private val _searchResult = MutableStateFlow<List<Song>>(emptyList())
     val searchResult = _searchResult.asStateFlow()
-
-    // 입력 중이면 결과 표시 X, 입력 다 되면 결과 표시할 용도
+    
     private val _isSearching = MutableSharedFlow<Boolean>()
     val isSearching = _isSearching.asSharedFlow()
 
@@ -46,6 +45,7 @@ class SearchViewModel @Inject constructor(
     fun onSearchTextChange(text: String) {
         viewModelScope.launch {
             _searchText.emit(text)
+            _isSearching.emit(text.isNotEmpty())
         }
     }
 

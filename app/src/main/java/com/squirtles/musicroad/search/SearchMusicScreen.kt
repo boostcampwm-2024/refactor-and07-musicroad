@@ -59,6 +59,7 @@ fun SearchMusicScreen() {
 
     val searchViewModel: SearchViewModel = hiltViewModel()
     val searchText by searchViewModel.searchText.collectAsState()
+    val isSearching by searchViewModel.isSearching.collectAsState(false)
 
     Scaffold(
         contentWindowInsets = WindowInsets.navigationBars,
@@ -71,7 +72,7 @@ fun SearchMusicScreen() {
                 SearchBar(
                     keyword = searchText,
                     onValueChange = searchViewModel::onSearchTextChange,
-                    active = false,
+                    active = isSearching,
                     onActiveChange = searchViewModel::searchSongs,
                     focusManager = focusManager
                 )
@@ -149,20 +150,22 @@ private fun SearchBar(
             placeholder = {
                 Text("검색")
             },
-            trailingIcon = {
-                IconButton(
-                    onClick = {
-                        focusManager.clearFocus()
-                        onActiveChange()
+            trailingIcon = if (active) {
+                {
+                    IconButton(
+                        onClick = {
+                            focusManager.clearFocus()
+                            onActiveChange()
+                        }
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Search,
+                            contentDescription = "stringResource(R.string.search_music_search_button_description)",
+                            tint = White
+                        )
                     }
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Search,
-                        contentDescription = "stringResource(R.string.search_music_search_button_description)",
-                        tint = White
-                    )
                 }
-            },
+            } else null,
             shape = CircleShape,
             colors = TextFieldDefaults.colors(
                 focusedTextColor = White,
