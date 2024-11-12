@@ -38,7 +38,8 @@ import com.squirtles.musicroad.ui.theme.MusicRoadTheme
 fun MapScreen(
     mapViewModel: MapViewModel,
     onFavoriteClick: () -> Unit,
-    onSettingClick: () -> Unit
+    onSettingClick: () -> Unit,
+    onCenterClick: () -> Unit
 ) {
     Log.d("MapScreen", mapViewModel.toString())
 
@@ -68,7 +69,8 @@ fun MapScreen(
                     .align(Alignment.BottomCenter)
                     .padding(bottom = 16.dp),
                 onFavoriteClick = onFavoriteClick,
-                onSettingClick = onSettingClick
+                onSettingClick = onSettingClick,
+                onCenterClick = onCenterClick
             )
         }
     }
@@ -78,7 +80,8 @@ fun MapScreen(
 fun BottomNavigation(
     modifier: Modifier = Modifier,
     onFavoriteClick: () -> Unit,
-    onSettingClick: () -> Unit
+    onSettingClick: () -> Unit,
+    onCenterClick: () -> Unit,
 ) {
     Box(
         modifier = modifier,
@@ -129,7 +132,7 @@ fun BottomNavigation(
                 .size(82.dp)
                 .clip(CircleShape)
                 .background(color = MaterialTheme.colorScheme.primary)
-                .clickable { /* TODO: 픽 등록 이동 */ },
+                .clickable { onCenterClick() },
             contentAlignment = Alignment.Center
         ) {
             Icon(
@@ -148,7 +151,8 @@ fun BottomNavigationLightPreview() {
     MusicRoadTheme {
         BottomNavigation(
             onFavoriteClick = {},
-            onSettingClick = {}
+            onSettingClick = {},
+            onCenterClick = {},
         )
     }
 }
@@ -159,7 +163,8 @@ fun BottomNavigationDarkPreview() {
     MusicRoadTheme {
         BottomNavigation(
             onFavoriteClick = {},
-            onSettingClick = {}
+            onSettingClick = {},
+            onCenterClick = {},
         )
     }
 }
