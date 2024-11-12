@@ -1,5 +1,6 @@
 package com.squirtles.data.di
 
+import com.squirtles.data.BuildConfig
 import com.squirtles.data.datasource.remote.applemusic.api.AppleMusicApi
 import dagger.Module
 import dagger.Provides
@@ -22,7 +23,16 @@ internal object ApiModule {
 
     @Provides
     @Singleton
-    fun provideOkhttpClient(): OkHttpClient = OkHttpClient.Builder().build()
+    fun provideAppleOkhttpClient(): OkHttpClient {
+        return OkHttpClient.Builder()
+            .addInterceptor { chain ->
+                val newRequest = chain.request().newBuilder()
+                    .addHeader("Authorization", "Bearer ${BuildConfig.APPLE_MUSIC_API_TOKEN}")
+                    .build()
+                chain.proceed(newRequest)
+            }
+            .build()
+    }
 
     @Provides
     @Singleton
@@ -35,13 +45,14 @@ internal object ApiModule {
     @Provides
     @Singleton
     fun provideAppleMusicApi(
-        okHttpClient: OkHttpClient,
+        appleOkHttpClient: OkHttpClient,
         converterFactory: Converter.Factory,
     ): AppleMusicApi {
         return Retrofit.Builder()
             .baseUrl(BASE_APPLE_MUSIC_URL)
             .addConverterFactory(converterFactory)
-            .client(okHttpClient).build()
+            .client(appleOkHttpClient)
+            .build()
             .create(AppleMusicApi::class.java)
     }
 
