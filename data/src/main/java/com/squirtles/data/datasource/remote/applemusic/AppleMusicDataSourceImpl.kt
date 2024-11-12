@@ -16,6 +16,9 @@ class AppleMusicDataSourceImpl @Inject constructor(
         const val DEFAULT_STOREFRONT = "kr"
     }
 
+    /**
+     * Apple Music API Search
+     */
     override suspend fun searchSongs(searchText: String): List<Song> {
         val queryMap = mapOf(
             "term" to searchText.replace(" ", "+"),
@@ -44,7 +47,7 @@ class AppleMusicDataSourceImpl @Inject constructor(
         TODO("Not yet implemented")
     }
 
-    fun <T> checkResponse(response: Response<T>): T {
+    private fun <T> checkResponse(response: Response<T>): T {
         if (response.isSuccessful) {
             return requireNotNull(response.body())
         } else {
