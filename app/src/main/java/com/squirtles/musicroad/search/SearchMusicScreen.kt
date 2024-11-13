@@ -1,8 +1,11 @@
 package com.squirtles.musicroad.search
 
+import android.util.Log
+import android.util.Size
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
-import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -18,6 +21,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -30,8 +34,10 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldDefaults
+import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -43,11 +49,13 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil3.compose.AsyncImage
+import com.squirtles.domain.model.Song
 import com.squirtles.musicroad.R
 import com.squirtles.musicroad.ui.theme.Black
 import com.squirtles.musicroad.ui.theme.Gray
@@ -58,10 +66,10 @@ import com.squirtles.musicroad.ui.theme.White
 fun SearchMusicScreen(
     searchViewModel: SearchViewModel = hiltViewModel()
 ) {
-
     val focusManager = LocalFocusManager.current
 
     val searchText by searchViewModel.searchText.collectAsStateWithLifecycle()
+    val searchResult by searchViewModel.searchResult.collectAsStateWithLifecycle()
     val isSearching by searchViewModel.isSearching.collectAsStateWithLifecycle(false)
 
     Scaffold(
@@ -103,16 +111,16 @@ fun SearchMusicScreen(
                     textStyle = MaterialTheme.typography.titleLarge,
                     modifier = Modifier.padding(start = DefaultPadding)
                 )
-                VerticalSpacer(32)
+                VerticalSpacer(20)
 
                 LazyColumn(
-                    modifier = Modifier
-                        .padding(horizontal = DefaultPadding)
-                        .padding(bottom = DefaultPadding),
-                    verticalArrangement = Arrangement.spacedBy(24.dp)
+                    modifier = Modifier.padding(bottom = DefaultPadding)
                 ) {
-                    items(10) {
-                        MusicItem()
+                    items(
+                        items = searchResult,
+                        key = { it.id }
+                    ) { song ->
+                        SongItem(song)
                     }
                 }
             }
@@ -125,7 +133,7 @@ private fun SearchBar(
     keyword: String,
     onValueChange: (String) -> Unit,
     active: Boolean, // whether the user is searching or not
-    onSearchClick: () -> Unit, //the callback to be invoked when this search bar's active state is changed
+    onSearchClick: () -> Unit,
     focusManager: FocusManager
 ) {
     Row(
@@ -188,13 +196,22 @@ private fun SearchBar(
 }
 
 @Composable
-private fun MusicItem() {
+private fun SongItem(song: Song) {
     Row(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(
+                interactionSource = remember { MutableInteractionSource() },
+                indication = ripple(color = White),
+            ) {
+                /* TODO: 아이템 클릭 시 song 정보를 가지고 등록 화면으로 이동 */
+                Log.d("SearchMusicScreen", "${song.songName} 클릭됨")
+            }
+            .padding(horizontal = DefaultPadding, vertical = ItemSpacing / 2),
         verticalAlignment = Alignment.CenterVertically
     ) {
         AsyncImage(
-            model = "https://i.scdn.co/image/ab67616d0000b2733d98a0ae7c78a3a9babaf8af",
+            model = song.getImageUrlWithSize(RequestImageSize),
             contentDescription = stringResource(R.string.search_music_album_description),
             contentScale = ContentScale.Crop,
             modifier = Modifier
@@ -204,17 +221,17 @@ private fun MusicItem() {
         HorizontalSpacer(16)
         Column {
             TextWithColorAndStyle(
-                text = "Ditto",
+                text = song.songName,
                 textColor = White,
                 textStyle = MaterialTheme.typography.bodyLarge
             )
             TextWithColorAndStyle(
-                text = "NewJeans",
+                text = song.artistName,
                 textColor = Gray,
                 textStyle = MaterialTheme.typography.bodyMedium
             )
             TextWithColorAndStyle(
-                text = "Ditto",
+                text = song.albumName,
                 textColor = Gray,
                 textStyle = MaterialTheme.typography.bodyMedium
             )
@@ -239,6 +256,8 @@ fun TextWithColorAndStyle(
         text = text,
         modifier = modifier,
         color = textColor,
+        overflow = TextOverflow.Ellipsis,
+        maxLines = 1,
         style = textStyle
     )
 }
@@ -254,11 +273,21 @@ fun Modifier.addFocusCleaner(focusManager: FocusManager, doOnClear: () -> Unit =
     }
 }
 
-
 @Preview
 @Composable
-fun MusicItemPreview() {
-    MusicItem()
+fun SongItemPreview() {
+    val song = Song(
+        id = "1",
+        songName = "Ditto",
+        artistName = "String",
+        albumName = "Ditto",
+        imageUrl = "https://i.scdn.co/image/ab67616d0000b2733d98a0ae7c78a3a9babaf8af",
+        genreNames = listOf(),
+        bgColor = android.graphics.Color.RED,
+        externalUrl = "",
+        previewUrl = "",
+    )
+    SongItem(song)
 }
 
 @Preview(apiLevel = 34)
@@ -273,4 +302,6 @@ private val colorStops = arrayOf(
 )
 private val SearchBarHeight = 56.dp
 private val DefaultPadding = 16.dp
+private val ItemSpacing = 24.dp
 private val ImageSize = 56.dp
+private val RequestImageSize = Size(300, 300)

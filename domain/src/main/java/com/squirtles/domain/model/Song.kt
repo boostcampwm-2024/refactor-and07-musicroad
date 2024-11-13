@@ -1,5 +1,6 @@
 package com.squirtles.domain.model
 
+import android.util.Size
 import androidx.annotation.ColorInt
 
 /**
@@ -15,4 +16,10 @@ data class Song(
     @ColorInt val bgColor: Int,
     val externalUrl: String,
     val previewUrl: String,
-)
+) {
+    fun getImageUrlWithSize(size: Size): String? {
+        return if (imageUrl.isEmpty()) null
+        else imageUrl.replace("{w}", size.width.toString())
+            .replace("{h}", size.height.toString())
+    }
+}
