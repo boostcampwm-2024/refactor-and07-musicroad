@@ -1,6 +1,7 @@
 package com.squirtles.musicroad.search
 
 import android.util.Log
+import android.util.Size
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
@@ -210,7 +211,7 @@ private fun SongItem(song: Song) {
         verticalAlignment = Alignment.CenterVertically
     ) {
         AsyncImage(
-            model = song.imageUrl.replace("{w}", RequestImageSize).replace("{h}", RequestImageSize),
+            model = getImageUrlWithSize(url = song.imageUrl, imageSize = RequestImageSize),
             contentDescription = stringResource(R.string.search_music_album_description),
             contentScale = ContentScale.Crop,
             modifier = Modifier
@@ -272,6 +273,11 @@ fun Modifier.addFocusCleaner(focusManager: FocusManager, doOnClear: () -> Unit =
     }
 }
 
+fun getImageUrlWithSize(url: String?, imageSize: Size): String? {
+    return url?.replace("{w}", imageSize.width.toString())
+        ?.replace("{h}", imageSize.height.toString())
+}
+
 @Preview
 @Composable
 fun SongItemPreview() {
@@ -303,4 +309,4 @@ private val SearchBarHeight = 56.dp
 private val DefaultPadding = 16.dp
 private val ItemSpacing = 24.dp
 private val ImageSize = 56.dp
-private const val RequestImageSize = "300"
+private val RequestImageSize = Size(300, 300)
