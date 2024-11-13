@@ -1,20 +1,29 @@
 package com.squirtles.data.mapper
 
-import com.squirtles.data.datasource.remote.model.firebase.FirebasePick
-import com.squirtles.domain.model.GeoPoint
+import com.squirtles.data.datasource.remote.firebase.model.FirebasePick
 import com.squirtles.domain.model.Pick
+import com.squirtles.domain.model.PickLocation
+import com.squirtles.domain.model.Song
 
 internal fun FirebasePick.toPick(): Pick = Pick(
     id = id.toString(),
-    albumTitle = albumTitle.toString(),
-    artists = artists,
-    songTitle = trackTitle.toString(),
-    location = GeoPoint(1.0, 1.0), // TODO: geohash -> GeoPoint 변환 정의 후 변경
+    song = Song(
+        id = songId.toString(),
+        songName = songName.toString(),
+        artistName = artistName.toString(),
+        albumName = albumName.toString(),
+        imageUrl = artwork?.get("url") ?: "",
+        genreNames = genreNames,
+        bgColor = artwork?.get("bgColor") ?: "",
+        externalUrl = externalUrl.toString(),
+        previewUrl = previewUrl.toString(),
+    ),
     comment = comment.toString(),
     createdAt = createdAt.seconds,
     createdBy = createdBy.toString(),
+    location = PickLocation(
+        latitude = location?.latitude ?: 0.0,
+        longitude = location?.longitude ?: 0.0
+    ),
     favoriteCount = favoriteCount,
-    imageUrl = imageUrl.toString(),
-    previewUrl = previewUrl.toString(),
-    externalUrl = externalUrl.toString(),
 )

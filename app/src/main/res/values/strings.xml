@@ -11,4 +11,8 @@
     <string name="map_info_window_album_description">앨범 이미지</string>
     <string name="map_info_window_pick_user">님의 픽</string>
     <string name="map_info_window_favorite_count_icon_description">픽을 담은 개수</string>
+
+    <!-- Search Music -->
+    <string name="search_music_album_description">노래 앨범 이미지</string>
+    <string name="search_music_search_button_description">노래 검색 버튼</string>
 </resources>

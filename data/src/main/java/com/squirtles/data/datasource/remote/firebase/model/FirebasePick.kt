@@ -1,27 +1,27 @@
-package com.squirtles.data.datasource.remote.model.firebase
+package com.squirtles.data.datasource.remote.firebase.model
 
 import com.google.firebase.Timestamp
 import com.google.firebase.firestore.GeoPoint
-import com.google.firebase.firestore.PropertyName
-import java.time.LocalDateTime
 
 /**
  * Firestore에 저장된 pick document를 불러와 변환하기위한 데이터 클래스
  */
 data class FirebasePick(
     val id: String? = null,
-    val albumTitle: String? = null,
-    val artists: List<String> = emptyList(),
-    val trackTitle: String? = null,
-    val geoHash: String? = null, // TODO: Firestore 데이터에도 추가해야함
-    val location: GeoPoint? = null,
+    val albumName: String? = null,
+    val artistName: String? = null,
+    val artwork: Map<String, String>? = null,
     val comment: String? = null,
     val createdAt: Timestamp = Timestamp.now(),
     val createdBy: String? = null,
-    val favoriteCount: Int = 0,
-    val imageUrl: String? = null,
-    val previewUrl: String? = null,
     val externalUrl: String? = null,
+    val favoriteCount: Int = 0,
+    val genreNames: List<String> = emptyList(),
+    val geoHash: String? = null,
+    val location: GeoPoint? = null,
+    val previewUrl: String? = null,
+    val songId: String? = null,
+    val songName: String? = null,
 )
 
 //data class FirebasePick(
