@@ -13,10 +13,6 @@ class AppleMusicDataSourceImpl @Inject constructor(
     private val appleMusicApi: AppleMusicApi
 ) : AppleMusicRemoteDataSource {
 
-    companion object {
-        const val DEFAULT_STOREFRONT = "kr"
-    }
-
     /**
      * Apple Music API Search
      */
@@ -61,5 +57,9 @@ class AppleMusicDataSourceImpl @Inject constructor(
             val errorBody = requireNotNull(response.errorBody()?.string())
             throw Exception(errorBody)
         }
+    }
+
+    companion object {
+        const val DEFAULT_STOREFRONT = "kr"
     }
 }
