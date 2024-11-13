@@ -46,9 +46,11 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.core.graphics.toColorInt
 import androidx.core.view.WindowInsetsControllerCompat
+import androidx.hilt.navigation.compose.hiltViewModel
 import coil3.compose.AsyncImage
 import com.squirtles.domain.model.Song
 import com.squirtles.musicroad.R
+import com.squirtles.musicroad.search.CreatePickViewModel
 import com.squirtles.musicroad.ui.theme.Black
 import com.squirtles.musicroad.ui.theme.Dark
 import com.squirtles.musicroad.ui.theme.Gray
@@ -57,11 +59,22 @@ import com.squirtles.musicroad.ui.theme.White
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CreatePickScreen(
-    song: Song,
+    searchViewModel: CreatePickViewModel,
     onBackClick: () -> Unit
 ) {
     val comment = rememberSaveable { mutableStateOf("") }
     val scrollState = rememberScrollState()
+    val song = Song(
+        id = "1778132734",
+        songName = "Super Shy",
+        artistName = "뉴진스",
+        albumName = "NewJeans 'Super Shy' - Single",
+        imageUrl = "https://i.scdn.co/image/ab67616d0000b2733d98a0ae7c78a3a9babaf8af",
+        genreNames = listOf("K-Pop"),
+        bgColor = "#8FC1E2".toColorInt(),
+        externalUrl = "",
+        previewUrl = ""
+    )
 
     val dynamicBackgroundColor = Color(song.bgColor)
     val dynamicOnBackgroundColor = if (dynamicBackgroundColor.luminance() >= 0.5f) Black else White
@@ -189,17 +202,18 @@ fun CreatePickScreen(
 @Composable
 private fun CreatePickScreenPreview() {
     CreatePickScreen(
-        song = Song(
-            id = "1778132734",
-            songName = "Super Shy",
-            artistName = "뉴진스",
-            albumName = "NewJeans 'Super Shy' - Single",
-            imageUrl = "https://i.scdn.co/image/ab67616d0000b2733d98a0ae7c78a3a9babaf8af",
-            genreNames = listOf("K-Pop"),
-            bgColor = "#8FC1E2".toColorInt(),
-            externalUrl = "",
-            previewUrl = ""
-        ),
-        onBackClick = {}
+//        song = Song(
+//            id = "1778132734",
+//            songName = "Super Shy",
+//            artistName = "뉴진스",
+//            albumName = "NewJeans 'Super Shy' - Single",
+//            imageUrl = "https://i.scdn.co/image/ab67616d0000b2733d98a0ae7c78a3a9babaf8af",
+//            genreNames = listOf("K-Pop"),
+//            bgColor = "#8FC1E2".toColorInt(),
+//            externalUrl = "",
+//            previewUrl = ""
+//        ),
+        onBackClick = {},
+        searchViewModel = hiltViewModel<CreatePickViewModel>()
     )
 }

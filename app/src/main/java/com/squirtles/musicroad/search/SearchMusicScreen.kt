@@ -45,7 +45,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil3.compose.AsyncImage
 import com.squirtles.musicroad.R
@@ -56,7 +55,8 @@ import com.squirtles.musicroad.ui.theme.White
 
 @Composable
 fun SearchMusicScreen(
-    searchViewModel: SearchViewModel = hiltViewModel()
+    searchViewModel: CreatePickViewModel,
+    onItemClick: () -> Unit,
 ) {
 
     val focusManager = LocalFocusManager.current
@@ -77,8 +77,9 @@ fun SearchMusicScreen(
                     keyword = searchText,
                     onValueChange = searchViewModel::onSearchTextChange,
                     active = isSearching,
-                    onSearchClick = searchViewModel::searchSongs,
-                    focusManager = focusManager
+//                    onSearchClick = searchViewModel::searchSongs,
+                    focusManager = focusManager,
+                    onSearchClick = onItemClick
                 )
             }
         },
@@ -259,12 +260,6 @@ fun Modifier.addFocusCleaner(focusManager: FocusManager, doOnClear: () -> Unit =
 @Composable
 fun MusicItemPreview() {
     MusicItem()
-}
-
-@Preview(apiLevel = 34)
-@Composable
-fun SearchMusicPreview() {
-    SearchMusicScreen()
 }
 
 private val colorStops = arrayOf(

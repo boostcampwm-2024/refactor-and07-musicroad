@@ -15,10 +15,13 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class SearchViewModel @Inject constructor(
+class CreatePickViewModel @Inject constructor(
     private val searchSongsUseCase: SearchSongsUseCase,
     private val searchMusicVideoUseCase: SearchMusicVideoUseCase
 ) : ViewModel() {
+
+    private var _selectedSong: Song? = null
+    val selectedSong get() = _selectedSong
 
     private val _searchText = MutableStateFlow<String>("")
     val searchText = _searchText.asStateFlow()
@@ -40,6 +43,10 @@ class SearchViewModel @Inject constructor(
                 Log.d("SearchViewModel", _searchResult.value.toString())
             }
         }
+    }
+
+    fun selectSongItem(song: Song) {
+        _selectedSong = song
     }
 
     fun onSearchTextChange(text: String) {
