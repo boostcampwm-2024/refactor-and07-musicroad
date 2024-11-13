@@ -9,7 +9,7 @@ import androidx.navigation.compose.navigation
 import com.squirtles.musicroad.favorite.FavoriteScreen
 import com.squirtles.musicroad.map.MapScreen
 import com.squirtles.musicroad.map.MapViewModel
-import com.squirtles.musicroad.search2.SearchMusicScreen
+import com.squirtles.musicroad.search.SearchMusicScreen
 import com.squirtles.musicroad.setting.SettingScreen
 
 @Composable
