@@ -211,7 +211,7 @@ private fun SongItem(song: Song) {
         verticalAlignment = Alignment.CenterVertically
     ) {
         AsyncImage(
-            model = getImageUrlWithSize(url = song.imageUrl, imageSize = RequestImageSize),
+            model = song.getImageUrlWithSize(RequestImageSize),
             contentDescription = stringResource(R.string.search_music_album_description),
             contentScale = ContentScale.Crop,
             modifier = Modifier
@@ -271,11 +271,6 @@ fun Modifier.addFocusCleaner(focusManager: FocusManager, doOnClear: () -> Unit =
             }
         )
     }
-}
-
-fun getImageUrlWithSize(url: String?, imageSize: Size): String? {
-    return url?.replace("{w}", imageSize.width.toString())
-        ?.replace("{h}", imageSize.height.toString())
 }
 
 @Preview
