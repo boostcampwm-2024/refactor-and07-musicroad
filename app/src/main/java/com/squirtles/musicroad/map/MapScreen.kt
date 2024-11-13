@@ -24,6 +24,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -35,6 +36,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.fragment.app.FragmentActivity
 import androidx.fragment.app.FragmentContainerView
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.squirtles.musicroad.R
 import com.squirtles.musicroad.ui.theme.MusicRoadTheme
 import com.squirtles.musicroad.ui.theme.White
@@ -47,7 +49,7 @@ fun MapScreen(
     onSettingClick: () -> Unit
 ) {
     Log.d("MapScreen", mapViewModel.toString())
-    val pickCount = 1
+    val pickCount by mapViewModel.pickCount.collectAsStateWithLifecycle()
 
     Scaffold(
         contentWindowInsets = WindowInsets.navigationBars

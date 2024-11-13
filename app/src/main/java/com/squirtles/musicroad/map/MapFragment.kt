@@ -76,6 +76,7 @@ class MapFragment : Fragment(), OnMapReadyCallback {
 
         // 테스트 : 네이버커넥트 기준 주변 5km 내 픽 정보 불러오기
         mapViewModel.fetchPickInArea(37.380324, 127.115282, 5.0 * 1000.0)
+        mapViewModel.requestPickNotificationArea(37.380324, 127.115282, CIRCLE_RADIUS_METER)
 
         lifecycleScope.launch {
             mapViewModel.centerButtonClick.collect {
