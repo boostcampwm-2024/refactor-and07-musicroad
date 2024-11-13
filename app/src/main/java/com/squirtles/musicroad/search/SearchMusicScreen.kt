@@ -71,12 +71,13 @@ fun SearchMusicScreen() {
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(WindowInsets.statusBars.asPaddingValues())
+                    .padding(top = 16.dp)
             ) {
                 SearchBar(
                     keyword = searchText,
                     onValueChange = searchViewModel::onSearchTextChange,
                     active = isSearching,
-                    onActiveChange = searchViewModel::searchSongs,
+                    onSearchClick = searchViewModel::searchSongs,
                     focusManager = focusManager
                 )
             }
@@ -124,7 +125,7 @@ private fun SearchBar(
     keyword: String,
     onValueChange: (String) -> Unit,
     active: Boolean, // whether the user is searching or not
-    onActiveChange: () -> Unit, //the callback to be invoked when this search bar's active state is changed
+    onSearchClick: () -> Unit, //the callback to be invoked when this search bar's active state is changed
     focusManager: FocusManager
 ) {
     Row(
@@ -158,7 +159,7 @@ private fun SearchBar(
                     IconButton(
                         onClick = {
                             focusManager.clearFocus()
-                            onActiveChange()
+                            onSearchClick()
                         }
                     ) {
                         Icon(
