@@ -1,6 +1,7 @@
 package com.squirtles.data.datasource.remote.applemusic
 
 import com.squirtles.data.datasource.remote.applemusic.api.AppleMusicApi
+import com.squirtles.data.mapper.toMusicVideo
 import com.squirtles.data.mapper.toSong
 import com.squirtles.domain.datasource.AppleMusicRemoteDataSource
 import com.squirtles.domain.model.MusicVideo
@@ -11,10 +12,6 @@ import javax.inject.Inject
 class AppleMusicDataSourceImpl @Inject constructor(
     private val appleMusicApi: AppleMusicApi
 ) : AppleMusicRemoteDataSource {
-
-    companion object {
-        const val DEFAULT_STOREFRONT = "kr"
-    }
 
     /**
      * Apple Music API Search
@@ -44,7 +41,13 @@ class AppleMusicDataSourceImpl @Inject constructor(
     }
 
     override suspend fun searchMusicVideoById(songId: String): List<MusicVideo> {
-        TODO("Not yet implemented")
+        val musicVideoResult = checkResponse(
+            appleMusicApi.searchMusicVideo(DEFAULT_STOREFRONT, songId)
+        )
+
+        return musicVideoResult.data.map {
+            it.toMusicVideo()
+        }
     }
 
     private fun <T> checkResponse(response: Response<T>): T {
@@ -54,5 +57,9 @@ class AppleMusicDataSourceImpl @Inject constructor(
             val errorBody = requireNotNull(response.errorBody()?.string())
             throw Exception(errorBody)
         }
+    }
+
+    companion object {
+        const val DEFAULT_STOREFRONT = "kr"
     }
 }
