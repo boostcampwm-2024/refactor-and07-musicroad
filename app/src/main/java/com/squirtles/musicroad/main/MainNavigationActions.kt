@@ -4,6 +4,17 @@ import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 
 class MainNavigationActions(navController: NavHostController) {
+
+    val navigateToMain: () -> Unit = {
+        navController.navigate(MainDestinations.MAIN_ROUTE) {
+            popUpTo(navController.graph.findStartDestination().id) {
+                saveState = true
+            }
+            launchSingleTop = true
+            restoreState = true
+        }
+    }
+
     val navigateToFavorite: () -> Unit = {
         navController.navigate(MainDestinations.FAVORITE_ROUTE) {
             popUpTo(navController.graph.findStartDestination().id) {
@@ -30,7 +41,12 @@ class MainNavigationActions(navController: NavHostController) {
                 saveState = true
             }
             launchSingleTop = true
-            restoreState = true
+        }
+    }
+
+    val navigateToCreate: () -> Unit = {
+        navController.navigate(CreatePickDestinations.CREATE_PICK_ROUTE) {
+            launchSingleTop = true
         }
     }
 }

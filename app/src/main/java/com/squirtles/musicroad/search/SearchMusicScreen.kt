@@ -1,6 +1,5 @@
 package com.squirtles.musicroad.search
 
-import android.util.Log
 import android.util.Size
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -63,14 +62,15 @@ import com.squirtles.musicroad.ui.theme.White
 
 @Composable
 fun SearchMusicScreen(
-    searchViewModel: CreatePickViewModel,
+    createPickViewModel: CreatePickViewModel,
+    onBackClick: () -> Boolean,
     onItemClick: () -> Unit,
 ) {
     val focusManager = LocalFocusManager.current
 
-    val searchText by searchViewModel.searchText.collectAsStateWithLifecycle()
-    val searchResult by searchViewModel.searchResult.collectAsStateWithLifecycle()
-    val isSearching by searchViewModel.isSearching.collectAsStateWithLifecycle(false)
+    val searchText by createPickViewModel.searchText.collectAsStateWithLifecycle()
+    val searchResult by createPickViewModel.searchResult.collectAsStateWithLifecycle()
+    val isSearching by createPickViewModel.isSearching.collectAsStateWithLifecycle(false)
 
     Scaffold(
         contentWindowInsets = WindowInsets.navigationBars,
@@ -83,11 +83,11 @@ fun SearchMusicScreen(
             ) {
                 SearchBar(
                     keyword = searchText,
-                    onValueChange = searchViewModel::onSearchTextChange,
+                    onValueChange = createPickViewModel::onSearchTextChange,
                     active = isSearching,
-//                    onSearchClick = searchViewModel::searchSongs,
+                    onSearchClick = createPickViewModel::searchSongs,
                     focusManager = focusManager,
-                    onSearchClick = onItemClick
+                    onBackClick = onBackClick,
                 )
             }
         },
@@ -121,7 +121,10 @@ fun SearchMusicScreen(
                         items = searchResult,
                         key = { it.id }
                     ) { song ->
-                        SongItem(song)
+                        SongItem(song) {
+                            createPickViewModel.onSongItemClick(song)
+                            onItemClick()
+                        }
                     }
                 }
             }
@@ -135,6 +138,7 @@ private fun SearchBar(
     onValueChange: (String) -> Unit,
     active: Boolean, // whether the user is searching or not
     onSearchClick: () -> Unit,
+    onBackClick: () -> Boolean,
     focusManager: FocusManager
 ) {
     Row(
@@ -145,7 +149,9 @@ private fun SearchBar(
         verticalAlignment = Alignment.CenterVertically
     ) {
         IconButton(
-            onClick = { /* TODO: 지도로 돌아가기 */ },
+            onClick = {
+                onBackClick()
+            },
             modifier = Modifier.padding(start = 4.dp)
         ) {
             Icon(
@@ -197,7 +203,10 @@ private fun SearchBar(
 }
 
 @Composable
-private fun SongItem(song: Song) {
+private fun SongItem(
+    song: Song,
+    onItemClick: () -> Unit,
+) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -205,8 +214,7 @@ private fun SongItem(song: Song) {
                 interactionSource = remember { MutableInteractionSource() },
                 indication = ripple(color = White),
             ) {
-                /* TODO: 아이템 클릭 시 song 정보를 가지고 등록 화면으로 이동 */
-                Log.d("SearchMusicScreen", "${song.songName} 클릭됨")
+                onItemClick()
             }
             .padding(horizontal = DefaultPadding, vertical = ItemSpacing / 2),
         verticalAlignment = Alignment.CenterVertically
@@ -288,7 +296,9 @@ fun SongItemPreview() {
         externalUrl = "",
         previewUrl = "",
     )
-    SongItem(song)
+    SongItem(song) {
+
+    }
 }
 
 private val colorStops = arrayOf(

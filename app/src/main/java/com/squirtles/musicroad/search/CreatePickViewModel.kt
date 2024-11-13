@@ -23,7 +23,10 @@ class CreatePickViewModel @Inject constructor(
     private var _selectedSong: Song? = null
     val selectedSong get() = _selectedSong
 
-    private val _searchText = MutableStateFlow<String>("")
+    private val _comment = MutableStateFlow("")
+    val comment get() = _comment
+
+    private val _searchText = MutableStateFlow("")
     val searchText = _searchText.asStateFlow()
 
     private val _searchResult = MutableStateFlow<List<Song>>(emptyList())
@@ -45,8 +48,12 @@ class CreatePickViewModel @Inject constructor(
         }
     }
 
-    fun selectSongItem(song: Song) {
+    fun onSongItemClick(song: Song) {
         _selectedSong = song
+    }
+
+    fun onCommentChange(text: String) {
+        _comment.value = text
     }
 
     fun onSearchTextChange(text: String) {
@@ -65,5 +72,9 @@ class CreatePickViewModel @Inject constructor(
                 /* TODO */
             }
         }
+    }
+
+    fun createPick() {
+
     }
 }

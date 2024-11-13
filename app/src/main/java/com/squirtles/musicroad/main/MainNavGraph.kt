@@ -26,18 +26,17 @@ fun MainNavGraph(
     navController: NavHostController,
     navigationActions: MainNavigationActions,
     modifier: Modifier = Modifier,
-    startDestination: String = MainDestinations.MAIN_ROUTE,
 ) {
     NavHost(
         navController = navController,
-        startDestination = startDestination,
+        startDestination = MainDestinations.MAIN_ROUTE,
         modifier = modifier
     ) {
         composable(MainDestinations.MAIN_ROUTE) {
             MapScreen(
                 mapViewModel = mapViewModel,
                 onFavoriteClick = navigationActions.navigateToFavorite,
-                onCenterClick = { navController.navigate(CreatePickDestinations.SEARCH_ROUTE) },
+                onCenterClick = navigationActions.navigateToSearch,
                 onSettingClick = navigationActions.navigateToSetting
             )
         }
@@ -59,8 +58,11 @@ fun MainNavGraph(
                     navController.getBackStackEntry(CreatePickDestinations.SEARCH_ROUTE)
                 }
                 SearchMusicScreen(
-                    searchViewModel = hiltViewModel<CreatePickViewModel>(parentEntry),
-                    onItemClick = { navController.navigate(CreatePickDestinations.CREATE_PICK_ROUTE) }
+                    createPickViewModel = hiltViewModel<CreatePickViewModel>(parentEntry),
+                    onBackClick = {
+                        navController.popBackStack()
+                    },
+                    onItemClick = navigationActions.navigateToCreate
                 )
             }
             composable(CreatePickDestinations.CREATE_PICK_ROUTE) {
@@ -68,8 +70,10 @@ fun MainNavGraph(
                     navController.getBackStackEntry(CreatePickDestinations.SEARCH_ROUTE)
                 }
                 CreatePickScreen(
-                    searchViewModel = hiltViewModel<CreatePickViewModel>(parentEntry),
-                    onBackClick = { }
+                    createPickViewModel = hiltViewModel<CreatePickViewModel>(parentEntry),
+                    onBackClick = {
+                        navController.popBackStack()
+                    }
                 )
             }
         }
