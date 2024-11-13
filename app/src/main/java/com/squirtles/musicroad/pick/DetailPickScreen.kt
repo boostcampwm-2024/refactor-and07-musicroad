@@ -1,6 +1,7 @@
 package com.squirtles.musicroad.pick
 
 import android.app.Activity
+import android.util.Size
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -25,7 +26,9 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -42,6 +45,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.core.graphics.toColorInt
 import androidx.core.view.WindowInsetsControllerCompat
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil3.compose.AsyncImage
 import com.squirtles.domain.model.Pick
 import com.squirtles.domain.model.PickLocation
@@ -52,13 +57,38 @@ import com.squirtles.musicroad.ui.theme.Dark
 import com.squirtles.musicroad.ui.theme.Gray
 import com.squirtles.musicroad.ui.theme.White
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DetailPickScreen(
+    pickId: String,
+    onBackClick: () -> Unit,
+    pickViewModel: PickViewModel = hiltViewModel(),
+) {
+    val userId = ""
+    val username = "짱구"
+    val isFavorite = false
+    val pick by pickViewModel.pick.collectAsStateWithLifecycle()
+
+    LaunchedEffect(Unit) {
+        pickViewModel.fetchPick(pickId)
+    }
+
+    DetailPickScreen(
+        userId = userId,
+        username = username,
+        pick = pick,
+        isFavorite = isFavorite,
+        onBackClick = onBackClick
+    )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun DetailPickScreen(
     userId: String,
     username: String,
     pick: Pick,
-    isFavorite: Boolean
+    isFavorite: Boolean,
+    onBackClick: () -> Unit,
 ) {
     val isMine = userId == pick.createdBy
     val scrollState = rememberScrollState()
@@ -87,7 +117,7 @@ fun DetailPickScreen(
                     )
                 },
                 navigationIcon = {
-                    IconButton(onClick = { /*TODO*/ }) {
+                    IconButton(onClick = onBackClick) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = stringResource(id = R.string.pick_app_bar_back_description),
@@ -208,22 +238,23 @@ private fun DetailPickScreenPreview() {
             id = "",
             song = Song(
                 id = "",
-                songName = "Ditto",
-                artistName = "NewJeans",
-                albumName = "Ditto",
+                songName = "Super Shy",
+                artistName = "뉴진스",
+                albumName = "NewJeans 'Super Shy' - Single",
                 imageUrl = "https://i.scdn.co/image/ab67616d0000b2733d98a0ae7c78a3a9babaf8af",
                 genreNames = listOf("KPop", "R&B", "Rap"),
-                bgColor = "#000000".toColorInt(),
+                bgColor = "#8fc1e2".toColorInt(),
                 externalUrl = "",
                 previewUrl = ""
             ),
-            comment = "강남역 거리는 ditto 듣기 좋네요 ^-^!",
-            createdAt = "1970.01.21",
+            comment = "강남역 거리는 Super Shy 듣기 좋네요 ^-^!",
+            createdAt = "2024.11.02",
             createdBy = "짱구",
             favoriteCount = 100,
             location = PickLocation(1.0, 1.0),
             musicVideoUrl = "",
         ),
-        isFavorite = false
+        isFavorite = false,
+        onBackClick = {}
     )
 }

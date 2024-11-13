@@ -14,6 +14,7 @@
 
     <!-- Pick -->
     <string name="pick_app_bar_title">픽 등록</string>
+    <string name="pick_app_bar_title_user">님의 픽</string>
     <string name="pick_app_bar_back_description">뒤로가기</string>
     <string name="pick_app_bar_upload_description">등록하기</string>
     <string name="pick_album_description">앨범 이미지</string>
