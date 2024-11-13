@@ -43,15 +43,14 @@ import androidx.compose.ui.unit.dp
 import androidx.core.graphics.toColorInt
 import androidx.core.view.WindowInsetsControllerCompat
 import coil3.compose.AsyncImage
-import com.squirtles.domain.model.GeoPoint
 import com.squirtles.domain.model.Pick
+import com.squirtles.domain.model.PickLocation
 import com.squirtles.domain.model.Song
 import com.squirtles.musicroad.R
 import com.squirtles.musicroad.ui.theme.Black
 import com.squirtles.musicroad.ui.theme.Dark
 import com.squirtles.musicroad.ui.theme.Gray
 import com.squirtles.musicroad.ui.theme.White
-import java.time.LocalDate
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -59,12 +58,11 @@ fun DetailPickScreen(
     userId: String,
     username: String,
     pick: Pick,
-    song: Song,  // TODO Pick에서 Song 타입을 불러오도록 수정 필요 ex) pick.song.bgColor
     isFavorite: Boolean
 ) {
     val isMine = userId == pick.createdBy
     val scrollState = rememberScrollState()
-    val dynamicBackgroundColor = Color(song.bgColor)
+    val dynamicBackgroundColor = Color(pick.song.bgColor)
     val dynamicOnBackgroundColor = if (dynamicBackgroundColor.luminance() >= 0.5f) Black else White
     val view = LocalView.current
     if (!view.isInEditMode) {
@@ -84,7 +82,8 @@ fun DetailPickScreen(
                 title = {
                     Text(
                         text = username + stringResource(id = R.string.pick_app_bar_title_user),
-                        color = dynamicOnBackgroundColor
+                        color = dynamicOnBackgroundColor,
+                        style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold)
                     )
                 },
                 navigationIcon = {
@@ -137,20 +136,20 @@ fun DetailPickScreen(
                 verticalArrangement = Arrangement.spacedBy(10.dp),
             ) {
                 Text(
-                    text = song.songName,
+                    text = pick.song.songName,
                     color = dynamicOnBackgroundColor,
                     style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold)
                 )
 
                 Text(
-                    text = song.artistName,
+                    text = pick.song.artistName,
                     color = dynamicOnBackgroundColor,
                     style = MaterialTheme.typography.bodyLarge
                 )
 
                 AsyncImage(
-                    model = song.artwork,
-                    contentDescription = song.albumName + stringResource(id = R.string.pick_album_description),
+                    model = pick.song.imageUrl,
+                    contentDescription = pick.song.albumName + stringResource(id = R.string.pick_album_description),
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(horizontal = 30.dp)
@@ -159,7 +158,7 @@ fun DetailPickScreen(
                     contentScale = ContentScale.Crop
                 )
 
-                PickInformation(formattedDate = pick.formattedDate, favoriteCount = pick.favoriteCount)
+                PickInformation(formattedDate = pick.createdAt, favoriteCount = pick.favoriteCount)
 
                 Text(
                     text = pick.comment,
@@ -207,29 +206,23 @@ private fun DetailPickScreenPreview() {
         username = "짱구",
         pick = Pick(
             id = "",
-            albumTitle = "Ditto",
-            artists = listOf("NewJeans"),
-            songTitle = "Ditto",
-            location = GeoPoint(0.0, 0.0),
+            song = Song(
+                id = "",
+                songName = "Ditto",
+                artistName = "NewJeans",
+                albumName = "Ditto",
+                imageUrl = "https://i.scdn.co/image/ab67616d0000b2733d98a0ae7c78a3a9babaf8af",
+                genreNames = listOf("KPop", "R&B", "Rap"),
+                bgColor = "#000000".toColorInt(),
+                externalUrl = "",
+                previewUrl = ""
+            ),
             comment = "강남역 거리는 ditto 듣기 좋네요 ^-^!",
-            createdAt = 1730957495,
+            createdAt = "1970.01.21",
             createdBy = "짱구",
             favoriteCount = 100,
-            imageUrl = "https://i.scdn.co/image/ab67616d0000b2733d98a0ae7c78a3a9babaf8af",
-            previewUrl = "",
-            externalUrl = ""
-        ),
-        song = Song(
-            id = "1778132734",
-            songName = "Super Shy",
-            artistName = "뉴진스",
-            albumName = "NewJeans 'Super Shy' - Single",
-            artwork = "https://i.scdn.co/image/ab67616d0000b2733d98a0ae7c78a3a9babaf8af",
-            releaseDate = LocalDate.now(),
-            genreNames = listOf("K-Pop"),
-            bgColor = "#8FC1E2".toColorInt(),
-            externalUrl = "",
-            previewUrl = ""
+            location = PickLocation(1.0, 1.0),
+            musicVideoUrl = "",
         ),
         isFavorite = false
     )
