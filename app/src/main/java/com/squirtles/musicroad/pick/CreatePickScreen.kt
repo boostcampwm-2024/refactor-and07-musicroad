@@ -57,8 +57,8 @@ import com.squirtles.musicroad.ui.theme.White
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CreatePickScreen(
-    username: String,
-    song: Song
+    song: Song,
+    onBackClick: () -> Unit
 ) {
     val comment = rememberSaveable { mutableStateOf("") }
     val scrollState = rememberScrollState()
@@ -82,12 +82,13 @@ fun CreatePickScreen(
             CenterAlignedTopAppBar(
                 title = {
                     Text(
-                        text = username + stringResource(id = R.string.pick_app_bar_title_user),
-                        color = dynamicOnBackgroundColor
+                        text = stringResource(id = R.string.pick_app_bar_title),
+                        color = dynamicOnBackgroundColor,
+                        style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold)
                     )
                 },
                 navigationIcon = {
-                    IconButton(onClick = { /*TODO*/ }) {
+                    IconButton(onClick = onBackClick) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = stringResource(id = R.string.pick_app_bar_back_description),
@@ -188,8 +189,7 @@ fun CreatePickScreen(
 @Composable
 private fun CreatePickScreenPreview() {
     CreatePickScreen(
-        username = "짱구",
-        Song(
+        song = Song(
             id = "1778132734",
             songName = "Super Shy",
             artistName = "뉴진스",
@@ -199,6 +199,7 @@ private fun CreatePickScreenPreview() {
             bgColor = "#8FC1E2".toColorInt(),
             externalUrl = "",
             previewUrl = ""
-        )
+        ),
+        onBackClick = {}
     )
 }
