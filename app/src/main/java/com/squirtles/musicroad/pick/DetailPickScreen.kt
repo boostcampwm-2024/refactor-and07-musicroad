@@ -178,7 +178,7 @@ private fun DetailPickScreen(
                 )
 
                 AsyncImage(
-                    model = pick.song.imageUrl,
+                    model = pick.song.getImageUrlWithSize(Size(400, 400)),
                     contentDescription = pick.song.albumName + stringResource(id = R.string.pick_album_description),
                     modifier = Modifier
                         .fillMaxWidth()
