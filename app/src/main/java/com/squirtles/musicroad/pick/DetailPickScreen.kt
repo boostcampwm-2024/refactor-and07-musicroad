@@ -99,9 +99,11 @@ fun DetailPickScreen(
                 actions = {
                     IconButton(onClick = { /*TODO*/ }) {
                         val iconPainter = if (isMine) R.drawable.ic_delete else if (isFavorite) R.drawable.ic_favorite_true else R.drawable.ic_favorite_false
+                        val iconDescription =
+                            if (isMine) R.string.pick_delete_icon_description else if (isFavorite) R.string.pick_favorite_true_icon_description else R.string.pick_favorite_false_icon_description
                         Icon(
                             painter = painterResource(iconPainter),
-                            contentDescription = stringResource(id = R.string.pick_delete_icon_description),
+                            contentDescription = stringResource(id = iconDescription),
                             tint = dynamicOnBackgroundColor
                         )
                     }
