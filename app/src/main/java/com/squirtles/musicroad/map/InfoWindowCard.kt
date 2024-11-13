@@ -30,8 +30,9 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
-import com.squirtles.domain.model.GeoPoint
 import com.squirtles.domain.model.Pick
+import com.squirtles.domain.model.PickLocation
+import com.squirtles.domain.model.Song
 import com.squirtles.musicroad.R
 import com.squirtles.musicroad.ui.theme.Gray
 import com.squirtles.musicroad.ui.theme.MusicRoadTheme
@@ -55,7 +56,7 @@ fun InfoWindow(
             horizontalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             AsyncImage(
-                model = pick.imageUrl,
+                model = pick.song.imageUrl,
                 contentDescription = stringResource(R.string.map_info_window_album_description),
                 modifier = Modifier
                     .size(90.dp)
@@ -68,7 +69,7 @@ fun InfoWindow(
                 modifier = Modifier.weight(1f)
             ) {
                 Text(
-                    text = "${pick.songTitle} - ${pick.artists.joinToString()}",
+                    text = "${pick.song.songName} - ${pick.song.artistName}",
                     color = MaterialTheme.colorScheme.onSurface,
                     overflow = TextOverflow.Ellipsis,
                     maxLines = 1,
@@ -141,19 +142,28 @@ fun InfoWindow(
 @Composable
 private fun InfoWindowPreview() {
     MusicRoadTheme {
-        InfoWindow(pick = Pick(
-            id = "",
-            albumTitle = "Ditto",
-            artists = listOf("NewJeans"),
-            songTitle = "Ditto",
-            location = GeoPoint(0.0, 0.0),
-            comment = "강남역 거리는 ditto 듣기 좋네요 ^-^!",
-            createdAt = 1730957495,
-            createdBy = "짱구",
-            favoriteCount = 100,
-            imageUrl = "https://i.scdn.co/image/ab67616d0000b2733d98a0ae7c78a3a9babaf8af",
-            previewUrl = "",
-            externalUrl = ""
-        ), {})
+        InfoWindow(
+            pick = Pick(
+                id = "",
+                song = Song(
+                    id = "",
+                    songName = "Ditto",
+                    artistName = "NewJeans",
+                    albumName = "Ditto",
+                    imageUrl = "https://i.scdn.co/image/ab67616d0000b2733d98a0ae7c78a3a9babaf8af",
+                    genreNames = listOf("KPop", "R&B", "Rap"),
+                    bgColor = "#000000",
+                    externalUrl = "",
+                    previewUrl = ""
+                ),
+                comment = "강남역 거리는 ditto 듣기 좋네요 ^-^!",
+                createdAt = 1730957495,
+                createdBy = "짱구",
+                favoriteCount = 100,
+                location = PickLocation(1.0, 1.0),
+                musicVideoUrl = "",
+            ),
+            navigateToPick = {}
+        )
     }
 }
