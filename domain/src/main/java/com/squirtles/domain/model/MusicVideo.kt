@@ -1,10 +1,12 @@
 package com.squirtles.domain.model
 
+import java.time.LocalDate
+
 data class MusicVideo(
     val id: String,
     val songName: String,
     val artistName: String,
     val albumName: String,
-    val releaseDate: String,
+    val releaseDate: LocalDate,
     val previewUrl: String,
 )

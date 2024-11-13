@@ -5,20 +5,18 @@ package com.squirtles.domain.model
  */
 data class Pick(
     val id: String,
-    val albumTitle: String,
-    val artists: List<String>,
-    val songTitle: String,
-    val location: GeoPoint,
+    val song: Song,
     val comment: String,
-    val createdAt: Long,
-    val createdBy: String,
     val favoriteCount: Int = 0,
-    val imageUrl: String,
-    val previewUrl: String,
-    val externalUrl: String,
+    val createdBy: String,
+    val createdAt: Long,
+    val location: PickLocation,
+    val musicVideoUrl: String = "",
 )
 
-data class GeoPoint(
+data class PickLocation(
     val latitude: Double,
     val longitude: Double
-)
+) {
+    /* TODO: Location 변환 함수 */
+}
