@@ -53,7 +53,6 @@ import com.squirtles.musicroad.ui.theme.Black
 import com.squirtles.musicroad.ui.theme.Dark
 import com.squirtles.musicroad.ui.theme.Gray
 import com.squirtles.musicroad.ui.theme.White
-import java.time.LocalDate
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -146,7 +145,7 @@ fun CreatePickScreen(
                 )
 
                 AsyncImage(
-                    model = song.artwork,
+                    model = song.imageUrl,
                     contentDescription = song.albumName + stringResource(id = R.string.pick_album_description),
                     modifier = Modifier
                         .fillMaxWidth()
@@ -195,8 +194,7 @@ private fun CreatePickScreenPreview() {
             songName = "Super Shy",
             artistName = "뉴진스",
             albumName = "NewJeans 'Super Shy' - Single",
-            artwork = "https://i.scdn.co/image/ab67616d0000b2733d98a0ae7c78a3a9babaf8af",
-            releaseDate = LocalDate.now(),
+            imageUrl = "https://i.scdn.co/image/ab67616d0000b2733d98a0ae7c78a3a9babaf8af",
             genreNames = listOf("K-Pop"),
             bgColor = "#8FC1E2".toColorInt(),
             externalUrl = "",
