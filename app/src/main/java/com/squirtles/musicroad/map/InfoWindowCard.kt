@@ -29,6 +29,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.core.graphics.toColorInt
 import coil3.compose.AsyncImage
 import com.squirtles.domain.model.Pick
 import com.squirtles.domain.model.PickLocation
@@ -152,7 +153,7 @@ private fun InfoWindowPreview() {
                     albumName = "Ditto",
                     imageUrl = "https://i.scdn.co/image/ab67616d0000b2733d98a0ae7c78a3a9babaf8af",
                     genreNames = listOf("KPop", "R&B", "Rap"),
-                    bgColor = "#000000",
+                    bgColor = "#000000".toColorInt(),
                     externalUrl = "",
                     previewUrl = ""
                 ),

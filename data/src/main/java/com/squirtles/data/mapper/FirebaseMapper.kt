@@ -1,5 +1,6 @@
 package com.squirtles.data.mapper
 
+import androidx.core.graphics.toColorInt
 import com.squirtles.data.datasource.remote.firebase.model.FirebasePick
 import com.squirtles.domain.model.Pick
 import com.squirtles.domain.model.PickLocation
@@ -14,7 +15,9 @@ internal fun FirebasePick.toPick(): Pick = Pick(
         albumName = albumName.toString(),
         imageUrl = artwork?.get("url") ?: "",
         genreNames = genreNames,
-        bgColor = artwork?.get("bgColor") ?: "",
+        bgColor = artwork?.get("bgColor")?.let {
+            "#${it}".toColorInt()
+        } ?: "#000000".toColorInt(),
         externalUrl = externalUrl.toString(),
         previewUrl = previewUrl.toString(),
     ),
