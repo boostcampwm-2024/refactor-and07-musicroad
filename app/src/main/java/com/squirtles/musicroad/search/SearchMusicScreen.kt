@@ -1,4 +1,4 @@
-package com.squirtles.musicroad.search2
+package com.squirtles.musicroad.search
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectTapGestures
@@ -59,7 +59,8 @@ fun SearchMusicScreen() {
 
     val focusManager = LocalFocusManager.current
 
-    val searchViewModel: SearchViewModel = hiltViewModel()
+    val searchViewModel: SearchViewModel = hiltViewModel() // FIXME : 여기서 뷰모델 생성하는게 맞는지
+
     val searchText by searchViewModel.searchText.collectAsStateWithLifecycle()
     val isSearching by searchViewModel.isSearching.collectAsStateWithLifecycle(false)
 

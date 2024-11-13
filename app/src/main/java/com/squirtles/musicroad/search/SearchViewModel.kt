@@ -1,4 +1,4 @@
-package com.squirtles.musicroad.search2
+package com.squirtles.musicroad.search
 
 import android.util.Log
 import androidx.lifecycle.ViewModel
@@ -25,7 +25,7 @@ class SearchViewModel @Inject constructor(
 
     private val _searchResult = MutableStateFlow<List<Song>>(emptyList())
     val searchResult = _searchResult.asStateFlow()
-    
+
     private val _isSearching = MutableSharedFlow<Boolean>()
     val isSearching = _isSearching.asSharedFlow()
 
