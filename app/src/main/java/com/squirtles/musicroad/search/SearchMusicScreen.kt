@@ -31,7 +31,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -42,11 +41,14 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil3.compose.AsyncImage
+import com.squirtles.musicroad.R
 import com.squirtles.musicroad.ui.theme.Black
 import com.squirtles.musicroad.ui.theme.Gray
 import com.squirtles.musicroad.ui.theme.Primary
@@ -58,8 +60,8 @@ fun SearchMusicScreen() {
     val focusManager = LocalFocusManager.current
 
     val searchViewModel: SearchViewModel = hiltViewModel()
-    val searchText by searchViewModel.searchText.collectAsState()
-    val isSearching by searchViewModel.isSearching.collectAsState(false)
+    val searchText by searchViewModel.searchText.collectAsStateWithLifecycle()
+    val isSearching by searchViewModel.isSearching.collectAsStateWithLifecycle(false)
 
     Scaffold(
         contentWindowInsets = WindowInsets.navigationBars,
@@ -160,12 +162,13 @@ private fun SearchBar(
                     ) {
                         Icon(
                             imageVector = Icons.Default.Search,
-                            contentDescription = "stringResource(R.string.search_music_search_button_description)",
+                            contentDescription = stringResource(R.string.search_music_search_button_description),
                             tint = White
                         )
                     }
                 }
             } else null,
+            singleLine = true,
             shape = CircleShape,
             colors = TextFieldDefaults.colors(
                 focusedTextColor = White,
@@ -190,7 +193,7 @@ private fun MusicItem() {
     ) {
         AsyncImage(
             model = "https://i.scdn.co/image/ab67616d0000b2733d98a0ae7c78a3a9babaf8af",
-            contentDescription = "stringResource(R.string.search_music_album_description)",
+            contentDescription = stringResource(R.string.search_music_album_description),
             contentScale = ContentScale.Crop,
             modifier = Modifier
                 .size(ImageSize)
