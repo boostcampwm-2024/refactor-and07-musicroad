@@ -55,11 +55,11 @@ import com.squirtles.musicroad.ui.theme.Primary
 import com.squirtles.musicroad.ui.theme.White
 
 @Composable
-fun SearchMusicScreen() {
+fun SearchMusicScreen(
+    searchViewModel: SearchViewModel = hiltViewModel()
+) {
 
     val focusManager = LocalFocusManager.current
-
-    val searchViewModel: SearchViewModel = hiltViewModel() // FIXME : 여기서 뷰모델 생성하는게 맞는지
 
     val searchText by searchViewModel.searchText.collectAsStateWithLifecycle()
     val isSearching by searchViewModel.isSearching.collectAsStateWithLifecycle(false)
