@@ -71,9 +71,9 @@ class MapViewModel @Inject constructor(
         }
     }
 
-    fun requestPickNotificationArea(lat: Double, lng: Double, notiRadius: Double) {
+    fun requestPickNotificationArea(location: Location, notiRadius: Double) {
         viewModelScope.launch {
-            fetchPickInAreaUseCase(lat, lng, notiRadius)
+            fetchPickInAreaUseCase(location.latitude, location.longitude, notiRadius)
                 .onSuccess {
                     _pickCount.emit(it.count())
                 }.onFailure {
