@@ -25,7 +25,7 @@ internal fun FirebasePick.toPick(): Pick = Pick(
         previewUrl = previewUrl.toString(),
     ),
     comment = comment.toString(),
-    createdAt = formatTimestamp(createdAt.seconds),
+    createdAt = formatTimestamp(createdAt.toDate()),
     createdBy = createdBy.toString(),
     location = PickLocation(
         latitude = location?.latitude ?: 0.0,
@@ -34,7 +34,7 @@ internal fun FirebasePick.toPick(): Pick = Pick(
     favoriteCount = favoriteCount,
 )
 
-private fun formatTimestamp(timestamp: Long): String {
+private fun formatTimestamp(date: Date): String {
     val dateFormat = SimpleDateFormat("yyyy.MM.dd", Locale.getDefault())
-    return dateFormat.format(Date(timestamp))
+    return dateFormat.format(date)
 }

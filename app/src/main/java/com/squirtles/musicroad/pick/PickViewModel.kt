@@ -44,7 +44,7 @@ class PickViewModel @Inject constructor(
                     previewUrl = ""
                 ),
                 comment = "",
-                createdAt = "1970.01.21",
+                createdAt = "",
                 createdBy = "",
                 favoriteCount = 0,
                 location = PickLocation(1.0, 1.0),

@@ -216,15 +216,16 @@ private fun PickInformation(formattedDate: String, favoriteCount: Int) {
         horizontalArrangement = Arrangement.spacedBy(4.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-
-        Text(text = formattedDate, style = MaterialTheme.typography.titleMedium.copy(Gray))
-        Icon(
-            painter = painterResource(id = R.drawable.ic_favorite),
-            contentDescription = stringResource(R.string.pick_favorite_count_icon_description),
-            modifier = Modifier.padding(start = 4.dp),
-            tint = Gray
-        )
-        Text(text = "$favoriteCount", style = MaterialTheme.typography.titleMedium.copy(Gray))
+        if (formattedDate.isNotBlank()) {
+            Text(text = formattedDate, style = MaterialTheme.typography.titleMedium.copy(Gray))
+            Icon(
+                painter = painterResource(id = R.drawable.ic_favorite),
+                contentDescription = stringResource(R.string.pick_favorite_count_icon_description),
+                modifier = Modifier.padding(start = 4.dp),
+                tint = Gray
+            )
+            Text(text = "$favoriteCount", style = MaterialTheme.typography.titleMedium.copy(Gray))
+        }
     }
 }
 
