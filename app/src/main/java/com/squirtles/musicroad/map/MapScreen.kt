@@ -11,19 +11,24 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.outlined.AccountCircle
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -31,8 +36,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.fragment.app.FragmentActivity
 import androidx.fragment.app.FragmentContainerView
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.squirtles.musicroad.R
 import com.squirtles.musicroad.ui.theme.MusicRoadTheme
+import com.squirtles.musicroad.ui.theme.White
 
 @Composable
 fun MapScreen(
@@ -42,6 +49,7 @@ fun MapScreen(
     onSettingClick: () -> Unit
 ) {
     Log.d("MapScreen", mapViewModel.toString())
+    val pickCount by mapViewModel.pickCount.collectAsStateWithLifecycle()
 
     Scaffold(
         contentWindowInsets = WindowInsets.navigationBars
@@ -64,6 +72,10 @@ fun MapScreen(
                 }
             )
 
+            if (pickCount > 0) {
+                PickNotificationBanner(pickCount)
+            }
+
             BottomNavigation(
                 modifier = Modifier
                     .align(Alignment.BottomCenter)
@@ -73,6 +85,21 @@ fun MapScreen(
                 onSettingClick = onSettingClick
             )
         }
+    }
+}
+
+@Composable
+fun PickNotificationBanner(pickCount: Int) {
+    Box(Modifier.fillMaxSize()) {
+        Text(
+            text = stringResource(id = R.string.map_pick_notification, pickCount),
+            modifier = Modifier
+                .align(Alignment.TopCenter)
+                .offset(y = (LocalConfiguration.current.screenHeightDp * 0.08).dp)
+                .clip(RoundedCornerShape(30.dp))
+                .background(White.copy(alpha = 0.8f))
+                .padding(vertical = 10.dp, horizontal = 23.dp)
+        )
     }
 }
 
@@ -166,6 +193,14 @@ fun BottomNavigationDarkPreview() {
             onCenterClick = {},
             onSettingClick = {}
         )
+    }
+}
+
+@Preview
+@Composable
+private fun PickNotificationBannerPreview() {
+    MusicRoadTheme {
+        PickNotificationBanner(1)
     }
 }
 

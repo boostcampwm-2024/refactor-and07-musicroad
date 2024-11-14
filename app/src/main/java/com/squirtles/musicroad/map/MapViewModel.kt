@@ -27,6 +27,9 @@ class MapViewModel @Inject constructor(
     private val _curLocation = MutableStateFlow<Location?>(null)
     val curLocation = _curLocation.asStateFlow()
 
+    private val _pickCount = MutableStateFlow(0)
+    val pickCount = _pickCount.asStateFlow()
+
     fun createMarker() {
         viewModelScope.launch {
             _centerButtonClick.emit(true)
@@ -65,6 +68,17 @@ class MapViewModel @Inject constructor(
             }
 
             Log.d("MapViewModel", picks.toString())
+        }
+    }
+
+    fun requestPickNotificationArea(location: Location, notiRadius: Double) {
+        viewModelScope.launch {
+            fetchPickInAreaUseCase(location.latitude, location.longitude, notiRadius)
+                .onSuccess {
+                    _pickCount.emit(it.count())
+                }.onFailure {
+                    _pickCount.emit(0)
+                }
         }
     }
 }
