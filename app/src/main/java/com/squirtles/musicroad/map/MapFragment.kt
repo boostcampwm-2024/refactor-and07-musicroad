@@ -128,6 +128,7 @@ class MapFragment : Fragment(), OnMapReadyCallback {
         naverMap.addOnLocationChangeListener { location ->
             setCircleOverlay(location)
             mapViewModel.updateCurLocation(location)
+            mapViewModel.requestPickNotificationArea(location, CIRCLE_RADIUS_METER)
         }
     }
 
