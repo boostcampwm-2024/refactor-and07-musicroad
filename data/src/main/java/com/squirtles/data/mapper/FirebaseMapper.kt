@@ -10,6 +10,7 @@ import com.squirtles.domain.model.Pick
 import com.squirtles.domain.model.PickLocation
 import com.squirtles.domain.model.Song
 import java.text.SimpleDateFormat
+import java.util.Date
 import java.util.Locale
 
 internal fun FirebasePick.toPick(): Pick = Pick(
@@ -28,7 +29,7 @@ internal fun FirebasePick.toPick(): Pick = Pick(
         previewUrl = previewUrl.toString(),
     ),
     comment = comment.toString(),
-    createdAt = createdAt.seconds,
+    createdAt = formatTimestamp(createdAt.toDate()),
     createdBy = createdBy.toString(),
     location = PickLocation(
         latitude = location?.latitude ?: 0.0,
@@ -36,6 +37,11 @@ internal fun FirebasePick.toPick(): Pick = Pick(
     ),
     favoriteCount = favoriteCount,
 )
+
+private fun formatTimestamp(date: Date): String {
+    val dateFormat = SimpleDateFormat("yyyy.MM.dd", Locale.getDefault())
+    return dateFormat.format(date)
+}
 
 fun Pick.toFirebasePick(): FirebasePick = FirebasePick(
     id = id,

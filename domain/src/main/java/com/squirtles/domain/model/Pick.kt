@@ -9,7 +9,7 @@ data class Pick(
     val comment: String,
     val favoriteCount: Int = 0,
     val createdBy: String,
-    val createdAt: Long,
+    val createdAt: String,
     val location: PickLocation,
     val musicVideoUrl: String = "",
 )
