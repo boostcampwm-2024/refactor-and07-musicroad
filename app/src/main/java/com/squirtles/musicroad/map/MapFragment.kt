@@ -81,27 +81,12 @@ class MapFragment : Fragment(), OnMapReadyCallback {
         // 테스트 : 네이버커넥트 기준 주변 5km 내 픽 정보 불러오기
         mapViewModel.fetchPickInArea(37.380324, 127.115282, 5.0 * 1000.0)
 
-        // 지도 클릭 이벤트 설정
-        naverMap.setOnMapClickListener { _, _ ->
-            selectedMarker?.let { marker ->
-                marker.width = marker.icon.getIntrinsicWidth(requireContext())
-                marker.height = marker.icon.getIntrinsicHeight(requireContext())
-
-                selectedMarker = null
-                mapViewModel.resetSelectedPick()
-            }
-        }
+        setMapClickListener()
+        observePickList()
 
         lifecycleScope.launch {
             mapViewModel.curLocation.collect {
                 Log.d(TAG_LOG, "map fragment: 위치 업데이트 - $it")
-            }
-        }
-
-        lifecycleScope.launch {
-            mapViewModel.pickList.collect {
-                Log.d(TAG_LOG, "pickList: $it")
-                createMarker(it)
             }
         }
     }
@@ -158,6 +143,28 @@ class MapFragment : Fragment(), OnMapReadyCallback {
                 PermissionChecker.PERMISSION_GRANTED &&
                 PermissionChecker.checkSelfPermission(requireContext(), PERMISSIONS[1]) ==
                 PermissionChecker.PERMISSION_GRANTED
+    }
+
+    // 지도 클릭 이벤트 설정
+    private fun setMapClickListener() {
+        naverMap.setOnMapClickListener { _, _ ->
+            selectedMarker?.let { marker ->
+                marker.width = marker.icon.getIntrinsicWidth(requireContext())
+                marker.height = marker.icon.getIntrinsicHeight(requireContext())
+
+                selectedMarker = null
+                mapViewModel.resetSelectedPick()
+            }
+        }
+    }
+
+    private fun observePickList() {
+        lifecycleScope.launch {
+            mapViewModel.pickList.collect {
+                Log.d(TAG_LOG, "pickList: $it")
+                createMarker(it)
+            }
+        }
     }
 
     private fun createMarker(pickList: List<Pick>) {
