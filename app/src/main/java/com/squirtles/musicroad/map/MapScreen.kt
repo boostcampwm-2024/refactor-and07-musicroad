@@ -68,7 +68,8 @@ fun MapScreen(
                 modifier = Modifier
                     .align(Alignment.BottomCenter)
                     .padding(bottom = 16.dp),
-                onFavoriteClick = onFavoriteClick,
+//                onFavoriteClick = onFavoriteClick,
+                onFavoriteClick = { mapViewModel.createMarker() },
                 onCenterClick = onCenterClick,
                 onSettingClick = onSettingClick
             )
