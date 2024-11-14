@@ -11,12 +11,16 @@ import com.google.firebase.firestore.Query
 import com.google.firebase.firestore.QuerySnapshot
 import com.google.firebase.firestore.toObject
 import com.squirtles.data.datasource.remote.firebase.model.FirebasePick
+import com.squirtles.data.mapper.toFirebasePick
 import com.squirtles.data.mapper.toPick
 import com.squirtles.domain.datasource.FirebaseRemoteDataSource
 import com.squirtles.domain.model.Pick
+import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 import javax.inject.Singleton
+import kotlin.coroutines.resume
+import kotlin.coroutines.resumeWithException
 
 @Singleton
 class FirebaseDataSourceImpl @Inject constructor(
@@ -115,9 +119,25 @@ class FirebaseDataSourceImpl @Inject constructor(
         return distanceInM <= radiusInM
     }
 
-    override suspend fun addPick(pick: Pick): Pick {
-        TODO("Not yet implemented")
-    }
+    /**
+     * Creates a new pick in Firestore.
+     * @param pick The pick to create.
+     * @return The created pick.
+     */
+    override suspend fun createPick(pick: Pick): String =
+        suspendCancellableCoroutine { continuation ->
+            val firebasePick = pick.toFirebasePick()
+
+            // add() 메소드는 Cloud Firestore에서 ID를 자동으로 생성
+            db.collection("picks").add(firebasePick)
+                .addOnSuccessListener { documentReference ->
+                    continuation.resume(documentReference.id)
+                }
+                .addOnFailureListener { exception ->
+                    Log.e("FirebaseDataSourceImpl", "Failed to create a pick", exception)
+                    continuation.resumeWithException(exception)
+                }
+        }
 
     override suspend fun deletePick(pick: Pick): Boolean {
         TODO("Not yet implemented")
