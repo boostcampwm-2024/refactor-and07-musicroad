@@ -42,10 +42,11 @@ class CreatePickViewModel @Inject constructor(
     fun searchSongs() {
         viewModelScope.launch {
             val result = searchSongsUseCase(_searchText.value)
-            if (result.isSuccess) {
+
+            result.onSuccess {
                 _searchResult.value = result.getOrElse { emptyList() }
                 Log.d("SearchViewModel", _searchResult.value.toString())
-            } else {
+            }.onFailure {
                 _searchResult.value = emptyList()
                 Log.d("SearchViewModel", _searchResult.value.toString())
             }
@@ -92,10 +93,10 @@ class CreatePickViewModel @Inject constructor(
                 )
             )
 
-            if (createResult.isSuccess) {
+            createResult.onSuccess {
                 /* TODO: 성공처리 */
                 Log.d("CreatePickViewModel", createResult.toString())
-            } else {
+            }.onFailure {
                 /* TODO: 실패처리 */
                 Log.d("CreatePickViewModel", createResult.exceptionOrNull()?.message.toString())
             }
