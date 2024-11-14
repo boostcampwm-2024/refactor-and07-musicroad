@@ -125,7 +125,6 @@ class FirebaseDataSourceImpl @Inject constructor(
      * @return The created pick.
      */
     override suspend fun createPick(pick: Pick): String =
-        // TODO: suspendCancellableCoroutine 무엇인가
         suspendCancellableCoroutine { continuation ->
             val firebasePick = pick.toFirebasePick()
 

@@ -46,7 +46,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.core.graphics.toColorInt
 import androidx.core.view.WindowInsetsControllerCompat
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil3.compose.AsyncImage
 import com.squirtles.domain.model.Song
@@ -79,16 +78,37 @@ fun CreatePickScreen(
 
     Log.d("CreatePickScreen", song.toString())
 
+    CreatePickDisplay(
+        song = song,
+        comment = comment.value,
+        dynamicBackgroundColor = dynamicBackgroundColor,
+        dynamicOnBackgroundColor = dynamicOnBackgroundColor,
+        onBackClick = {
+            createPickViewModel.resetComment()
+            onBackClick()
+        },
+        onCreateClick = createPickViewModel::createPick,
+        onCommentChange = createPickViewModel::onCommentChange
+    )
+}
+
+@Composable
+private fun CreatePickDisplay(
+    song: Song,
+    comment: String,
+    dynamicBackgroundColor: Color,
+    dynamicOnBackgroundColor: Color,
+    onCommentChange: (String) -> Unit,
+    onBackClick: () -> Unit,
+    onCreateClick: () -> Unit,
+) {
     Scaffold(
         containerColor = dynamicBackgroundColor,
         topBar = {
             CreatePickScreenTopBar(
                 dynamicOnBackgroundColor = dynamicOnBackgroundColor,
-                onBackClick = {
-                    createPickViewModel.resetComment()
-                    onBackClick()
-                },
-                onCreateClick = createPickViewModel::createPick
+                onBackClick = onBackClick,
+                onCreateClick = onCreateClick
             )
         }
     ) { innerPadding ->
@@ -107,12 +127,11 @@ fun CreatePickScreen(
         ) {
             CreatePickContent(
                 song = song,
-                comment = comment.value,
-                onValueChange = createPickViewModel::onCommentChange,
+                comment = comment,
+                onValueChange = onCommentChange,
                 dynamicOnBackgroundColor = dynamicOnBackgroundColor,
             )
         }
-
     }
 }
 
@@ -239,20 +258,28 @@ private fun CreatePickScreenTopBar(
 @Preview
 @Composable
 private fun CreatePickScreenPreview() {
-    CreatePickScreen(
-//        song = Song(
-//            id = "1778132734",
-//            songName = "Super Shy",
-//            artistName = "뉴진스",
-//            albumName = "NewJeans 'Super Shy' - Single",
-//            imageUrl = "https://i.scdn.co/image/ab67616d0000b2733d98a0ae7c78a3a9babaf8af",
-//            genreNames = listOf("K-Pop"),
-//            bgColor = "#8FC1E2".toColorInt(),
-//            externalUrl = "",
-//            previewUrl = ""
-//        ),
+    CreatePickDisplay(
+        song = Song(
+            id = "1778132734",
+            songName = "Super Shy",
+            artistName = "뉴진스",
+            albumName = "NewJeans 'Super Shy' - Single",
+            imageUrl = "https://i.scdn.co/image/ab67616d0000b2733d98a0ae7c78a3a9babaf8af",
+            genreNames = listOf("K-Pop"),
+            bgColor = "#8FC1E2".toColorInt(),
+            externalUrl = "",
+            previewUrl = ""
+        ),
         onBackClick = {},
-        createPickViewModel = hiltViewModel<CreatePickViewModel>()
+        comment = "TEST COMMENT",
+        dynamicBackgroundColor = Color.White,
+        dynamicOnBackgroundColor = Color.Gray,
+        onCommentChange = {
+
+        },
+        onCreateClick = {
+
+        }
     )
 }
 

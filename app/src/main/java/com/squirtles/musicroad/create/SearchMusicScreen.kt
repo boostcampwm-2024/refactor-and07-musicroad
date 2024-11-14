@@ -35,15 +35,12 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusManager
-import androidx.compose.ui.focus.FocusRequester
-import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
@@ -123,7 +120,6 @@ private fun SearchTopBar(
     onBackClick: () -> Boolean,
     focusManager: FocusManager
 ) {
-    val focusRequester = remember { FocusRequester() }
 
     Row(
         modifier = Modifier
@@ -150,8 +146,7 @@ private fun SearchTopBar(
             value = keyword,
             onValueChange = onValueChange,
             modifier = Modifier
-                .weight(1f)
-                .focusRequester(focusRequester),
+                .weight(1f),
             placeholder = {
                 Text("검색")
             },
@@ -185,12 +180,6 @@ private fun SearchTopBar(
                 unfocusedPlaceholderColor = White
             ),
         )
-    }
-
-    LaunchedEffect(keyword) {
-        if (keyword.isEmpty()) {
-            focusRequester.requestFocus() // 텍스트가 비어도 포커스를 유지
-        }
     }
 }
 
