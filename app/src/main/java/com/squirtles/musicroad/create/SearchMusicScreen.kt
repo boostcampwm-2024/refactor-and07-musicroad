@@ -35,12 +35,15 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusManager
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
@@ -81,7 +84,7 @@ fun SearchMusicScreen(
                     .padding(WindowInsets.statusBars.asPaddingValues())
                     .padding(top = 16.dp)
             ) {
-                SearchBar(
+                SearchTopBar(
                     keyword = searchText,
                     onValueChange = createPickViewModel::onSearchTextChange,
                     active = isSearching,
@@ -97,43 +100,22 @@ fun SearchMusicScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .background(Brush.verticalGradient(colorStops = colorStops))
+                .padding(innerPadding)
         ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(innerPadding)
-                    .addFocusCleaner(focusManager)
-            ) {
-                VerticalSpacer(20)
-
-                TextWithColorAndStyle(
-                    text = "Result",
-                    textColor = White,
-                    textStyle = MaterialTheme.typography.titleLarge,
-                    modifier = Modifier.padding(start = DefaultPadding)
-                )
-                VerticalSpacer(20)
-
-                LazyColumn(
-                    modifier = Modifier.padding(bottom = DefaultPadding)
-                ) {
-                    items(
-                        items = searchResult,
-                        key = { it.id }
-                    ) { song ->
-                        SongItem(song) {
-                            createPickViewModel.onSongItemClick(song)
-                            onItemClick()
-                        }
-                    }
+            SearchResult(
+                focusManager = focusManager,
+                searchResult = searchResult,
+                onItemClick = { song ->
+                    createPickViewModel.onSongItemClick(song)
+                    onItemClick()
                 }
-            }
+            )
         }
     }
 }
 
 @Composable
-private fun SearchBar(
+private fun SearchTopBar(
     keyword: String,
     onValueChange: (String) -> Unit,
     active: Boolean, // whether the user is searching or not
@@ -141,6 +123,8 @@ private fun SearchBar(
     onBackClick: () -> Boolean,
     focusManager: FocusManager
 ) {
+    val focusRequester = remember { FocusRequester() }
+
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -165,7 +149,9 @@ private fun SearchBar(
         OutlinedTextField(
             value = keyword,
             onValueChange = onValueChange,
-            modifier = Modifier.weight(1f),
+            modifier = Modifier
+                .weight(1f)
+                .focusRequester(focusRequester),
             placeholder = {
                 Text("검색")
             },
@@ -197,8 +183,50 @@ private fun SearchBar(
                 unfocusedIndicatorColor = White,
                 focusedPlaceholderColor = Gray,
                 unfocusedPlaceholderColor = White
-            )
+            ),
         )
+    }
+
+    LaunchedEffect(keyword) {
+        if (keyword.isEmpty()) {
+            focusRequester.requestFocus() // 텍스트가 비어도 포커스를 유지
+        }
+    }
+}
+
+@Composable
+private fun SearchResult(
+    focusManager: FocusManager,
+    searchResult: List<Song>,
+    onItemClick: (Song) -> Unit
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .addFocusCleaner(focusManager)
+    ) {
+        VerticalSpacer(20)
+
+        TextWithColorAndStyle(
+            text = "Result",
+            textColor = White,
+            textStyle = MaterialTheme.typography.titleLarge,
+            modifier = Modifier.padding(start = DefaultPadding)
+        )
+        VerticalSpacer(20)
+
+        LazyColumn(
+            modifier = Modifier.padding(bottom = DefaultPadding)
+        ) {
+            items(
+                items = searchResult,
+                key = { it.id }
+            ) { song ->
+                SongItem(song) {
+                    onItemClick(song)
+                }
+            }
+        }
     }
 }
 
