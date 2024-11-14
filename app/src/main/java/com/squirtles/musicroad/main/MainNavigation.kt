@@ -16,6 +16,12 @@ object CreatePickDestinations {
     const val CREATE_PICK_ROUTE = "create_pick"
 }
 
+object PickInfoDestinations {
+    private const val PICK_DETAIL_ROUTE = "pick_detail"
+
+    fun pickDetail(pickId: String) = "$PICK_DETAIL_ROUTE/$pickId"
+}
+
 class MainNavigationActions(navController: NavHostController) {
     val navigateToFavorite: () -> Unit = {
         navController.navigate(MainDestinations.FAVORITE_ROUTE) {
@@ -39,6 +45,16 @@ class MainNavigationActions(navController: NavHostController) {
 
     val navigateToSearch: () -> Unit = {
         navController.navigate(MainDestinations.SEARCH_ROUTE) {
+            popUpTo(navController.graph.findStartDestination().id) {
+                saveState = true
+            }
+            launchSingleTop = true
+            restoreState = true
+        }
+    }
+
+    val navigateToPickDetail: (String) -> Unit = { pickId ->
+        navController.navigate(PickInfoDestinations.pickDetail(pickId)) {
             popUpTo(navController.graph.findStartDestination().id) {
                 saveState = true
             }

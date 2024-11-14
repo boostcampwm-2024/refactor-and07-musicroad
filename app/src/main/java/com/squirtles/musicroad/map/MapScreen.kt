@@ -45,7 +45,8 @@ fun MapScreen(
     mapViewModel: MapViewModel,
     onFavoriteClick: () -> Unit,
     onCenterClick: () -> Unit,
-    onSettingClick: () -> Unit
+    onSettingClick: () -> Unit,
+    onInfoWindowClick: (String) -> Unit
 ) {
     Log.d("MapScreen", mapViewModel.toString())
     val selectedPick by mapViewModel.selectedPick.collectAsStateWithLifecycle()
@@ -77,7 +78,10 @@ fun MapScreen(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 selectedPick?.let { pick ->
-                    InfoWindow(pick) { }
+                    InfoWindow(pick) { pickId ->
+                        onInfoWindowClick(pickId)
+                        mapViewModel.resetSelectedPick()
+                    }
                     Spacer(Modifier.height(16.dp))
                 }
 

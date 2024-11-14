@@ -3,12 +3,15 @@ package com.squirtles.musicroad.main
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.navigation
+import androidx.navigation.navArgument
 import com.squirtles.musicroad.favorite.FavoriteScreen
 import com.squirtles.musicroad.map.MapScreen
 import com.squirtles.musicroad.map.MapViewModel
+import com.squirtles.musicroad.pick.DetailPickScreen
 import com.squirtles.musicroad.search.SearchMusicScreen
 import com.squirtles.musicroad.setting.SettingScreen
 
@@ -30,7 +33,8 @@ fun MainNavGraph(
                 mapViewModel = mapViewModel,
                 onFavoriteClick = navigationActions.navigateToFavorite,
                 onCenterClick = { navController.navigate(CreatePickDestinations.CREATE_ROUTE) },
-                onSettingClick = navigationActions.navigateToSetting
+                onSettingClick = navigationActions.navigateToSetting,
+                onInfoWindowClick = { navigationActions.navigateToPickDetail(it) }
             )
         }
 
@@ -52,6 +56,17 @@ fun MainNavGraph(
             composable(CreatePickDestinations.CREATE_PICK_ROUTE) {
 
             }
+        }
+
+        composable(
+            route = PickInfoDestinations.pickDetail("{pickId}"),
+            arguments = listOf(navArgument("pickId") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val pickId = backStackEntry.arguments?.getString("pickId") ?: ""
+            DetailPickScreen(
+                pickId = pickId,
+                onBackClick = { navController.navigateUp() }
+            )
         }
     }
 }
