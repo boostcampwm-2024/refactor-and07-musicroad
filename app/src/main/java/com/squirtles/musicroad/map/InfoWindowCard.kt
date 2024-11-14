@@ -158,7 +158,7 @@ private fun InfoWindowPreview() {
                     previewUrl = ""
                 ),
                 comment = "강남역 거리는 ditto 듣기 좋네요 ^-^!",
-                createdAt = 1730957495,
+                createdAt = "1970.01.21",
                 createdBy = "짱구",
                 favoriteCount = 100,
                 location = PickLocation(1.0, 1.0),
