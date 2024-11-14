@@ -16,6 +16,7 @@ import androidx.lifecycle.lifecycleScope
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import com.naver.maps.geometry.LatLng
+import com.naver.maps.map.CameraAnimation
 import com.naver.maps.map.CameraUpdate
 import com.naver.maps.map.LocationTrackingMode
 import com.naver.maps.map.MapFragment
@@ -203,6 +204,11 @@ class MapFragment : Fragment(), OnMapReadyCallback {
         marker.width = (defaultIconWidth * MARKER_SCALE).toInt()
         marker.height = (defaultIconHeight * MARKER_SCALE).toInt()
         selectedMarker = marker
+
+        val cameraUpdate = CameraUpdate
+            .scrollTo(marker.position)
+            .animate(CameraAnimation.Easing)
+        naverMap.moveCamera(cameraUpdate)
 
         mapViewModel.setSelectedPick(pick)
     }
