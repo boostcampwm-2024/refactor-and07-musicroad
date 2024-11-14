@@ -4,6 +4,7 @@ import android.Manifest
 import android.location.Location
 import android.os.Bundle
 import android.util.Log
+import android.util.Size
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -25,6 +26,7 @@ import com.naver.maps.map.overlay.LocationOverlay
 import com.naver.maps.map.overlay.Marker
 import com.naver.maps.map.overlay.OverlayImage
 import com.naver.maps.map.util.FusedLocationSource
+import com.squirtles.domain.model.Pick
 import com.squirtles.musicroad.R
 import com.squirtles.musicroad.databinding.FragmentMapBinding
 import com.squirtles.musicroad.ui.theme.Blue
@@ -41,6 +43,7 @@ class MapFragment : Fragment(), OnMapReadyCallback {
     private lateinit var locationOverlay: LocationOverlay
     private val circleOverlay = CircleOverlay()
     private var selectedMarker: Marker? = null
+    private val markers = mutableListOf<Marker>() // 지도의 마커 리스트
 
     private val mapViewModel: MapViewModel by activityViewModels()
 
@@ -85,21 +88,20 @@ class MapFragment : Fragment(), OnMapReadyCallback {
                 marker.height = marker.icon.getIntrinsicHeight(requireContext())
 
                 selectedMarker = null
-            }
-        }
-
-        lifecycleScope.launch {
-            mapViewModel.centerButtonClick.collect {
-                Log.d(TAG_LOG, "map fragment: center button click collect - $it")
-                mapViewModel.curLocation.value?.let { location ->
-                    createMarker(location)
-                }
+                mapViewModel.resetSelectedPick()
             }
         }
 
         lifecycleScope.launch {
             mapViewModel.curLocation.collect {
                 Log.d(TAG_LOG, "map fragment: 위치 업데이트 - $it")
+            }
+        }
+
+        lifecycleScope.launch {
+            mapViewModel.pickList.collect {
+                Log.d(TAG_LOG, "pickList: $it")
+                createMarker(it)
             }
         }
     }
@@ -158,42 +160,28 @@ class MapFragment : Fragment(), OnMapReadyCallback {
                 PermissionChecker.PERMISSION_GRANTED
     }
 
-    private fun createMarker(location: Location) {
-        val marker = Marker()
-        val markerIconView = MarkerIconView(requireContext())
-        markerIconView.setPaintColor(Blue.toArgb())
-        markerIconView.loadImage("https://i.scdn.co/image/ab67616d0000b2733d98a0ae7c78a3a9babaf8af") {
-//            marker.position = LatLng(37.5670135, 126.9783740)
-            marker.position = LatLng(location.latitude, location.longitude)
-            marker.icon = OverlayImage.fromView(markerIconView)
-            marker.setOnClickListener {
-                onMarkerClick(marker)
-                true
-            }
-            marker.map = naverMap
-        }
+    private fun createMarker(pickList: List<Pick>) {
+        // 기존 마커 삭제
+        markers.forEach { it.map = null }
+        markers.clear()
 
-        addMarker(35.1969198, 129.0827011)
-        addMarker(35.1989350, 129.08407821)
-    }
-
-    // 지도에 테스트 마커 임의 추가를 위한 함수
-    private fun addMarker(latitude: Double, longitude: Double) {
-        val marker = Marker()
-        val markerIconView = MarkerIconView(requireContext())
-        markerIconView.setPaintColor(Primary.toArgb())
-        markerIconView.loadImage("https://i.scdn.co/image/ab67616d0000b2733d98a0ae7c78a3a9babaf8af") {
-            marker.position = LatLng(latitude, longitude)
-            marker.icon = OverlayImage.fromView(markerIconView)
-            marker.setOnClickListener {
-                onMarkerClick(marker)
-                true
+        pickList.forEach { pick ->
+            val marker = Marker()
+            val markerIconView = MarkerIconView(requireContext())
+            markerIconView.setPaintColor(Blue.toArgb()) // TODO: 내가 생성한 마커인지 확인하여 내가 생성한 것 - Primary, 아니면 - Blue로 설정해야함
+            markerIconView.loadImage(pick.song.getImageUrlWithSize(RequestImageSize)) {
+                marker.position = LatLng(pick.location.latitude, pick.location.longitude)
+                marker.icon = OverlayImage.fromView(markerIconView)
+                marker.setOnClickListener {
+                    onMarkerClick(marker, pick)
+                    true
+                }
+                marker.map = naverMap
             }
-            marker.map = naverMap
         }
     }
 
-    private fun onMarkerClick(marker: Marker) {
+    private fun onMarkerClick(marker: Marker, pick: Pick) {
         if (selectedMarker == marker) return // 선택된 마커를 다시 클릭하는 경우 -> 아무 동작도 하지 않도록
 
         val defaultIconWidth = marker.icon.getIntrinsicWidth(requireContext())
@@ -208,6 +196,8 @@ class MapFragment : Fragment(), OnMapReadyCallback {
         marker.width = (defaultIconWidth * MARKER_SCALE).toInt()
         marker.height = (defaultIconHeight * MARKER_SCALE).toInt()
         selectedMarker = marker
+
+        mapViewModel.setSelectedPick(pick)
     }
 
     companion object {
@@ -219,6 +209,7 @@ class MapFragment : Fragment(), OnMapReadyCallback {
             Manifest.permission.ACCESS_COARSE_LOCATION
         )
         private const val MARKER_SCALE = 1.5
+        private val RequestImageSize = Size(300, 300)
 
         private const val TAG_LOG = "MapFragment"
     }

@@ -5,12 +5,11 @@ import android.util.Log
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.squirtles.domain.model.Pick
 import com.squirtles.domain.usecase.FetchPickInAreaUseCase
 import com.squirtles.domain.usecase.FetchPickUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -21,17 +20,14 @@ class MapViewModel @Inject constructor(
     private val fetchPickUseCase: FetchPickUseCase,
     private val fetchPickInAreaUseCase: FetchPickInAreaUseCase
 ) : ViewModel() {
-    private val _centerButtonClick = MutableSharedFlow<Boolean>()
-    val centerButtonClick = _centerButtonClick.asSharedFlow()
-
     private val _curLocation = MutableStateFlow<Location?>(null)
     val curLocation = _curLocation.asStateFlow()
 
-    fun createMarker() {
-        viewModelScope.launch {
-            _centerButtonClick.emit(true)
-        }
-    }
+    private val _pickList = MutableStateFlow<List<Pick>>(emptyList())
+    val pickList = _pickList.asStateFlow()
+
+    private val _selectedPick = MutableStateFlow<Pick?>(null)
+    val selectedPick = _selectedPick.asStateFlow()
 
     fun updateCurLocation(location: Location) {
         viewModelScope.launch {
@@ -58,13 +54,25 @@ class MapViewModel @Inject constructor(
             val picks = fetchPickInAreaUseCase(lat, lng, radiusInM)
 
             picks.onSuccess {
-                // TODO
+                _pickList.value = it
             }
             picks.onFailure {
                 // TODO
             }
 
             Log.d("MapViewModel", picks.toString())
+        }
+    }
+
+    fun setSelectedPick(pick: Pick) {
+        viewModelScope.launch {
+            _selectedPick.value = pick
+        }
+    }
+
+    fun resetSelectedPick() {
+        viewModelScope.launch {
+            _selectedPick.value = null
         }
     }
 }

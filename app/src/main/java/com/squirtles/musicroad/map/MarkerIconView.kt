@@ -69,7 +69,7 @@ class MarkerIconView(
         strokePaint.color = color
     }
 
-    fun loadImage(url: String, onImageLoaded: () -> Unit) {
+    fun loadImage(url: String?, onImageLoaded: () -> Unit) {
         Log.d(TAG_LOG, "loader : $imageLoader")
         val request = ImageRequest.Builder(context)
             .data(url)
