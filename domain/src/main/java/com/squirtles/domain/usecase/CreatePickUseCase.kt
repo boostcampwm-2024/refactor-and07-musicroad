@@ -7,5 +7,5 @@ import javax.inject.Inject
 class CreatePickUseCase @Inject constructor(
     private val firebaseRepository: FirebaseRepository
 ) {
-    suspend operator fun invoke(pick: Pick): Result<Pick> = firebaseRepository.createPick(pick)
+    suspend operator fun invoke(pick: Pick): Result<String> = firebaseRepository.createPick(pick)
 }

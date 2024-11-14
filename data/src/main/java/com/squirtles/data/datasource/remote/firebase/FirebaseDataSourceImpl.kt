@@ -119,16 +119,20 @@ class FirebaseDataSourceImpl @Inject constructor(
         return distanceInM <= radiusInM
     }
 
-    override suspend fun createPick(pick: Pick): Pick =
-        // TODO: suspendCancellableCoroutine 학습정리
+    /**
+     * Creates a new pick in Firestore.
+     * @param pick The pick to create.
+     * @return The created pick.
+     */
+    override suspend fun createPick(pick: Pick): String =
+        // TODO: suspendCancellableCoroutine 무엇인가
         suspendCancellableCoroutine { continuation ->
             val firebasePick = pick.toFirebasePick()
 
             // add() 메소드는 Cloud Firestore에서 ID를 자동으로 생성
             db.collection("picks").add(firebasePick)
                 .addOnSuccessListener { documentReference ->
-                    val resultPick = pick.copy(id = documentReference.id)
-                    continuation.resume(resultPick) // 성공 시 결과 반환
+                    continuation.resume(documentReference.id)
                 }
                 .addOnFailureListener { exception ->
                     Log.e("FirebaseDataSourceImpl", "Failed to create a pick", exception)

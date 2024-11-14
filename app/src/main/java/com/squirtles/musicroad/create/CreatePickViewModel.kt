@@ -60,6 +60,10 @@ class CreatePickViewModel @Inject constructor(
         _comment.value = text
     }
 
+    fun resetComment() {
+        _comment.value = ""
+    }
+
     fun onSearchTextChange(text: String) {
         viewModelScope.launch {
             _searchText.emit(text)
@@ -74,17 +78,27 @@ class CreatePickViewModel @Inject constructor(
         viewModelScope.launch {
             val musicVideoUrl = searchMusicVideoById(song.id)
 
-            val result = createPickUseCase(
+            /* 등록 결과 - pick ID 담긴 Result */
+            /* FIXME : createdBy, location 임시값 */
+            val createResult = createPickUseCase(
                 Pick(
                     id = "",
                     song = song,
                     comment = _comment.value,
-                    createdAt = 0L,
+                    createdAt = "",
                     createdBy = "",
                     location = PickLocation(37.380324, 127.115282),
                     musicVideoUrl = musicVideoUrl
                 )
             )
+
+            if (createResult.isSuccess) {
+                /* TODO: 성공처리 */
+                Log.d("CreatePickViewModel", createResult.toString())
+            } else {
+                /* TODO: 실패처리 */
+                Log.d("CreatePickViewModel", createResult.exceptionOrNull()?.message.toString())
+            }
         }
     }
 

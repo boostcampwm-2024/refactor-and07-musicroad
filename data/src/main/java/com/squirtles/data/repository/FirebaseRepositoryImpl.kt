@@ -29,7 +29,7 @@ class FirebaseRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun createPick(pick: Pick): Result<Pick> {
+    override suspend fun createPick(pick: Pick): Result<String> {
         return handleResult {
             firebaseRemoteDataSource.createPick(pick)
         }

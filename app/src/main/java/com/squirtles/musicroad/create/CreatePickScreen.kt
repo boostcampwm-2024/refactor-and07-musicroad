@@ -80,22 +80,39 @@ fun CreatePickScreen(
     Log.d("CreatePickScreen", song.toString())
 
     Scaffold(
+        containerColor = dynamicBackgroundColor,
         topBar = {
             CreatePickScreenTopBar(
                 dynamicOnBackgroundColor = dynamicOnBackgroundColor,
-                onBackClick = onBackClick,
+                onBackClick = {
+                    createPickViewModel.resetComment()
+                    onBackClick()
+                },
                 onCreateClick = createPickViewModel::createPick
             )
         }
     ) { innerPadding ->
-        CreatePickContent(
-            song = song,
-            comment = comment.value,
-            onValueChange = createPickViewModel::onCommentChange,
-            modifier = Modifier.padding(innerPadding),
-            dynamicBackgroundColor = dynamicBackgroundColor,
-            dynamicOnBackgroundColor = dynamicOnBackgroundColor,
-        )
+        Box(
+            modifier = Modifier
+                .padding(innerPadding)
+                .fillMaxSize()
+                .background(
+                    brush = Brush.verticalGradient(
+                        colorStops = arrayOf(
+                            0.0f to dynamicBackgroundColor,
+                            0.47f to Black
+                        )
+                    )
+                )
+        ) {
+            CreatePickContent(
+                song = song,
+                comment = comment.value,
+                onValueChange = createPickViewModel::onCommentChange,
+                dynamicOnBackgroundColor = dynamicOnBackgroundColor,
+            )
+        }
+
     }
 }
 
@@ -104,69 +121,54 @@ private fun CreatePickContent(
     song: Song,
     comment: String,
     onValueChange: (String) -> Unit,
-    modifier: Modifier = Modifier,
-    dynamicBackgroundColor: Color,
-    dynamicOnBackgroundColor: Color
+    dynamicOnBackgroundColor: Color,
 ) {
     val scrollState = rememberScrollState()
 
-    Box(
-        modifier = modifier
+    Column(
+        modifier = Modifier
             .fillMaxSize()
-            .background(
-                brush = Brush.verticalGradient(
-                    colorStops = arrayOf(
-                        0.0f to dynamicBackgroundColor,
-                        0.47f to Black
-                    )
-                )
-            )
+            .verticalScroll(scrollState)
+            .padding(vertical = 10.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(10.dp),
     ) {
-        Column(
+        Text(
+            text = song.songName,
+            color = dynamicOnBackgroundColor,
+            style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold)
+        )
+
+        Text(
+            text = song.artistName,
+            color = dynamicOnBackgroundColor,
+            style = MaterialTheme.typography.bodyLarge
+        )
+
+        AsyncImage(
+            model = song.getImageUrlWithSize(RequestImageSize),
+            contentDescription = song.albumName + stringResource(id = R.string.pick_album_description),
             modifier = Modifier
-                .fillMaxSize()
-                .verticalScroll(scrollState)
-                .padding(vertical = 10.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(10.dp),
-        ) {
-            Text(
-                text = song.songName,
-                color = dynamicOnBackgroundColor,
-                style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold)
-            )
+                .fillMaxWidth()
+                .padding(horizontal = 30.dp)
+                .aspectRatio(1f)
+                .clip(RoundedCornerShape(20.dp)),
+            contentScale = ContentScale.Crop
+        )
 
-            Text(
-                text = song.artistName,
-                color = dynamicOnBackgroundColor,
-                style = MaterialTheme.typography.bodyLarge
-            )
+        Spacer(modifier = Modifier.height(40.dp))
 
-            AsyncImage(
-                model = song.getImageUrlWithSize(RequestImageSize),
-                contentDescription = song.albumName + stringResource(id = R.string.pick_album_description),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 30.dp)
-                    .aspectRatio(1f)
-                    .clip(RoundedCornerShape(20.dp)),
-                contentScale = ContentScale.Crop
-            )
-
-            Spacer(modifier = Modifier.height(40.dp))
-
-            CommentTextBox(
-                comment = comment,
-                onValueChange = onValueChange
-            )
-        }
+        CommentTextBox(
+            comment = comment,
+            onValueChange = onValueChange,
+        )
     }
 }
 
 @Composable
 private fun CommentTextBox(
     comment: String,
-    onValueChange: (String) -> Unit
+    onValueChange: (String) -> Unit,
 ) {
     OutlinedTextField(
         value = comment,
