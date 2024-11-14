@@ -32,7 +32,7 @@ import com.squirtles.musicroad.ui.theme.Primary
 import com.squirtles.musicroad.ui.theme.Purple15
 import kotlinx.coroutines.launch
 
-class MapFragment : Fragment(), OnMapReadyCallback {
+class NaverMapFragment : Fragment(), OnMapReadyCallback {
 
     private lateinit var mapView: MapView
 

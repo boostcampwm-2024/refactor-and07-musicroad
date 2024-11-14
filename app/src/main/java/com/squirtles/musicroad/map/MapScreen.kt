@@ -58,7 +58,7 @@ fun MapScreen(
                         id = View.generateViewId()
 
                         (context as FragmentActivity).supportFragmentManager.beginTransaction()
-                            .replace(id, MapFragment())
+                            .replace(id, NaverMapFragment())
                             .commitAllowingStateLoss()
                     }
                 }
