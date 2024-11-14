@@ -15,20 +15,24 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.outlined.AccountCircle
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -39,6 +43,7 @@ import androidx.fragment.app.FragmentContainerView
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.squirtles.musicroad.R
 import com.squirtles.musicroad.ui.theme.MusicRoadTheme
+import com.squirtles.musicroad.ui.theme.White
 
 @Composable
 fun MapScreen(
@@ -49,6 +54,7 @@ fun MapScreen(
     onInfoWindowClick: (String) -> Unit
 ) {
     Log.d("MapScreen", mapViewModel.toString())
+    val pickCount by mapViewModel.pickCount.collectAsStateWithLifecycle()
     val selectedPick by mapViewModel.selectedPick.collectAsStateWithLifecycle()
 
     Scaffold(
@@ -66,11 +72,15 @@ fun MapScreen(
                         id = View.generateViewId()
 
                         (context as FragmentActivity).supportFragmentManager.beginTransaction()
-                            .replace(id, MapFragment())
+                            .replace(id, NaverMapFragment())
                             .commitAllowingStateLoss()
                     }
                 }
             )
+
+            if (pickCount > 0) {
+                PickNotificationBanner(pickCount)
+            }
 
             Column(
                 modifier = Modifier.fillMaxSize(),
@@ -93,6 +103,21 @@ fun MapScreen(
                 )
             }
         }
+    }
+}
+
+@Composable
+fun PickNotificationBanner(pickCount: Int) {
+    Box(Modifier.fillMaxSize()) {
+        Text(
+            text = stringResource(id = R.string.map_pick_notification, pickCount),
+            modifier = Modifier
+                .align(Alignment.TopCenter)
+                .offset(y = (LocalConfiguration.current.screenHeightDp * 0.08).dp)
+                .clip(RoundedCornerShape(30.dp))
+                .background(White.copy(alpha = 0.8f))
+                .padding(vertical = 10.dp, horizontal = 23.dp)
+        )
     }
 }
 
@@ -186,6 +211,14 @@ fun BottomNavigationDarkPreview() {
             onCenterClick = {},
             onSettingClick = {}
         )
+    }
+}
+
+@Preview
+@Composable
+private fun PickNotificationBannerPreview() {
+    MusicRoadTheme {
+        PickNotificationBanner(1)
     }
 }
 

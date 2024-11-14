@@ -18,8 +18,8 @@ class AppleMusicDataSourceImpl @Inject constructor(
      */
     override suspend fun searchSongs(searchText: String): List<Song> {
         val queryMap = mapOf(
-            "term" to searchText.replace(" ", "+"),
             "types" to "songs",
+            "term" to searchText.replace(" ", "+"),
             "limit" to "10",
             "offset" to "0"
         )

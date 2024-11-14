@@ -1,6 +1,5 @@
-package com.squirtles.musicroad.search
+package com.squirtles.musicroad.create
 
-import android.util.Log
 import android.util.Size
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -52,7 +51,6 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil3.compose.AsyncImage
 import com.squirtles.domain.model.Song
@@ -64,13 +62,15 @@ import com.squirtles.musicroad.ui.theme.White
 
 @Composable
 fun SearchMusicScreen(
-    searchViewModel: SearchViewModel = hiltViewModel()
+    createPickViewModel: CreatePickViewModel,
+    onBackClick: () -> Boolean,
+    onItemClick: () -> Unit,
 ) {
     val focusManager = LocalFocusManager.current
 
-    val searchText by searchViewModel.searchText.collectAsStateWithLifecycle()
-    val searchResult by searchViewModel.searchResult.collectAsStateWithLifecycle()
-    val isSearching by searchViewModel.isSearching.collectAsStateWithLifecycle(false)
+    val searchText by createPickViewModel.searchText.collectAsStateWithLifecycle()
+    val searchResult by createPickViewModel.searchResult.collectAsStateWithLifecycle()
+    val isSearching by createPickViewModel.isSearching.collectAsStateWithLifecycle(false)
 
     Scaffold(
         contentWindowInsets = WindowInsets.navigationBars,
@@ -81,12 +81,13 @@ fun SearchMusicScreen(
                     .padding(WindowInsets.statusBars.asPaddingValues())
                     .padding(top = 16.dp)
             ) {
-                SearchBar(
+                SearchTopBar(
                     keyword = searchText,
-                    onValueChange = searchViewModel::onSearchTextChange,
+                    onValueChange = createPickViewModel::onSearchTextChange,
                     active = isSearching,
-                    onSearchClick = searchViewModel::searchSongs,
-                    focusManager = focusManager
+                    onSearchClick = createPickViewModel::searchSongs,
+                    focusManager = focusManager,
+                    onBackClick = onBackClick,
                 )
             }
         },
@@ -96,46 +97,30 @@ fun SearchMusicScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .background(Brush.verticalGradient(colorStops = colorStops))
+                .padding(innerPadding)
         ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(innerPadding)
-                    .addFocusCleaner(focusManager)
-            ) {
-                VerticalSpacer(20)
-
-                TextWithColorAndStyle(
-                    text = "Result",
-                    textColor = White,
-                    textStyle = MaterialTheme.typography.titleLarge,
-                    modifier = Modifier.padding(start = DefaultPadding)
-                )
-                VerticalSpacer(20)
-
-                LazyColumn(
-                    modifier = Modifier.padding(bottom = DefaultPadding)
-                ) {
-                    items(
-                        items = searchResult,
-                        key = { it.id }
-                    ) { song ->
-                        SongItem(song)
-                    }
+            SearchResult(
+                focusManager = focusManager,
+                searchResult = searchResult,
+                onItemClick = { song ->
+                    createPickViewModel.onSongItemClick(song)
+                    onItemClick()
                 }
-            }
+            )
         }
     }
 }
 
 @Composable
-private fun SearchBar(
+private fun SearchTopBar(
     keyword: String,
     onValueChange: (String) -> Unit,
     active: Boolean, // whether the user is searching or not
     onSearchClick: () -> Unit,
+    onBackClick: () -> Boolean,
     focusManager: FocusManager
 ) {
+
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -144,7 +129,9 @@ private fun SearchBar(
         verticalAlignment = Alignment.CenterVertically
     ) {
         IconButton(
-            onClick = { /* TODO: 지도로 돌아가기 */ },
+            onClick = {
+                onBackClick()
+            },
             modifier = Modifier.padding(start = 4.dp)
         ) {
             Icon(
@@ -158,7 +145,8 @@ private fun SearchBar(
         OutlinedTextField(
             value = keyword,
             onValueChange = onValueChange,
-            modifier = Modifier.weight(1f),
+            modifier = Modifier
+                .weight(1f),
             placeholder = {
                 Text("검색")
             },
@@ -190,13 +178,52 @@ private fun SearchBar(
                 unfocusedIndicatorColor = White,
                 focusedPlaceholderColor = Gray,
                 unfocusedPlaceholderColor = White
-            )
+            ),
         )
     }
 }
 
 @Composable
-private fun SongItem(song: Song) {
+private fun SearchResult(
+    focusManager: FocusManager,
+    searchResult: List<Song>,
+    onItemClick: (Song) -> Unit
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .addFocusCleaner(focusManager)
+    ) {
+        VerticalSpacer(20)
+
+        TextWithColorAndStyle(
+            text = "Result",
+            textColor = White,
+            textStyle = MaterialTheme.typography.titleLarge,
+            modifier = Modifier.padding(start = DefaultPadding)
+        )
+        VerticalSpacer(20)
+
+        LazyColumn(
+            modifier = Modifier.padding(bottom = DefaultPadding)
+        ) {
+            items(
+                items = searchResult,
+                key = { it.id }
+            ) { song ->
+                SongItem(song) {
+                    onItemClick(song)
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun SongItem(
+    song: Song,
+    onItemClick: () -> Unit,
+) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -204,8 +231,7 @@ private fun SongItem(song: Song) {
                 interactionSource = remember { MutableInteractionSource() },
                 indication = ripple(color = White),
             ) {
-                /* TODO: 아이템 클릭 시 song 정보를 가지고 등록 화면으로 이동 */
-                Log.d("SearchMusicScreen", "${song.songName} 클릭됨")
+                onItemClick()
             }
             .padding(horizontal = DefaultPadding, vertical = ItemSpacing / 2),
         verticalAlignment = Alignment.CenterVertically
@@ -287,13 +313,9 @@ fun SongItemPreview() {
         externalUrl = "",
         previewUrl = "",
     )
-    SongItem(song)
-}
+    SongItem(song) {
 
-@Preview(apiLevel = 34)
-@Composable
-fun SearchMusicPreview() {
-    SearchMusicScreen()
+    }
 }
 
 private val colorStops = arrayOf(

@@ -23,6 +23,9 @@ class MapViewModel @Inject constructor(
     private val _curLocation = MutableStateFlow<Location?>(null)
     val curLocation = _curLocation.asStateFlow()
 
+    private val _pickCount = MutableStateFlow(0)
+    val pickCount = _pickCount.asStateFlow()
+
     private val _pickList = MutableStateFlow<List<Pick>>(emptyList())
     val pickList = _pickList.asStateFlow()
 
@@ -73,6 +76,17 @@ class MapViewModel @Inject constructor(
     fun resetSelectedPick() {
         viewModelScope.launch {
             _selectedPick.value = null
+        }
+    }
+
+    fun requestPickNotificationArea(location: Location, notiRadius: Double) {
+        viewModelScope.launch {
+            fetchPickInAreaUseCase(location.latitude, location.longitude, notiRadius)
+                .onSuccess {
+                    _pickCount.emit(it.count())
+                }.onFailure {
+                    _pickCount.emit(0)
+                }
         }
     }
 }

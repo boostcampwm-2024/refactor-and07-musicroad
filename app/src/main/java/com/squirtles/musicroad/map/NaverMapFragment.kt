@@ -19,7 +19,7 @@ import com.naver.maps.geometry.LatLng
 import com.naver.maps.map.CameraAnimation
 import com.naver.maps.map.CameraUpdate
 import com.naver.maps.map.LocationTrackingMode
-import com.naver.maps.map.MapFragment
+import com.naver.maps.map.MapView
 import com.naver.maps.map.NaverMap
 import com.naver.maps.map.OnMapReadyCallback
 import com.naver.maps.map.overlay.CircleOverlay
@@ -35,9 +35,12 @@ import com.squirtles.musicroad.ui.theme.Primary
 import com.squirtles.musicroad.ui.theme.Purple15
 import kotlinx.coroutines.launch
 
-class MapFragment : Fragment(), OnMapReadyCallback {
+class NaverMapFragment : Fragment(), OnMapReadyCallback {
+    private lateinit var mapView: MapView
+
     private var _binding: FragmentMapBinding? = null
     private val binding get() = _binding!!
+
     private lateinit var naverMap: NaverMap
     private lateinit var locationSource: FusedLocationSource
     private lateinit var fusedLocationClient: FusedLocationProviderClient
@@ -61,13 +64,10 @@ class MapFragment : Fragment(), OnMapReadyCallback {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         Log.d(TAG_LOG, mapViewModel.toString())
-        val mapView = binding.containerMap.getFragment<MapFragment>()
-        mapView.getMapAsync(this)
-    }
 
-    override fun onDestroyView() {
-        super.onDestroyView()
-        _binding = null
+        mapView = binding.navermap
+        mapView.onCreate(savedInstanceState)
+        mapView.getMapAsync(this)
     }
 
     override fun onMapReady(naverMap: NaverMap) {
@@ -127,6 +127,7 @@ class MapFragment : Fragment(), OnMapReadyCallback {
         naverMap.addOnLocationChangeListener { location ->
             setCircleOverlay(location)
             mapViewModel.updateCurLocation(location)
+            mapViewModel.requestPickNotificationArea(location, CIRCLE_RADIUS_METER)
         }
     }
 
@@ -211,6 +212,45 @@ class MapFragment : Fragment(), OnMapReadyCallback {
         naverMap.moveCamera(cameraUpdate)
 
         mapViewModel.setSelectedPick(pick)
+    }
+
+    override fun onStart() {
+        super.onStart()
+        mapView.onStart()
+    }
+
+    override fun onResume() {
+        Log.d(TAG_LOG, "onResume() $this")
+        super.onResume()
+        mapView.onResume()
+    }
+
+    override fun onPause() {
+        Log.d(TAG_LOG, "onPause() $this")
+        super.onPause()
+        mapView.onPause()
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        mapView.onSaveInstanceState(outState)
+    }
+
+    override fun onStop() {
+        Log.d(TAG_LOG, "onStop() $this")
+        super.onStop()
+        mapView.onStop()
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
+        mapView.onDestroy()
+    }
+
+    override fun onLowMemory() {
+        super.onLowMemory()
+        mapView.onLowMemory()
     }
 
     companion object {
