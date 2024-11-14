@@ -1,4 +1,4 @@
-package com.squirtles.musicroad.pick
+package com.squirtles.musicroad.create
 
 import android.app.Activity
 import android.util.Log
@@ -51,7 +51,6 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil3.compose.AsyncImage
 import com.squirtles.domain.model.Song
 import com.squirtles.musicroad.R
-import com.squirtles.musicroad.search.CreatePickViewModel
 import com.squirtles.musicroad.ui.theme.Black
 import com.squirtles.musicroad.ui.theme.Dark
 import com.squirtles.musicroad.ui.theme.Gray
@@ -84,7 +83,8 @@ fun CreatePickScreen(
         topBar = {
             CreatePickScreenTopBar(
                 dynamicOnBackgroundColor = dynamicOnBackgroundColor,
-                onBackClick = onBackClick
+                onBackClick = onBackClick,
+                onCreateClick = createPickViewModel::createPick
             )
         }
     ) { innerPadding ->
@@ -167,7 +167,7 @@ private fun CreatePickContent(
 private fun CommentTextBox(
     comment: String,
     onValueChange: (String) -> Unit
-){
+) {
     OutlinedTextField(
         value = comment,
         onValueChange = { textValue ->
@@ -198,7 +198,8 @@ private fun CommentTextBox(
 @Composable
 private fun CreatePickScreenTopBar(
     dynamicOnBackgroundColor: Color,
-    onBackClick: () -> Unit
+    onBackClick: () -> Unit,
+    onCreateClick: () -> Unit
 ) {
     CenterAlignedTopAppBar(
         modifier = Modifier.statusBarsPadding(),
@@ -219,7 +220,7 @@ private fun CreatePickScreenTopBar(
             }
         },
         actions = {
-            IconButton(onClick = { /*TODO*/ }) {
+            IconButton(onClick = onCreateClick) {
                 Icon(
                     imageVector = Icons.Filled.Check,
                     contentDescription = stringResource(id = R.string.pick_app_bar_upload_description),

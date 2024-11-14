@@ -29,8 +29,10 @@ class FirebaseRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun addPick(pick: Pick): Result<Pick> {
-        TODO("Not yet implemented")
+    override suspend fun createPick(pick: Pick): Result<Pick> {
+        return handleResult {
+            firebaseRemoteDataSource.createPick(pick)
+        }
     }
 
     override suspend fun deletePick(pick: Pick): Result<Boolean> {
@@ -43,6 +45,14 @@ class FirebaseRepositoryImpl @Inject constructor(
     ): Result<T> {
         return runCatching {
             call() ?: throw firebaseRepositoryException
+        }
+    }
+
+    private suspend fun <T> handleResult(
+        call: suspend () -> T
+    ): Result<T> {
+        return runCatching {
+            call()
         }
     }
 }

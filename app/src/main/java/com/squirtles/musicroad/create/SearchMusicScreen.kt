@@ -1,4 +1,4 @@
-package com.squirtles.musicroad.search
+package com.squirtles.musicroad.create
 
 import android.util.Size
 import androidx.compose.foundation.background

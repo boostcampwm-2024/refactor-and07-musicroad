@@ -1,9 +1,12 @@
-package com.squirtles.musicroad.search
+package com.squirtles.musicroad.create
 
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.squirtles.domain.model.Pick
+import com.squirtles.domain.model.PickLocation
 import com.squirtles.domain.model.Song
+import com.squirtles.domain.usecase.CreatePickUseCase
 import com.squirtles.domain.usecase.SearchMusicVideoUseCase
 import com.squirtles.domain.usecase.SearchSongsUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -17,7 +20,8 @@ import javax.inject.Inject
 @HiltViewModel
 class CreatePickViewModel @Inject constructor(
     private val searchSongsUseCase: SearchSongsUseCase,
-    private val searchMusicVideoUseCase: SearchMusicVideoUseCase
+    private val searchMusicVideoUseCase: SearchMusicVideoUseCase,
+    private val createPickUseCase: CreatePickUseCase
 ) : ViewModel() {
 
     private var _selectedSong: Song? = null
@@ -63,18 +67,33 @@ class CreatePickViewModel @Inject constructor(
         }
     }
 
-    fun searchMusicVideoById(songId: String) {
+    fun createPick() {
+        if (_selectedSong == null) return
+        val song = selectedSong!!
+
         viewModelScope.launch {
-            val result = searchMusicVideoUseCase(songId)
-            if (result.isSuccess) {
-                /* TODO */
-            } else {
-                /* TODO */
-            }
+            val musicVideoUrl = searchMusicVideoById(song.id)
+
+            val result = createPickUseCase(
+                Pick(
+                    id = "",
+                    song = song,
+                    comment = _comment.value,
+                    createdAt = 0L,
+                    createdBy = "",
+                    location = PickLocation(37.380324, 127.115282),
+                    musicVideoUrl = musicVideoUrl
+                )
+            )
         }
     }
 
-    fun createPick() {
+    private suspend fun searchMusicVideoById(songId: String): String {
+        val result = searchMusicVideoUseCase(songId)
 
+        val musicVideoUrl = result.getOrElse { emptyList() }
+            .sortedBy { it.releaseDate }
+
+        return musicVideoUrl.firstOrNull()?.previewUrl.orEmpty()  // 결과가 없으면 빈 문자열 반환
     }
 }
