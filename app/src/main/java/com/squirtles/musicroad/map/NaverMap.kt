@@ -84,26 +84,25 @@ fun NaverMap(mapViewModel: MapViewModel) {
                         }
                     }
 
+                    naverMap.value?.run {
+                        initMapSettings()
+                        initDeviceLocation(context, circleOverlay, fusedLocationClient)
+                        initLocationOverlay(locationSource, locationOverlay)
+                        setLocationChangeListener(circleOverlay, mapViewModel)
+                    }
                 }
             }
         },
         modifier = Modifier.fillMaxSize()
-    ) {
-        naverMap.value?.run {
-            initMapSettings()
-            initDeviceLocation(context, circleOverlay, fusedLocationClient)
-            initLocationOverlay(locationSource, locationOverlay)
-            setLocationChangeListener(circleOverlay, mapViewModel)
-        }
-    }
+    )
 }
 
 private fun NaverMap.initLocationOverlay(
     currentLocationSource: FusedLocationSource,
     currentLocationOverlay: MutableState<LocationOverlay?>
 ) {
-    locationTrackingMode = LocationTrackingMode.Follow
     locationSource = currentLocationSource
+    locationTrackingMode = LocationTrackingMode.Follow
     currentLocationOverlay.value = locationOverlay
     currentLocationOverlay.value?.run {
         isVisible = true
