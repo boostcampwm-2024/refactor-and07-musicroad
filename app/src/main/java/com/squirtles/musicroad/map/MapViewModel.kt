@@ -2,11 +2,13 @@ package com.squirtles.musicroad.map
 
 import android.location.Location
 import android.util.Log
-import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.squirtles.domain.model.Pick
 import com.squirtles.domain.usecase.FetchPickInAreaUseCase
 import com.squirtles.domain.usecase.FetchPickUseCase
+import com.squirtles.domain.usecase.SaveLocationUseCase
+import com.squirtles.domain.usecase.SaveSelectedPickUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -17,7 +19,8 @@ import javax.inject.Inject
 
 @HiltViewModel
 class MapViewModel @Inject constructor(
-    private val savedStateHandle: SavedStateHandle,
+    private val saveLocationUseCase: SaveLocationUseCase,
+    private val saveSelectedPickUseCase: SaveSelectedPickUseCase,
     private val fetchPickUseCase: FetchPickUseCase,
     private val fetchPickInAreaUseCase: FetchPickInAreaUseCase
 ) : ViewModel() {
@@ -33,6 +36,18 @@ class MapViewModel @Inject constructor(
     fun createMarker() {
         viewModelScope.launch {
             _centerButtonClick.emit(true)
+        }
+    }
+
+    fun saveLocation(location: Location) {
+        viewModelScope.launch {
+            saveLocationUseCase(location.latitude, location.longitude)
+        }
+    }
+
+    fun saveSelectedPick(pick: Pick) {
+        viewModelScope.launch {
+            saveSelectedPickUseCase(pick)
         }
     }
 
