@@ -1,8 +1,6 @@
 package com.squirtles.musicroad.map
 
 import android.content.res.Configuration
-import android.util.Log
-import android.view.View
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -33,9 +31,6 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.viewinterop.AndroidView
-import androidx.fragment.app.FragmentActivity
-import androidx.fragment.app.FragmentContainerView
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.squirtles.musicroad.R
 import com.squirtles.musicroad.ui.theme.MusicRoadTheme
@@ -48,7 +43,6 @@ fun MapScreen(
     onCenterClick: () -> Unit,
     onSettingClick: () -> Unit
 ) {
-    Log.d("MapScreen", mapViewModel.toString())
     val pickCount by mapViewModel.pickCount.collectAsStateWithLifecycle()
 
     Scaffold(
@@ -59,18 +53,7 @@ fun MapScreen(
                 .fillMaxSize()
                 .padding(innerPadding)
         ) {
-            AndroidView(
-                modifier = Modifier.fillMaxSize(),
-                factory = { context ->
-                    FragmentContainerView(context).apply {
-                        id = View.generateViewId()
-
-                        (context as FragmentActivity).supportFragmentManager.beginTransaction()
-                            .replace(id, NaverMapFragment())
-                            .commitAllowingStateLoss()
-                    }
-                }
-            )
+            NaverMap(mapViewModel)
 
             if (pickCount > 0) {
                 PickNotificationBanner(pickCount)
