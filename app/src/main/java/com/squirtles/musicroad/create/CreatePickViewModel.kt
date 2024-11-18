@@ -10,9 +10,7 @@ import com.squirtles.domain.usecase.CreatePickUseCase
 import com.squirtles.domain.usecase.SearchMusicVideoUseCase
 import com.squirtles.domain.usecase.SearchSongsUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -36,8 +34,8 @@ class CreatePickViewModel @Inject constructor(
     private val _searchResult = MutableStateFlow<List<Song>>(emptyList())
     val searchResult = _searchResult.asStateFlow()
 
-    private val _isSearching = MutableSharedFlow<Boolean>()
-    val isSearching = _isSearching.asSharedFlow()
+    private val _isSearching = MutableStateFlow<Boolean>(false)
+    val isSearching = _isSearching.asStateFlow()
 
     fun searchSongs() {
         viewModelScope.launch {
@@ -66,10 +64,8 @@ class CreatePickViewModel @Inject constructor(
     }
 
     fun onSearchTextChange(text: String) {
-        viewModelScope.launch {
-            _searchText.emit(text)
-            _isSearching.emit(text.isNotEmpty())
-        }
+        _searchText.value = text
+        _isSearching.value = true
     }
 
     fun createPick() {
