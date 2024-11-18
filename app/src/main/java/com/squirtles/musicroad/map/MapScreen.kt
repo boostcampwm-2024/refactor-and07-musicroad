@@ -73,7 +73,6 @@ fun MapScreen(
                 selectedPick?.let { pick ->
                     InfoWindow(pick) { pickId ->
                         onInfoWindowClick(pickId)
-                        mapViewModel.resetSelectedPick()
                     }
                     Spacer(Modifier.height(16.dp))
                 }

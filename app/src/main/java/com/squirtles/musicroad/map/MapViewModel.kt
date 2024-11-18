@@ -5,6 +5,8 @@ import android.util.Log
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.naver.maps.map.NaverMap
+import com.naver.maps.map.overlay.Marker
 import com.squirtles.domain.model.Pick
 import com.squirtles.domain.usecase.FetchPickInAreaUseCase
 import com.squirtles.domain.usecase.FetchPickUseCase
@@ -20,17 +22,20 @@ class MapViewModel @Inject constructor(
     private val fetchPickUseCase: FetchPickUseCase,
     private val fetchPickInAreaUseCase: FetchPickInAreaUseCase
 ) : ViewModel() {
+    private val _pickMap = MutableStateFlow<Map<Pick, Marker>>(emptyMap())
+    val pickMap = _pickMap.asStateFlow()
+
     private val _curLocation = MutableStateFlow<Location?>(null)
     val curLocation = _curLocation.asStateFlow()
 
     private val _pickCount = MutableStateFlow(0)
     val pickCount = _pickCount.asStateFlow()
 
-    private val _pickList = MutableStateFlow<List<Pick>>(emptyList())
-    val pickList = _pickList.asStateFlow()
-
     private val _selectedPick = MutableStateFlow<Pick?>(null)
     val selectedPick = _selectedPick.asStateFlow()
+
+    private val _selectedMarker = MutableStateFlow<Marker?>(null)
+    val selectedMarker = _selectedMarker.asStateFlow()
 
     fun updateCurLocation(location: Location) {
         viewModelScope.launch {
@@ -57,7 +62,15 @@ class MapViewModel @Inject constructor(
             val picks = fetchPickInAreaUseCase(lat, lng, radiusInM)
 
             picks.onSuccess {
-                _pickList.value = it
+                val newMap = mutableMapOf<Pick, Marker>()
+                it.forEach { pick ->
+                    if (_pickMap.value.contains(pick)) {
+                        newMap[pick] = _pickMap.value[pick]!!
+                    } else {
+                        newMap[pick] = Marker()
+                    }
+                }
+                _pickMap.value = newMap
             }
             picks.onFailure {
                 // TODO
@@ -67,16 +80,21 @@ class MapViewModel @Inject constructor(
         }
     }
 
-    fun setSelectedPick(pick: Pick) {
-        viewModelScope.launch {
-            _selectedPick.value = pick
-        }
+    fun setSelectedMarkerAndPick(marker: Marker, pick: Pick) {
+        _selectedMarker.value = marker
+        _selectedPick.value = pick
     }
 
-    fun resetSelectedPick() {
-        viewModelScope.launch {
-            _selectedPick.value = null
+    fun resetSelectedMarkerAndPick() {
+        _selectedMarker.value = null
+        _selectedPick.value = null
+    }
+
+    fun setMapToMarker(map: NaverMap) {
+        _pickMap.value.forEach { (_, marker) ->
+            marker.map = map
         }
+        _pickMap.value = _pickMap.value
     }
 
     fun requestPickNotificationArea(location: Location, notiRadius: Double) {
