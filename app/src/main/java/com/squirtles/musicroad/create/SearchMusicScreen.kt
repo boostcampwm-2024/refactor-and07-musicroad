@@ -23,6 +23,8 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Search
@@ -48,6 +50,8 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -70,7 +74,7 @@ fun SearchMusicScreen(
 
     val searchText by createPickViewModel.searchText.collectAsStateWithLifecycle()
     val searchResult by createPickViewModel.searchResult.collectAsStateWithLifecycle()
-    val isSearching by createPickViewModel.isSearching.collectAsStateWithLifecycle(false)
+    val isSearching by createPickViewModel.isSearching.collectAsStateWithLifecycle()
 
     Scaffold(
         contentWindowInsets = WindowInsets.navigationBars,
@@ -166,6 +170,17 @@ private fun SearchTopBar(
                     }
                 }
             } else null,
+            // 키보드 완료버튼 -> Search로 변경, 누르면 Search 동작 실행
+            keyboardOptions = KeyboardOptions(
+                keyboardType = KeyboardType.Text,
+                imeAction = ImeAction.Search
+            ),
+            keyboardActions = KeyboardActions(
+                onSearch = {
+                    focusManager.clearFocus()
+                    onSearchClick()
+                }
+            ),
             singleLine = true,
             shape = CircleShape,
             colors = TextFieldDefaults.colors(
