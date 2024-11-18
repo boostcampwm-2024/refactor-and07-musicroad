@@ -4,10 +4,13 @@ import android.Manifest
 import android.app.Activity
 import android.content.Context
 import android.location.Location
+import android.util.Log
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -19,6 +22,7 @@ import androidx.core.content.PermissionChecker
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import com.naver.maps.geometry.LatLng
@@ -47,12 +51,22 @@ fun NaverMap(mapViewModel: MapViewModel) {
     val naverMap = remember { mutableStateOf<NaverMap?>(null) }
 
     val fusedLocationClient = remember { LocationServices.getFusedLocationProviderClient(context) }
-    val locationSource = remember { FusedLocationSource(context as Activity, LOCATION_PERMISSION_REQUEST_CODE) }
+    val locationSource =
+        remember { FusedLocationSource(context as Activity, LOCATION_PERMISSION_REQUEST_CODE) }
     val locationOverlay = remember { mutableStateOf<LocationOverlay?>(null) }
     val circleOverlay = remember { CircleOverlay() }
 
     val lifecycleOwner = LocalLifecycleOwner.current
     val coroutineScope = rememberCoroutineScope()
+
+    val curLocation by mapViewModel.curLocation.collectAsStateWithLifecycle()
+
+    LaunchedEffect(curLocation) {
+        mapViewModel.fetchPickInArea(curLocation.latitude, curLocation.longitude, PICK_RADIUS_METER)
+        mapViewModel.requestPickNotificationArea(curLocation, CIRCLE_RADIUS_METER)
+        Log.d("NaverMap", "curLocation : $curLocation")
+    }
+
     DisposableEffect(lifecycleOwner) {
         val mapLifecycleObserver = LifecycleEventObserver { _, event ->
             when (event) {
@@ -88,7 +102,10 @@ fun NaverMap(mapViewModel: MapViewModel) {
                         initMapSettings()
                         initDeviceLocation(context, circleOverlay, fusedLocationClient)
                         initLocationOverlay(locationSource, locationOverlay)
-                        setLocationChangeListener(circleOverlay, mapViewModel)
+                        setLocationChangeListener(
+                            circleOverlay = circleOverlay,
+                            updateCurLocation = mapViewModel::updateCurLocation,
+                        )
                     }
                 }
             }
@@ -127,12 +144,13 @@ private fun NaverMap.initDeviceLocation(
     }
 }
 
-private fun NaverMap.setLocationChangeListener(circleOverlay: CircleOverlay, mapViewModel: MapViewModel) {
+private fun NaverMap.setLocationChangeListener(
+    circleOverlay: CircleOverlay,
+    updateCurLocation: (Location) -> Unit,
+) {
     addOnLocationChangeListener { location ->
         this.setCircleOverlay(circleOverlay, location)
-        mapViewModel.updateCurLocation(location)
-        mapViewModel.fetchPickInArea(location.latitude, location.longitude, PICK_RADIUS_METER)
-        mapViewModel.requestPickNotificationArea(location, CIRCLE_RADIUS_METER)
+        updateCurLocation(location)
     }
 }
 

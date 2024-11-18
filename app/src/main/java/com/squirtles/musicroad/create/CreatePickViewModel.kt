@@ -1,5 +1,6 @@
 package com.squirtles.musicroad.create
 
+import android.location.Location
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -7,16 +8,23 @@ import com.squirtles.domain.model.LocationPoint
 import com.squirtles.domain.model.Pick
 import com.squirtles.domain.model.Song
 import com.squirtles.domain.usecase.CreatePickUseCase
+import com.squirtles.domain.usecase.FetchLocationUseCase
 import com.squirtles.domain.usecase.SearchMusicVideoUseCase
 import com.squirtles.domain.usecase.SearchSongsUseCase
+import com.squirtles.musicroad.map.MapViewModel.Companion.DEFAULT_LOCATION
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 class CreatePickViewModel @Inject constructor(
+    private val fetchLocationUseCase: FetchLocationUseCase,
     private val searchSongsUseCase: SearchSongsUseCase,
     private val searchMusicVideoUseCase: SearchMusicVideoUseCase,
     private val createPickUseCase: CreatePickUseCase
@@ -36,6 +44,16 @@ class CreatePickViewModel @Inject constructor(
 
     private val _isSearching = MutableStateFlow<Boolean>(false)
     val isSearching = _isSearching.asStateFlow()
+
+    val curLocation: StateFlow<Location> = fetchLocationUseCase()
+        .map {
+            it ?: DEFAULT_LOCATION
+        }
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = DEFAULT_LOCATION
+        )
 
     fun searchSongs() {
         viewModelScope.launch {

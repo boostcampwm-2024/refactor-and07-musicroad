@@ -6,5 +6,5 @@ import javax.inject.Inject
 class FetchLocationUseCase @Inject constructor(
     private val localRepository: LocalRepository
 ) {
-    fun invoke() = localRepository.currentLocation
+    operator fun invoke() = localRepository.currentLocation
 }
