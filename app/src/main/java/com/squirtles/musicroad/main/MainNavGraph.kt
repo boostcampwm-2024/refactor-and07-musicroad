@@ -18,7 +18,7 @@ import com.squirtles.musicroad.setting.SettingScreen
 
 @Composable
 fun MainNavGraph(
-    mapViewModel: MapViewModel,
+    mapViewModel: MapViewModel = hiltViewModel<MapViewModel>(),
     navController: NavHostController,
     navigationActions: MainNavigationActions,
     modifier: Modifier = Modifier,
