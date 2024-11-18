@@ -6,14 +6,19 @@ import android.content.Context
 import android.location.Location
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.PermissionChecker
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import com.naver.maps.geometry.LatLng
@@ -21,6 +26,7 @@ import com.naver.maps.map.CameraUpdate
 import com.naver.maps.map.LocationTrackingMode
 import com.naver.maps.map.MapView
 import com.naver.maps.map.NaverMap
+import com.naver.maps.map.UiSettings
 import com.naver.maps.map.overlay.CircleOverlay
 import com.naver.maps.map.overlay.LocationOverlay
 import com.naver.maps.map.overlay.Marker
@@ -30,27 +36,64 @@ import com.squirtles.musicroad.R
 import com.squirtles.musicroad.ui.theme.Blue
 import com.squirtles.musicroad.ui.theme.Primary
 import com.squirtles.musicroad.ui.theme.Purple15
+import kotlinx.coroutines.launch
+import kotlin.coroutines.resume
+import kotlin.coroutines.suspendCoroutine
 
 @Composable
 fun NaverMap(mapViewModel: MapViewModel) {
     val context = LocalContext.current
     val mapView = remember { MapView(context) }
+    val naverMap = remember { mutableStateOf<NaverMap?>(null) }
+
     val fusedLocationClient = remember { LocationServices.getFusedLocationProviderClient(context) }
     val locationSource = remember { FusedLocationSource(context as Activity, LOCATION_PERMISSION_REQUEST_CODE) }
     val locationOverlay = remember { mutableStateOf<LocationOverlay?>(null) }
     val circleOverlay = remember { CircleOverlay() }
 
+    val lifecycleOwner = LocalLifecycleOwner.current
+    val coroutineScope = rememberCoroutineScope()
+    DisposableEffect(lifecycleOwner) {
+        val mapLifecycleObserver = LifecycleEventObserver { _, event ->
+            when (event) {
+                Lifecycle.Event.ON_CREATE -> mapView.onCreate(null)
+                Lifecycle.Event.ON_START -> mapView.onStart()
+                Lifecycle.Event.ON_RESUME -> mapView.onResume()
+                Lifecycle.Event.ON_PAUSE -> mapView.onPause()
+                Lifecycle.Event.ON_STOP -> mapView.onStop()
+                Lifecycle.Event.ON_DESTROY -> mapView.onDestroy()
+                else -> throw IllegalStateException()
+            }
+        }
+
+        lifecycleOwner.lifecycle.addObserver(mapLifecycleObserver)
+
+        onDispose {
+            lifecycleOwner.lifecycle.removeObserver(mapLifecycleObserver)
+            mapView.onDestroy()
+        }
+    }
+
     AndroidView(
-        factory = { mapView },
+        factory = {
+            mapView.apply {
+                coroutineScope.launch {
+                    naverMap.value = suspendCoroutine { continuation ->
+                        getMapAsync {
+                            continuation.resume(it)
+                        }
+                    }
+
+                }
+            }
+        },
         modifier = Modifier.fillMaxSize()
     ) {
-        mapView.getMapAsync { map ->
-            with(map) {
-                initMapSettings()
-                initLocationOverlay(locationSource, locationOverlay)
-                setInitLocation(context, circleOverlay, fusedLocationClient)
-                setLocationChangeListener(circleOverlay, mapViewModel)
-            }
+        naverMap.value?.run {
+            initMapSettings()
+            initDeviceLocation(context, circleOverlay, fusedLocationClient)
+            initLocationOverlay(locationSource, locationOverlay)
+            setLocationChangeListener(circleOverlay, mapViewModel)
         }
     }
 }
@@ -59,6 +102,7 @@ private fun NaverMap.initLocationOverlay(
     currentLocationSource: FusedLocationSource,
     currentLocationOverlay: MutableState<LocationOverlay?>
 ) {
+    locationTrackingMode = LocationTrackingMode.Follow
     locationSource = currentLocationSource
     currentLocationOverlay.value = locationOverlay
     currentLocationOverlay.value?.run {
@@ -68,7 +112,11 @@ private fun NaverMap.initLocationOverlay(
     moveCamera(CameraUpdate.zoomTo(INITIAL_CAMERA_ZOOM))
 }
 
-private fun NaverMap.setInitLocation(context: Context, circleOverlay: CircleOverlay, fusedLocationClient: FusedLocationProviderClient) {
+private fun NaverMap.initDeviceLocation(
+    context: Context,
+    circleOverlay: CircleOverlay,
+    fusedLocationClient: FusedLocationProviderClient,
+) {
     if (checkSelfPermission(context)) {
         fusedLocationClient.lastLocation.addOnSuccessListener { location ->
             if (location != null) {
@@ -111,14 +159,13 @@ private fun NaverMap.createMarker(context: Context, location: Location) {
 
 private fun NaverMap.initMapSettings() {
     setCameraZoomLimit()
-    setNaverMapMapUi()
+    uiSettings.setNaverMapMapUi()
 }
 
-private fun NaverMap.setNaverMapMapUi() {
-    uiSettings.isLocationButtonEnabled = true
-    uiSettings.isZoomControlEnabled = false
-    uiSettings.isTiltGesturesEnabled = false
-    locationTrackingMode = LocationTrackingMode.Follow
+private fun UiSettings.setNaverMapMapUi() {
+    isLocationButtonEnabled = true
+    isZoomControlEnabled = false
+    isTiltGesturesEnabled = false
 }
 
 private fun NaverMap.setCameraZoomLimit() {
