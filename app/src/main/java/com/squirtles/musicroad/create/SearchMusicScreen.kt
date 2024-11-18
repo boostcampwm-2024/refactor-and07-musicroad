@@ -74,7 +74,7 @@ fun SearchMusicScreen(
 
     val searchText by createPickViewModel.searchText.collectAsStateWithLifecycle()
     val searchResult by createPickViewModel.searchResult.collectAsStateWithLifecycle()
-    val isSearching by createPickViewModel.isSearching.collectAsStateWithLifecycle(false)
+    val isSearching by createPickViewModel.isSearching.collectAsStateWithLifecycle()
 
     Scaffold(
         contentWindowInsets = WindowInsets.navigationBars,
@@ -170,6 +170,17 @@ private fun SearchTopBar(
                     }
                 }
             } else null,
+            // 키보드 완료버튼 -> Search로 변경, 누르면 Search 동작 실행
+            keyboardOptions = KeyboardOptions(
+                keyboardType = KeyboardType.Text,
+                imeAction = ImeAction.Search
+            ),
+            keyboardActions = KeyboardActions(
+                onSearch = {
+                    focusManager.clearFocus()
+                    onSearchClick()
+                }
+            ),
             singleLine = true,
             shape = CircleShape,
             colors = TextFieldDefaults.colors(
@@ -183,17 +194,6 @@ private fun SearchTopBar(
                 focusedPlaceholderColor = Gray,
                 unfocusedPlaceholderColor = White
             ),
-            // 키보드 완료버튼 -> Search로 변경, 누르면 Search 동작 실행
-            keyboardOptions = KeyboardOptions(
-                keyboardType = KeyboardType.Text,
-                imeAction = ImeAction.Search
-            ),
-            keyboardActions = KeyboardActions(
-                onSearch = {
-                    focusManager.clearFocus()
-                    onSearchClick()
-                }
-            )
         )
     }
 }
