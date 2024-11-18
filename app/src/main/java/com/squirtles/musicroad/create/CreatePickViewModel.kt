@@ -66,9 +66,10 @@ class CreatePickViewModel @Inject constructor(
     }
 
     fun onSearchTextChange(text: String) {
+        _searchText.value = text
+
         viewModelScope.launch {
-            _searchText.emit(text)
-            _isSearching.emit(text.isNotEmpty())
+            _isSearching.emit(true)
         }
     }
 
