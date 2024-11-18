@@ -71,7 +71,6 @@ fun MapScreen(
     }
 }
 
-
 @Composable
 fun PickNotificationBanner(pickCount: Int) {
     Box(Modifier.fillMaxSize()) {
