@@ -3,8 +3,8 @@ package com.squirtles.musicroad.create
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.squirtles.domain.model.LocationPoint
 import com.squirtles.domain.model.Pick
-import com.squirtles.domain.model.PickLocation
 import com.squirtles.domain.model.Song
 import com.squirtles.domain.usecase.CreatePickUseCase
 import com.squirtles.domain.usecase.SearchMusicVideoUseCase
@@ -88,7 +88,7 @@ class CreatePickViewModel @Inject constructor(
                     comment = _comment.value,
                     createdAt = "",
                     createdBy = "",
-                    location = PickLocation(37.380324, 127.115282),
+                    location = LocationPoint(37.380324, 127.115282),
                     musicVideoUrl = musicVideoUrl
                 )
             )

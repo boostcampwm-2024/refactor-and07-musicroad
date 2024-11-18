@@ -31,8 +31,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.core.graphics.toColorInt
 import coil3.compose.AsyncImage
+import com.squirtles.domain.model.LocationPoint
 import com.squirtles.domain.model.Pick
-import com.squirtles.domain.model.PickLocation
 import com.squirtles.domain.model.Song
 import com.squirtles.musicroad.R
 import com.squirtles.musicroad.ui.theme.Gray
@@ -161,7 +161,7 @@ private fun InfoWindowPreview() {
                 createdAt = "1970.01.21",
                 createdBy = "짱구",
                 favoriteCount = 100,
-                location = PickLocation(1.0, 1.0),
+                location = LocationPoint(1.0, 1.0),
                 musicVideoUrl = "",
             ),
             navigateToPick = {}
