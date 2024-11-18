@@ -58,14 +58,14 @@ import com.squirtles.musicroad.ui.theme.White
 
 @Composable
 fun DetailPickScreen(
-    pickId: String,
     onBackClick: () -> Unit,
     pickViewModel: PickViewModel = hiltViewModel(),
 ) {
     val userId = ""
     val username = "짱구"
     val isFavorite = false
-    val pick by pickViewModel.selectedPick.collectAsStateWithLifecycle()
+
+    val pick by pickViewModel.pick.collectAsStateWithLifecycle()
 
 //    LaunchedEffect(Unit) {
 //        pickViewModel.fetchPick(pickId)
