@@ -5,15 +5,20 @@ import android.util.Log
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.naver.maps.map.overlay.Marker
+import com.squirtles.domain.model.Pick
 import com.squirtles.domain.usecase.FetchPickInAreaUseCase
 import com.squirtles.domain.usecase.FetchPickUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+
+data class PickState(
+    val previous: Pick?,
+    val current: Pick?
+)
 
 @HiltViewModel
 class MapViewModel @Inject constructor(
@@ -21,8 +26,8 @@ class MapViewModel @Inject constructor(
     private val fetchPickUseCase: FetchPickUseCase,
     private val fetchPickInAreaUseCase: FetchPickInAreaUseCase
 ) : ViewModel() {
-    private val _centerButtonClick = MutableSharedFlow<Boolean>()
-    val centerButtonClick = _centerButtonClick.asSharedFlow()
+    private val _pickMarkers = MutableStateFlow<Map<Pick, Marker>>(emptyMap())
+    val pickMarkers = _pickMarkers.asStateFlow()
 
     private val _curLocation = MutableStateFlow<Location?>(null)
     val curLocation = _curLocation.asStateFlow()
@@ -30,11 +35,8 @@ class MapViewModel @Inject constructor(
     private val _pickCount = MutableStateFlow(0)
     val pickCount = _pickCount.asStateFlow()
 
-    fun createMarker() {
-        viewModelScope.launch {
-            _centerButtonClick.emit(true)
-        }
-    }
+    private val _selectedPickState = MutableStateFlow(PickState(null, null))
+    val selectedPickState = _selectedPickState.asStateFlow()
 
     fun updateCurLocation(location: Location) {
         viewModelScope.launch {
@@ -61,13 +63,33 @@ class MapViewModel @Inject constructor(
             val picks = fetchPickInAreaUseCase(lat, lng, radiusInM)
 
             picks.onSuccess {
-                // TODO
+                val newMap = mutableMapOf<Pick, Marker>()
+                it.forEach { pick ->
+                    newMap[pick] = _pickMarkers.value[pick] ?: Marker()
+                }
+                _pickMarkers.value = newMap
             }
             picks.onFailure {
                 // TODO
             }
 
             Log.d("MapViewModel", picks.toString())
+        }
+    }
+
+    fun setSelectedPickState(pick: Pick) {
+        viewModelScope.launch {
+            val lastSelectedPick = selectedPickState.value.current
+            if (lastSelectedPick == pick) return@launch
+
+            _selectedPickState.emit(PickState(lastSelectedPick, pick))
+        }
+    }
+
+    fun resetSelectedPickState() {
+        viewModelScope.launch {
+            val lastSelectedPick = selectedPickState.value.current
+            _selectedPickState.emit(PickState(lastSelectedPick, null))
         }
     }
 

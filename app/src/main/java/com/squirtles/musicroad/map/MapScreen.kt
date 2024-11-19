@@ -3,11 +3,15 @@ package com.squirtles.musicroad.map
 import android.content.res.Configuration
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
@@ -41,9 +45,11 @@ fun MapScreen(
     mapViewModel: MapViewModel,
     onFavoriteClick: () -> Unit,
     onCenterClick: () -> Unit,
-    onSettingClick: () -> Unit
+    onSettingClick: () -> Unit,
+    onInfoWindowClick: (String) -> Unit
 ) {
     val pickCount by mapViewModel.pickCount.collectAsStateWithLifecycle()
+    val selectedPickState by mapViewModel.selectedPickState.collectAsStateWithLifecycle()
 
     Scaffold(
         contentWindowInsets = WindowInsets.navigationBars
@@ -59,14 +65,25 @@ fun MapScreen(
                 PickNotificationBanner(pickCount)
             }
 
-            BottomNavigation(
-                modifier = Modifier
-                    .align(Alignment.BottomCenter)
-                    .padding(bottom = 16.dp),
-                onFavoriteClick = onFavoriteClick,
-                onCenterClick = onCenterClick,
-                onSettingClick = onSettingClick
-            )
+            Column(
+                modifier = Modifier.fillMaxSize(),
+                verticalArrangement = Arrangement.Bottom,
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                selectedPickState.current?.let { pick ->
+                    InfoWindow(pick) { pickId ->
+                        onInfoWindowClick(pickId)
+                    }
+                    Spacer(Modifier.height(16.dp))
+                }
+
+                BottomNavigation(
+                    modifier = Modifier.padding(bottom = 16.dp),
+                    onFavoriteClick = onFavoriteClick,
+                    onCenterClick = onCenterClick,
+                    onSettingClick = onSettingClick
+                )
+            }
         }
     }
 }

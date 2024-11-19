@@ -5,15 +5,18 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.navigation
+import androidx.navigation.navArgument
 import com.squirtles.musicroad.create.CreatePickScreen
 import com.squirtles.musicroad.create.CreatePickViewModel
 import com.squirtles.musicroad.create.SearchMusicScreen
 import com.squirtles.musicroad.favorite.FavoriteScreen
 import com.squirtles.musicroad.map.MapScreen
 import com.squirtles.musicroad.map.MapViewModel
+import com.squirtles.musicroad.pick.DetailPickScreen
 import com.squirtles.musicroad.setting.SettingScreen
 
 @Composable
@@ -33,7 +36,8 @@ fun MainNavGraph(
                 mapViewModel = mapViewModel,
                 onFavoriteClick = navigationActions.navigateToFavorite,
                 onCenterClick = navigationActions.navigateToSearch,
-                onSettingClick = navigationActions.navigateToSetting
+                onSettingClick = navigationActions.navigateToSetting,
+                onInfoWindowClick = { navigationActions.navigateToPickDetail(it) }
             )
         }
 
@@ -72,6 +76,17 @@ fun MainNavGraph(
                     }
                 )
             }
+        }
+
+        composable(
+            route = PickInfoDestinations.pickDetail("{pickId}"),
+            arguments = listOf(navArgument("pickId") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val pickId = backStackEntry.arguments?.getString("pickId") ?: ""
+            DetailPickScreen(
+                pickId = pickId,
+                onBackClick = { navController.navigateUp() }
+            )
         }
     }
 }
