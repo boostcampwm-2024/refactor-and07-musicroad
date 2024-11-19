@@ -2,14 +2,16 @@ package com.squirtles.musicroad.map
 
 import android.location.Location
 import android.util.Log
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.squirtles.domain.usecase.FetchLocationUseCase
+import com.naver.maps.map.overlay.Marker
+import com.squirtles.domain.model.Pick
 import com.squirtles.domain.usecase.FetchPickInAreaUseCase
 import com.squirtles.domain.usecase.FetchPickUseCase
 import com.squirtles.domain.usecase.SaveLocationUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -20,6 +22,11 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+data class PickState(
+    val previous: Pick?,
+    val current: Pick?
+)
+
 @HiltViewModel
 class MapViewModel @Inject constructor(
     private val fetchLocationUseCase: FetchLocationUseCase,
@@ -27,13 +34,14 @@ class MapViewModel @Inject constructor(
     private val fetchPickUseCase: FetchPickUseCase,
     private val fetchPickInAreaUseCase: FetchPickInAreaUseCase
 ) : ViewModel() {
-
-    private val _centerButtonClick = MutableSharedFlow<Boolean>()
-    val centerButtonClick = _centerButtonClick.asSharedFlow()
+    private val _pickMarkers = MutableStateFlow<Map<Pick, Marker>>(emptyMap())
+    val pickMarkers = _pickMarkers.asStateFlow()
 
     private val _pickCount = MutableStateFlow(0)
     val pickCount = _pickCount.asStateFlow()
 
+    private val _selectedPickState = MutableStateFlow(PickState(null, null))
+    val selectedPickState = _selectedPickState.asStateFlow()
     val curLocation: StateFlow<Location> = fetchLocationUseCase()
         .map { it ?: DEFAULT_LOCATION } // 기본값을 설정
         .stateIn(
@@ -41,12 +49,6 @@ class MapViewModel @Inject constructor(
             started = SharingStarted.WhileSubscribed(5000),
             initialValue = DEFAULT_LOCATION
         )
-
-    fun createMarker() {
-        viewModelScope.launch {
-            _centerButtonClick.emit(true)
-        }
-    }
 
     fun updateCurLocation(location: Location) {
         val curLocationPoint = curLocation.value
@@ -89,13 +91,33 @@ class MapViewModel @Inject constructor(
             val picks = fetchPickInAreaUseCase(lat, lng, radiusInM)
 
             picks.onSuccess {
-                // TODO
+                val newMap = mutableMapOf<Pick, Marker>()
+                it.forEach { pick ->
+                    newMap[pick] = _pickMarkers.value[pick] ?: Marker()
+                }
+                _pickMarkers.value = newMap
             }
             picks.onFailure {
                 // TODO
             }
 
             Log.d("MapViewModel", picks.toString())
+        }
+    }
+
+    fun setSelectedPickState(pick: Pick) {
+        viewModelScope.launch {
+            val lastSelectedPick = selectedPickState.value.current
+            if (lastSelectedPick == pick) return@launch
+
+            _selectedPickState.emit(PickState(lastSelectedPick, pick))
+        }
+    }
+
+    fun resetSelectedPickState() {
+        viewModelScope.launch {
+            val lastSelectedPick = selectedPickState.value.current
+            _selectedPickState.emit(PickState(lastSelectedPick, null))
         }
     }
 

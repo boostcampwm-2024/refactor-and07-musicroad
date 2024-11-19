@@ -1,6 +1,7 @@
 package com.squirtles.musicroad.map
 
 import android.content.res.Configuration.UI_MODE_NIGHT_YES
+import android.util.Size
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -24,6 +25,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.painter.ColorPainter
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
@@ -31,6 +33,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.core.graphics.toColorInt
 import coil3.compose.AsyncImage
+import coil3.request.ImageRequest
+import coil3.request.crossfade
 import com.squirtles.domain.model.LocationPoint
 import com.squirtles.domain.model.Pick
 import com.squirtles.domain.model.Song
@@ -49,6 +53,7 @@ fun InfoWindow(
         modifier = Modifier
             .fillMaxWidth()
             .height(122.dp)
+            .padding(horizontal = 16.dp)
     ) {
         Row(
             modifier = Modifier
@@ -57,7 +62,10 @@ fun InfoWindow(
             horizontalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             AsyncImage(
-                model = pick.song.imageUrl,
+                model = ImageRequest.Builder(LocalContext.current)
+                    .data(pick.song.getImageUrlWithSize(RequestImageSize))
+                    .crossfade(true)
+                    .build(),
                 contentDescription = stringResource(R.string.map_info_window_album_description),
                 modifier = Modifier
                     .size(90.dp)
@@ -168,3 +176,5 @@ private fun InfoWindowPreview() {
         )
     }
 }
+
+private val RequestImageSize = Size(400, 400)
