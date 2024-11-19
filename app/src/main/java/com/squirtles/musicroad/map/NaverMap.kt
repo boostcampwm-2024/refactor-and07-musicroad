@@ -124,9 +124,7 @@ fun NaverMap(
                         context = context,
                         marker = marker,
                         pick = pick,
-                        setSelectedPickState = { pick ->
-                            mapViewModel.setSelectedPickState(pick)
-                        }
+                        setSelectedPickState = { selectedPick -> mapViewModel.setSelectedPickState(selectedPick) }
                     )
                 }
             }
@@ -172,20 +170,6 @@ private fun NaverMap.onMarkerClick(
     clickedPick: Pick,
     setSelectedPickState: (Pick) -> Unit
 ) {
-//    if (prevSelectedMarker.value == clickedMarker) return // 선택된 마커를 다시 클릭하는 경우 -> 아무 동작도 하지 않도록
-
-//    val defaultIconWidth = clickedMarker.icon.getIntrinsicWidth(context)
-//    val defaultIconHeight = clickedMarker.icon.getIntrinsicHeight(context)
-//
-//    // 선택된 마커가 있는 경우 -> 해당 마커를 원래 크기로
-//    prevSelectedMarker.value?.let {
-//        it.width = defaultIconWidth
-//        it.height = defaultIconHeight
-//    }
-//
-//    clickedMarker.width = (defaultIconWidth * MARKER_SCALE).toInt()
-//    clickedMarker.height = (defaultIconHeight * MARKER_SCALE).toInt()
-
     val cameraUpdate = CameraUpdate
         .scrollTo(clickedMarker.position)
         .animate(CameraAnimation.Easing)
