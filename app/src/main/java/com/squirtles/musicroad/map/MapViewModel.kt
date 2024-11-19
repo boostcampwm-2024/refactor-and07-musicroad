@@ -16,6 +16,11 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+data class PickState(
+    val previous: Pick?,
+    val current: Pick?
+)
+
 @HiltViewModel
 class MapViewModel @Inject constructor(
     private val savedStateHandle: SavedStateHandle,
@@ -31,11 +36,8 @@ class MapViewModel @Inject constructor(
     private val _pickCount = MutableStateFlow(0)
     val pickCount = _pickCount.asStateFlow()
 
-    private val _selectedPick = MutableStateFlow<Pick?>(null)
-    val selectedPick = _selectedPick.asStateFlow()
-
-    private val _selectedMarker = MutableStateFlow<Marker?>(null)
-    val selectedMarker = _selectedMarker.asStateFlow()
+    private val _selectedPickState = MutableStateFlow(PickState(null, null))
+    val selectedPickState = _selectedPickState.asStateFlow()
 
     fun updateCurLocation(location: Location) {
         viewModelScope.launch {
@@ -76,14 +78,20 @@ class MapViewModel @Inject constructor(
         }
     }
 
-    fun setSelectedMarkerAndPick(marker: Marker, pick: Pick) {
-        _selectedMarker.value = marker
-        _selectedPick.value = pick
+    fun setSelectedPickState(pick: Pick) {
+        viewModelScope.launch {
+            val oldSelectedPick = selectedPickState.value.current
+            if (oldSelectedPick == pick) return@launch
+
+            _selectedPickState.emit(PickState(oldSelectedPick, pick))
+        }
     }
 
-    fun resetSelectedMarkerAndPick() {
-        _selectedMarker.value = null
-        _selectedPick.value = null
+    fun resetSelectedPickState() {
+        viewModelScope.launch {
+            val oldSelectedPick = selectedPickState.value.current
+            _selectedPickState.emit(PickState(oldSelectedPick, null))
+        }
     }
 
     fun setMapToMarker(map: NaverMap) {
