@@ -109,7 +109,7 @@ fun NaverMap(
                         initLocationOverlay(locationSource, locationOverlay)
                         setLocationChangeListener(circleOverlay, mapViewModel)
                         setMapClickListener { mapViewModel.resetSelectedPickState() }
-                        mapViewModel.setMapToMarker(this)
+                        pickMarkers.forEach { (_, marker) -> marker.map = this }
                     }
                 }
             }

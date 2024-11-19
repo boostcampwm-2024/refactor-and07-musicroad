@@ -5,7 +5,6 @@ import android.util.Log
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.naver.maps.map.NaverMap
 import com.naver.maps.map.overlay.Marker
 import com.squirtles.domain.model.Pick
 import com.squirtles.domain.usecase.FetchPickInAreaUseCase
@@ -92,13 +91,6 @@ class MapViewModel @Inject constructor(
             val oldSelectedPick = selectedPickState.value.current
             _selectedPickState.emit(PickState(oldSelectedPick, null))
         }
-    }
-
-    fun setMapToMarker(map: NaverMap) {
-        _pickMarkers.value.forEach { (_, marker) ->
-            marker.map = map
-        }
-        _pickMarkers.value = _pickMarkers.value
     }
 
     fun requestPickNotificationArea(location: Location, notiRadius: Double) {
