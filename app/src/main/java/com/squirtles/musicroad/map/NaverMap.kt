@@ -34,12 +34,9 @@ import com.naver.maps.map.NaverMap
 import com.naver.maps.map.UiSettings
 import com.naver.maps.map.overlay.CircleOverlay
 import com.naver.maps.map.overlay.LocationOverlay
-import com.naver.maps.map.overlay.Marker
 import com.naver.maps.map.overlay.OverlayImage
 import com.naver.maps.map.util.FusedLocationSource
-import com.squirtles.domain.model.Pick
 import com.squirtles.musicroad.R
-import com.squirtles.musicroad.ui.theme.Blue
 import com.squirtles.musicroad.ui.theme.Primary
 import com.squirtles.musicroad.ui.theme.Purple15
 import kotlinx.coroutines.launch
@@ -54,9 +51,9 @@ fun NaverMap(
     val mapView = remember { MapView(context) }
     val naverMap = remember { mutableStateOf<NaverMap?>(null) }
 
+    val fusedLocationClient = remember { LocationServices.getFusedLocationProviderClient(context) }
     val locationSource =
         remember { FusedLocationSource(context as Activity, LOCATION_PERMISSION_REQUEST_CODE) }
-    val fusedLocationClient = remember { LocationServices.getFusedLocationProviderClient(context) }
     val locationOverlay = remember { mutableStateOf<LocationOverlay?>(null) }
     val circleOverlay = remember { CircleOverlay() }
 
@@ -127,12 +124,7 @@ fun NaverMap(
                     it.createMarker(
                         context = context,
                         marker = marker,
-                        pick = pick,
-                        setSelectedPickState = { selectedPick ->
-                            mapViewModel.setSelectedPickState(
-                                selectedPick
-                            )
-                        }
+                        setSelectedPickState = mapViewModel::setSelectedPickState
                     )
                 }
             }
@@ -142,48 +134,27 @@ fun NaverMap(
 
 private fun NaverMap.createMarker(
     context: Context,
-    marker: Marker,
-    pick: Pick,
-    setSelectedPickState: (Pick) -> Unit
+    marker: MusicRoadMarker,
+    setSelectedPickState: (String) -> Unit
 ) {
-    val markerIconView = MarkerIconView(context)
-
-    markerIconView.setPaintColor(Blue.toArgb()) // TODO: 내가 생성한 마커인지 확인하여 내가 생성한 것 - Primary, 아니면 - Blue로 설정해야함
-
-    markerIconView.loadImage(pick.song.getImageUrlWithSize(REQUEST_IMAGE_SIZE)) {
-        marker.position = LatLng(pick.location.latitude, pick.location.longitude)
-        marker.icon = OverlayImage.fromView(markerIconView)
-        marker.setOnClickListener {
-            onMarkerClick(
-                clickedMarker = marker,
-                clickedPick = pick,
-                setSelectedPickState = setSelectedPickState
-            )
-            true
-        }
-        marker.map = this
+    marker.loadMarkerImage(context = context, map = this) {
+        onMarkerClick(
+            clickedMarker = marker,
+            setSelectedPickState = setSelectedPickState
+        )
     }
 }
 
-private fun Marker.toggleSizeByClick(context: Context, isClicked: Boolean) {
-    val defaultIconWidth = this.icon.getIntrinsicWidth(context)
-    val defaultIconHeight = this.icon.getIntrinsicHeight(context)
-
-    width = if (isClicked) (defaultIconWidth * MARKER_SCALE).toInt() else defaultIconWidth
-    height = if (isClicked) (defaultIconHeight * MARKER_SCALE).toInt() else defaultIconHeight
-}
-
 private fun NaverMap.onMarkerClick(
-    clickedMarker: Marker,
-    clickedPick: Pick,
-    setSelectedPickState: (Pick) -> Unit
+    clickedMarker: MusicRoadMarker,
+    setSelectedPickState: (String) -> Unit
 ) {
     val cameraUpdate = CameraUpdate
         .scrollTo(clickedMarker.position)
         .animate(CameraAnimation.Easing)
     this.moveCamera(cameraUpdate)
 
-    setSelectedPickState(clickedPick)
+    setSelectedPickState(clickedMarker.pick.id)
 }
 
 private fun NaverMap.initLocationOverlay(
@@ -267,12 +238,12 @@ private fun checkSelfPermission(context: Context): Boolean {
             PermissionChecker.PERMISSION_GRANTED
 }
 
+private const val LOCATION_PERMISSION_REQUEST_CODE = 1000
 private const val CIRCLE_RADIUS_METER = 100.0
 private const val PICK_RADIUS_METER = 5000.0
 private const val INITIAL_CAMERA_ZOOM = 16.5
 private const val MIN_ZOOM_LEVEL = 6.0
 private const val MAX_ZOOM_LEVEL = 18.0
-private const val LOCATION_PERMISSION_REQUEST_CODE = 1000
 private val PERMISSIONS = arrayOf(
     Manifest.permission.ACCESS_FINE_LOCATION,
     Manifest.permission.ACCESS_COARSE_LOCATION

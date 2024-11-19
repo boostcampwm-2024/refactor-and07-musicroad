@@ -3,8 +3,6 @@ package com.squirtles.musicroad.map
 import android.location.Location
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.naver.maps.map.overlay.Marker
-import com.squirtles.domain.model.Pick
 import com.squirtles.domain.usecase.FetchLocationUseCase
 import com.squirtles.domain.usecase.FetchPickInAreaUseCase
 import com.squirtles.domain.usecase.FetchPickUseCase
@@ -20,8 +18,8 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 data class PickState(
-    val previous: Pick?,
-    val current: Pick?
+    val previous: String,
+    val current: String
 )
 
 @HiltViewModel
@@ -31,13 +29,14 @@ class MapViewModel @Inject constructor(
     private val fetchPickUseCase: FetchPickUseCase,
     private val fetchPickInAreaUseCase: FetchPickInAreaUseCase
 ) : ViewModel() {
-    private val _pickMarkers = MutableStateFlow<Map<Pick, Marker>>(emptyMap())
+
+    private val _pickMarkers = MutableStateFlow<Map<String, MusicRoadMarker>>(emptyMap())
     val pickMarkers = _pickMarkers.asStateFlow()
 
     private val _pickCount = MutableStateFlow(0)
     val pickCount = _pickCount.asStateFlow()
 
-    private val _selectedPickState = MutableStateFlow(PickState(null, null))
+    private val _selectedPickState = MutableStateFlow(PickState("", ""))
     val selectedPickState = _selectedPickState.asStateFlow()
 
     // FIXME : 네이버맵의 LocationChangeListener에서 실시간으로 변하는 위치 정보
@@ -85,48 +84,37 @@ class MapViewModel @Inject constructor(
     fun calculateDistance(location1: Location, location2: Location): Double =
         location1.distanceTo(location2).toDouble()
 
-    fun fetchPick(pickId: String) {
-        viewModelScope.launch {
-            val pick = fetchPickUseCase(pickId)
-            pick.onSuccess {
-                // TODO: UiState 등 사용할 수 도?
-            }
-            pick.onFailure {
-                // TODO
-            }
-        }
-    }
-
     fun fetchPickInArea(lat: Double, lng: Double, radiusInM: Double) {
         viewModelScope.launch {
-            val picks = fetchPickInAreaUseCase(lat, lng, radiusInM)
+            val fetchPickResult = fetchPickInAreaUseCase(lat, lng, radiusInM)
 
-            picks.onSuccess {
-                val newMap = mutableMapOf<Pick, Marker>()
-                it.forEach { pick ->
-                    newMap[pick] = _pickMarkers.value[pick] ?: Marker()
+            fetchPickResult.onSuccess { pickList ->
+                val newMarkerMap = mutableMapOf<String, MusicRoadMarker>()
+                pickList.forEach { pick ->
+                    newMarkerMap[pick.id] =
+                        _pickMarkers.value[pick.id] ?: MusicRoadMarker(pick = pick)
                 }
-                _pickMarkers.value = newMap
+                _pickMarkers.value = newMarkerMap
             }
-            picks.onFailure {
+            fetchPickResult.onFailure {
                 // TODO
             }
         }
     }
 
-    fun setSelectedPickState(pick: Pick) {
+    fun setSelectedPickState(pickId: String) {
         viewModelScope.launch {
-            val lastSelectedPick = selectedPickState.value.current
-            if (lastSelectedPick == pick) return@launch
+            val oldSelectedPick = selectedPickState.value.current
+            if (oldSelectedPick == pickId) return@launch
 
-            _selectedPickState.emit(PickState(lastSelectedPick, pick))
+            _selectedPickState.emit(PickState(oldSelectedPick, pickId))
         }
     }
 
     fun resetSelectedPickState() {
         viewModelScope.launch {
             val lastSelectedPick = selectedPickState.value.current
-            _selectedPickState.emit(PickState(lastSelectedPick, null))
+            _selectedPickState.emit(PickState(lastSelectedPick, ""))
         }
     }
 

@@ -49,7 +49,8 @@ fun MapScreen(
     onInfoWindowClick: (String) -> Unit
 ) {
     val pickCount by mapViewModel.pickCount.collectAsStateWithLifecycle()
-    val selectedPickState by mapViewModel.selectedPickState.collectAsStateWithLifecycle()
+    val pickMarkers by mapViewModel.pickMarkers.collectAsStateWithLifecycle()
+    val selectedPick by mapViewModel.selectedPickState.collectAsStateWithLifecycle()
 
     Scaffold(
         contentWindowInsets = WindowInsets.navigationBars
@@ -72,7 +73,7 @@ fun MapScreen(
                 verticalArrangement = Arrangement.Bottom,
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                selectedPickState.current?.let { pick ->
+                pickMarkers[selectedPick.current]?.pick?.let { pick ->
                     InfoWindow(pick) { pickId ->
                         onInfoWindowClick(pickId)
                     }
