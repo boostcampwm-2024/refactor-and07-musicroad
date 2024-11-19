@@ -34,6 +34,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -94,9 +97,14 @@ fun DetailPickScreen(
     val username = "짱구"
     val isFavorite = false
     val pick by pickViewModel.pick.collectAsStateWithLifecycle()
+    var showMusicVideo by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
         pickViewModel.fetchPick(pickId)
+    }
+
+    LaunchedEffect(pick) {
+        showMusicVideo = pick.musicVideoUrl.isNotEmpty()
     }
 
     Box(modifier = Modifier.fillMaxSize()) {
@@ -109,14 +117,17 @@ fun DetailPickScreen(
             onBackClick = onBackClick
         )
 
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .offset { IntOffset(0, swipeableState.offset.value.roundToInt()) }
-        ) {
-            MusicVideoScreen(
-                modifier = swipeableModifier
-            )
+        if (showMusicVideo) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .offset { IntOffset(0, swipeableState.offset.value.roundToInt()) }
+            ) {
+                MusicVideoScreen(
+                    videoUri = pick.musicVideoUrl,
+                    modifier = swipeableModifier
+                )
+            }
         }
     }
 }
