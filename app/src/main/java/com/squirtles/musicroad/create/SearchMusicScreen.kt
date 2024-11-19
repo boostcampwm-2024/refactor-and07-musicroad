@@ -1,6 +1,5 @@
 package com.squirtles.musicroad.create
 
-import android.util.Log
 import android.util.Size
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -38,7 +37,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -77,11 +75,6 @@ fun SearchMusicScreen(
     val searchText by createPickViewModel.searchText.collectAsStateWithLifecycle()
     val searchResult by createPickViewModel.searchResult.collectAsStateWithLifecycle()
     val isSearching by createPickViewModel.isSearching.collectAsStateWithLifecycle()
-    val curLocation by createPickViewModel.curLocation.collectAsStateWithLifecycle()
-
-    LaunchedEffect(curLocation) {
-        Log.d("SearchMusicScreen", curLocation.toString())
-    }
 
     Scaffold(
         contentWindowInsets = WindowInsets.navigationBars,

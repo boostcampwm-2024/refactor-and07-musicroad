@@ -13,7 +13,6 @@ import com.squirtles.domain.usecase.SearchMusicVideoUseCase
 import com.squirtles.domain.usecase.SearchSongsUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -41,7 +40,7 @@ class CreatePickViewModel @Inject constructor(
     private val _isSearching = MutableStateFlow<Boolean>(false)
     val isSearching = _isSearching.asStateFlow()
 
-    val curLocation: StateFlow<Location?> = fetchLocationUseCase()
+    val curLocation: Location? = fetchLocationUseCase().value
 
     fun searchSongs() {
         viewModelScope.launch {
