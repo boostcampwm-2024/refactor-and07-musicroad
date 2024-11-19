@@ -22,8 +22,8 @@ class MapViewModel @Inject constructor(
     private val fetchPickUseCase: FetchPickUseCase,
     private val fetchPickInAreaUseCase: FetchPickInAreaUseCase
 ) : ViewModel() {
-    private val _pickMap = MutableStateFlow<Map<Pick, Marker>>(emptyMap())
-    val pickMap = _pickMap.asStateFlow()
+    private val _pickMarkers = MutableStateFlow<Map<Pick, Marker>>(emptyMap())
+    val pickMarkers = _pickMarkers.asStateFlow()
 
     private val _curLocation = MutableStateFlow<Location?>(null)
     val curLocation = _curLocation.asStateFlow()
@@ -64,13 +64,9 @@ class MapViewModel @Inject constructor(
             picks.onSuccess {
                 val newMap = mutableMapOf<Pick, Marker>()
                 it.forEach { pick ->
-                    if (_pickMap.value.contains(pick)) {
-                        newMap[pick] = _pickMap.value[pick]!!
-                    } else {
-                        newMap[pick] = Marker()
-                    }
+                    newMap[pick] = _pickMarkers.value[pick] ?: Marker()
                 }
-                _pickMap.value = newMap
+                _pickMarkers.value = newMap
             }
             picks.onFailure {
                 // TODO
@@ -91,10 +87,10 @@ class MapViewModel @Inject constructor(
     }
 
     fun setMapToMarker(map: NaverMap) {
-        _pickMap.value.forEach { (_, marker) ->
+        _pickMarkers.value.forEach { (_, marker) ->
             marker.map = map
         }
-        _pickMap.value = _pickMap.value
+        _pickMarkers.value = _pickMarkers.value
     }
 
     fun requestPickNotificationArea(location: Location, notiRadius: Double) {

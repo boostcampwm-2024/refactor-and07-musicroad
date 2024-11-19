@@ -63,7 +63,7 @@ fun NaverMap(
     val lifecycleOwner = LocalLifecycleOwner.current
     val coroutineScope = rememberCoroutineScope()
 
-    val pickMap by mapViewModel.pickMap.collectAsStateWithLifecycle()
+    val pickMarkers by mapViewModel.pickMarkers.collectAsStateWithLifecycle()
 
     DisposableEffect(lifecycleOwner) {
         val mapLifecycleObserver = LifecycleEventObserver { _, event ->
@@ -110,7 +110,7 @@ fun NaverMap(
         modifier = Modifier.fillMaxSize()
     ) {
         naverMap.value?.let {
-            pickMap.forEach { (pick, marker) ->
+            pickMarkers.forEach { (pick, marker) ->
                 if (marker.map == null) {
                     Log.d("NaverMap", "새로 마커 만들기")
                     it.createMarker(
