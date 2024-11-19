@@ -60,7 +60,7 @@ class MapViewModel @Inject constructor(
         if (curLocation.value == DEFAULT_LOCATION) {
             saveCurLocation(location)
         } else {
-            if (calculateDistance(location, curLocation.value) > 5.0) {
+            if (calculateDistance(to = location) > 5.0) {
                 saveCurLocation(location)
             }
         }
@@ -81,8 +81,21 @@ class MapViewModel @Inject constructor(
     }
 
     /* 미터 단위 거리 계산 */
-    fun calculateDistance(location1: Location, location2: Location): Double =
-        location1.distanceTo(location2).toDouble()
+    fun calculateDistance(from: Location = curLocation.value, to: Location): Double =
+        from.distanceTo(to).toDouble()
+
+    fun calculateDistance(
+        from: Location = curLocation.value,
+        lat: Double,
+        lng: Double,
+    ): Double {
+        val location = Location("").apply {
+            latitude = lat
+            longitude = lng
+        }
+        return from.distanceTo(location).toDouble()
+    }
+
 
     fun fetchPickInArea(lat: Double, lng: Double, radiusInM: Double) {
         viewModelScope.launch {

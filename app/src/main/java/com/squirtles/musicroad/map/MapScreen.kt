@@ -74,9 +74,15 @@ fun MapScreen(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 pickMarkers[selectedPick.current]?.pick?.let { pick ->
-                    InfoWindow(pick) { pickId ->
-                        onInfoWindowClick(pickId)
-                    }
+                    InfoWindow(
+                        pick,
+                        navigateToPick = { pickId ->
+                            onInfoWindowClick(pickId)
+                        },
+                        calculateDistance = { lat, lng ->
+                            mapViewModel.calculateDistance(lat = lat, lng = lng).toInt().toString()
+                        }
+                    )
                     Spacer(Modifier.height(16.dp))
                 }
 

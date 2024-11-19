@@ -46,7 +46,8 @@ import com.squirtles.musicroad.ui.theme.Primary
 @Composable
 fun InfoWindow(
     pick: Pick,
-    navigateToPick: (String) -> Unit
+    navigateToPick: (String) -> Unit,
+    calculateDistance: (Double, Double) -> String
 ) {
     ElevatedCard(
         onClick = { navigateToPick(pick.id) },
@@ -139,7 +140,7 @@ fun InfoWindow(
             }
 
             Text(
-                text = "${100}m", // TODO pick.distance 값
+                text = "${calculateDistance(pick.location.latitude, pick.location.longitude)}m",
                 style = MaterialTheme.typography.bodyMedium.copy(Gray)
             )
         }
@@ -172,7 +173,10 @@ private fun InfoWindowPreview() {
                 location = LocationPoint(1.0, 1.0),
                 musicVideoUrl = "",
             ),
-            navigateToPick = {}
+            navigateToPick = { },
+            calculateDistance =  { _, _ ->
+                TODO()
+            }
         )
     }
 }
