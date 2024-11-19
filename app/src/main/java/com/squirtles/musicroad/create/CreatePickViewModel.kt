@@ -19,7 +19,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class CreatePickViewModel @Inject constructor(
-    private val fetchLocationUseCase: FetchLocationUseCase,
+    fetchLocationUseCase: FetchLocationUseCase,
     private val searchSongsUseCase: SearchSongsUseCase,
     private val searchMusicVideoUseCase: SearchMusicVideoUseCase,
     private val createPickUseCase: CreatePickUseCase
@@ -40,7 +40,16 @@ class CreatePickViewModel @Inject constructor(
     private val _isSearching = MutableStateFlow<Boolean>(false)
     val isSearching = _isSearching.asStateFlow()
 
-    val curLocation: Location? = fetchLocationUseCase().value
+    private var curLocation: Location? = null
+
+    init {
+        // 데이터소스의 위치값을 계속 collect하며 curLocation 변수에 저장
+        viewModelScope.launch {
+            fetchLocationUseCase().collect { location ->
+                curLocation = location
+            }
+        }
+    }
 
     fun searchSongs() {
         viewModelScope.launch {

@@ -1,13 +1,11 @@
 package com.squirtles.musicroad.map
 
 import android.location.Location
-import android.util.Log
-import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.squirtles.domain.usecase.FetchLocationUseCase
 import com.naver.maps.map.overlay.Marker
 import com.squirtles.domain.model.Pick
+import com.squirtles.domain.usecase.FetchLocationUseCase
 import com.squirtles.domain.usecase.FetchPickInAreaUseCase
 import com.squirtles.domain.usecase.FetchPickUseCase
 import com.squirtles.domain.usecase.SaveLocationUseCase
@@ -15,7 +13,6 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
@@ -29,7 +26,7 @@ data class PickState(
 
 @HiltViewModel
 class MapViewModel @Inject constructor(
-    private val fetchLocationUseCase: FetchLocationUseCase,
+    fetchLocationUseCase: FetchLocationUseCase,
     private val saveLocationUseCase: SaveLocationUseCase,
     private val fetchPickUseCase: FetchPickUseCase,
     private val fetchPickInAreaUseCase: FetchPickInAreaUseCase
@@ -42,6 +39,14 @@ class MapViewModel @Inject constructor(
 
     private val _selectedPickState = MutableStateFlow(PickState(null, null))
     val selectedPickState = _selectedPickState.asStateFlow()
+
+    // FIXME : 네이버맵의 LocationChangeListener에서 실시간으로 변하는 위치 정보
+    // 등록 버튼 눌렀을때 해당 시점에서의 위치정보를 LocalDataSource에 저장하기 위함 -> 더 나은 방법이 있으면 고쳐주세요
+    private var _realTimeLocation: Location? = null
+    val realTimeLocation get() = _realTimeLocation
+
+    // LocalDataSource에 저장되는 위치 정보
+    // Firestore 데이터 쿼리 작업 최소화 및 위치데이터 공유 용도
     val curLocation: StateFlow<Location> = fetchLocationUseCase()
         .map { it ?: DEFAULT_LOCATION } // 기본값을 설정
         .stateIn(
@@ -51,12 +56,12 @@ class MapViewModel @Inject constructor(
         )
 
     fun updateCurLocation(location: Location) {
-        val curLocationPoint = curLocation.value
+        _realTimeLocation = location
 
-        if (curLocationPoint == DEFAULT_LOCATION) {
+        if (curLocation.value == DEFAULT_LOCATION) {
             saveCurLocation(location)
         } else {
-            if (calculateDistance(location, curLocationPoint) > 5.0) {
+            if (calculateDistance(location, curLocation.value) > 5.0) {
                 saveCurLocation(location)
             }
         }
@@ -65,6 +70,14 @@ class MapViewModel @Inject constructor(
     private fun saveCurLocation(location: Location) {
         viewModelScope.launch {
             saveLocationUseCase(location)
+        }
+    }
+
+    fun onCenterButtonClick() {
+        if (_realTimeLocation == null) return
+
+        viewModelScope.launch {
+            saveCurLocation(_realTimeLocation!!)
         }
     }
 
@@ -81,8 +94,6 @@ class MapViewModel @Inject constructor(
             pick.onFailure {
                 // TODO
             }
-
-            Log.d("MapViewModel", pick.toString())
         }
     }
 
@@ -100,8 +111,6 @@ class MapViewModel @Inject constructor(
             picks.onFailure {
                 // TODO
             }
-
-            Log.d("MapViewModel", picks.toString())
         }
     }
 

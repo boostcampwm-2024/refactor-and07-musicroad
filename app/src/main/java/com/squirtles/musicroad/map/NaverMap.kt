@@ -4,7 +4,6 @@ import android.Manifest
 import android.app.Activity
 import android.content.Context
 import android.location.Location
-import android.util.Log
 import android.util.Size
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
@@ -55,21 +54,28 @@ fun NaverMap(
     val mapView = remember { MapView(context) }
     val naverMap = remember { mutableStateOf<NaverMap?>(null) }
 
-    val fusedLocationClient = remember { LocationServices.getFusedLocationProviderClient(context) }
     val locationSource =
         remember { FusedLocationSource(context as Activity, LOCATION_PERMISSION_REQUEST_CODE) }
+    val fusedLocationClient = remember { LocationServices.getFusedLocationProviderClient(context) }
     val locationOverlay = remember { mutableStateOf<LocationOverlay?>(null) }
     val circleOverlay = remember { CircleOverlay() }
 
     val lifecycleOwner = LocalLifecycleOwner.current
     val coroutineScope = rememberCoroutineScope()
 
+    val curLocation by mapViewModel.curLocation.collectAsStateWithLifecycle()
     val pickMarkers by mapViewModel.pickMarkers.collectAsStateWithLifecycle()
     val selectedPickState by mapViewModel.selectedPickState.collectAsStateWithLifecycle()
 
     LaunchedEffect(selectedPickState) {
         pickMarkers[selectedPickState.current]?.toggleSizeByClick(context, true)
         pickMarkers[selectedPickState.previous]?.toggleSizeByClick(context, false)
+    }
+
+    LaunchedEffect(curLocation) {
+        // 5미터 이상 차이가 날때만 주변 픽 정보 Firestore로부터 호출
+        mapViewModel.fetchPickInArea(curLocation.latitude, curLocation.longitude, PICK_RADIUS_METER)
+        mapViewModel.requestPickNotificationArea(curLocation, CIRCLE_RADIUS_METER)
     }
 
     DisposableEffect(lifecycleOwner) {
@@ -109,7 +115,6 @@ fun NaverMap(
                         initLocationOverlay(locationSource, locationOverlay)
                         setLocationChangeListener(circleOverlay, mapViewModel)
                         setMapClickListener { mapViewModel.resetSelectedPickState() }
-                        pickMarkers.forEach { (_, marker) -> marker.map = this }
                     }
                 }
             }
@@ -119,12 +124,15 @@ fun NaverMap(
         naverMap.value?.let {
             pickMarkers.forEach { (pick, marker) ->
                 if (marker.map == null) {
-                    Log.d("NaverMap", "새로 마커 만들기")
                     it.createMarker(
                         context = context,
                         marker = marker,
                         pick = pick,
-                        setSelectedPickState = { selectedPick -> mapViewModel.setSelectedPickState(selectedPick) }
+                        setSelectedPickState = { selectedPick ->
+                            mapViewModel.setSelectedPickState(
+                                selectedPick
+                            )
+                        }
                     )
                 }
             }
@@ -215,8 +223,6 @@ private fun NaverMap.setLocationChangeListener(
     addOnLocationChangeListener { location ->
         this.setCircleOverlay(circleOverlay, location)
         mapViewModel.updateCurLocation(location)
-        mapViewModel.fetchPickInArea(location.latitude, location.longitude, PICK_RADIUS_METER)
-        mapViewModel.requestPickNotificationArea(location, CIRCLE_RADIUS_METER)
     }
 }
 
@@ -261,12 +267,12 @@ private fun checkSelfPermission(context: Context): Boolean {
             PermissionChecker.PERMISSION_GRANTED
 }
 
-private const val LOCATION_PERMISSION_REQUEST_CODE = 1000
 private const val CIRCLE_RADIUS_METER = 100.0
 private const val PICK_RADIUS_METER = 5000.0
 private const val INITIAL_CAMERA_ZOOM = 16.5
 private const val MIN_ZOOM_LEVEL = 6.0
 private const val MAX_ZOOM_LEVEL = 18.0
+private const val LOCATION_PERMISSION_REQUEST_CODE = 1000
 private val PERMISSIONS = arrayOf(
     Manifest.permission.ACCESS_FINE_LOCATION,
     Manifest.permission.ACCESS_COARSE_LOCATION

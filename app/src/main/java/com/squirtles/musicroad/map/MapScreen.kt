@@ -59,7 +59,9 @@ fun MapScreen(
                 .fillMaxSize()
                 .padding(innerPadding)
         ) {
-            NaverMap(mapViewModel)
+            NaverMap(
+                mapViewModel = mapViewModel
+            )
 
             if (pickCount > 0) {
                 PickNotificationBanner(pickCount)
@@ -80,7 +82,10 @@ fun MapScreen(
                 BottomNavigation(
                     modifier = Modifier.padding(bottom = 16.dp),
                     onFavoriteClick = onFavoriteClick,
-                    onCenterClick = onCenterClick,
+                    onCenterClick = {
+                        onCenterClick()
+                        mapViewModel.onCenterButtonClick()
+                    },
                     onSettingClick = onSettingClick
                 )
             }

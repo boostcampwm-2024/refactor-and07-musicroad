@@ -27,6 +27,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -58,6 +59,7 @@ import com.squirtles.musicroad.ui.theme.White
 
 @Composable
 fun DetailPickScreen(
+    pickId: String,
     onBackClick: () -> Unit,
     pickViewModel: PickViewModel = hiltViewModel(),
 ) {
@@ -67,9 +69,9 @@ fun DetailPickScreen(
 
     val pick by pickViewModel.pick.collectAsStateWithLifecycle()
 
-//    LaunchedEffect(Unit) {
-//        pickViewModel.fetchPick(pickId)
-//    }
+    LaunchedEffect(Unit) {
+        pickViewModel.fetchPick(pickId)
+    }
 
     DetailPickScreen(
         userId = userId,

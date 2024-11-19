@@ -1,7 +1,6 @@
 package com.squirtles.musicroad.pick
 
 import androidx.core.graphics.toColorInt
-import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.squirtles.domain.model.LocationPoint
@@ -16,20 +15,13 @@ import javax.inject.Inject
 
 @HiltViewModel
 class PickViewModel @Inject constructor(
-    private val savedStateHandle: SavedStateHandle,
     private val fetchPickUseCase: FetchPickUseCase
 ) : ViewModel() {
-
-    private val pickId = savedStateHandle["pickId"] ?: ""
 
     private val _pick = MutableStateFlow(DEFAULT_PICK)
     val pick = _pick.asStateFlow()
 
-    init {
-        if (pickId.isNotBlank()) fetchPick(pickId)
-    }
-
-    private fun fetchPick(pickId: String) {
+    fun fetchPick(pickId: String) {
         viewModelScope.launch {
             fetchPickUseCase(pickId)
                 .onSuccess { _pick.emit(it) }
