@@ -37,6 +37,7 @@ import com.naver.maps.map.overlay.Marker
 import com.naver.maps.map.overlay.OverlayImage
 import com.naver.maps.map.util.FusedLocationSource
 import com.squirtles.musicroad.R
+import com.squirtles.musicroad.map.MapViewModel.Companion.DEFAULT_LOCATION
 import com.squirtles.musicroad.ui.theme.Blue
 import com.squirtles.musicroad.ui.theme.Primary
 import com.squirtles.musicroad.ui.theme.Purple15
@@ -62,9 +63,15 @@ fun NaverMap(mapViewModel: MapViewModel) {
     val curLocation by mapViewModel.curLocation.collectAsStateWithLifecycle()
 
     LaunchedEffect(curLocation) {
-        mapViewModel.fetchPickInArea(curLocation.latitude, curLocation.longitude, PICK_RADIUS_METER)
-        mapViewModel.requestPickNotificationArea(curLocation, CIRCLE_RADIUS_METER)
-        Log.d("NaverMap", "curLocation : $curLocation")
+        if (curLocation != DEFAULT_LOCATION) {
+            mapViewModel.fetchPickInArea(
+                curLocation.latitude,
+                curLocation.longitude,
+                PICK_RADIUS_METER
+            )
+            mapViewModel.requestPickNotificationArea(curLocation, CIRCLE_RADIUS_METER)
+            Log.d("NaverMap", "curLocation : $curLocation")
+        }
     }
 
     DisposableEffect(lifecycleOwner) {

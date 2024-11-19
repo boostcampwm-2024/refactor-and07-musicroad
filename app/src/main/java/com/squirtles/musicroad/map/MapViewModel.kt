@@ -41,7 +41,7 @@ class MapViewModel @Inject constructor(
             started = SharingStarted.WhileSubscribed(5000),
             initialValue = DEFAULT_LOCATION
         )
-    
+
     fun createMarker() {
         viewModelScope.launch {
             _centerButtonClick.emit(true)
@@ -51,7 +51,7 @@ class MapViewModel @Inject constructor(
     fun updateCurLocation(location: Location) {
         val curLocationPoint = curLocation.value
 
-        if (curLocationPoint.latitude == 0.0 && curLocationPoint.longitude == 0.0) {
+        if (curLocationPoint == DEFAULT_LOCATION) {
             saveCurLocation(location)
         } else {
             if (calculateDistance(location, curLocationPoint) > 5.0) {
@@ -111,6 +111,6 @@ class MapViewModel @Inject constructor(
     }
 
     companion object {
-        val DEFAULT_LOCATION = Location("manual").apply { latitude = 0.0; longitude = 0.0 }
+        val DEFAULT_LOCATION = Location("default").apply { latitude = 0.0; longitude = 0.0 }
     }
 }
