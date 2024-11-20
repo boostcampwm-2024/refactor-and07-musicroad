@@ -113,6 +113,7 @@ fun DetailPickScreen(
             username = username,
             pick = pick,
             isFavorite = isFavorite,
+            showMusicVideo = showMusicVideo,
             swipeableModifier = swipeableModifier,
             onBackClick = onBackClick
         )
@@ -139,6 +140,7 @@ private fun DetailPickScreen(
     username: String,
     pick: Pick,
     isFavorite: Boolean,
+    showMusicVideo: Boolean,
     swipeableModifier: Modifier,
     onBackClick: () -> Unit,
 ) {
@@ -258,17 +260,19 @@ private fun DetailPickScreen(
                 )
             }
 
-            Box(
-                modifier = swipeableModifier
-                    .fillMaxWidth()
-                    .heightIn(min = 100.dp)
-            ) {
-                Icon(
-                    painter = painterResource(id = R.drawable.ic_swipe),
-                    contentDescription = stringResource(id = R.string.pick_swipe_icon_description),
-                    modifier = Modifier.align(Alignment.Center),
-                    tint = White
-                )
+            if (showMusicVideo) {
+                Box(
+                    modifier = swipeableModifier
+                        .fillMaxWidth()
+                        .heightIn(min = 100.dp)
+                ) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.ic_swipe),
+                        contentDescription = stringResource(id = R.string.pick_swipe_icon_description),
+                        modifier = Modifier.align(Alignment.Center),
+                        tint = White
+                    )
+                }
             }
         }
     }
@@ -323,6 +327,7 @@ private fun DetailPickScreenPreview() {
             musicVideoUrl = "",
         ),
         isFavorite = false,
+        showMusicVideo = true,
         swipeableModifier = Modifier,
         onBackClick = {}
     )
