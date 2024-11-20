@@ -267,7 +267,6 @@ private fun checkSelfPermission(context: Context): Boolean {
 
 private const val LOCATION_PERMISSION_REQUEST_CODE = 1000
 private const val CIRCLE_RADIUS_METER = 100.0
-private const val PICK_RADIUS_METER = 5000.0
 private const val INITIAL_CAMERA_ZOOM = 16.5
 private const val MIN_ZOOM_LEVEL = 6.0
 private const val MAX_ZOOM_LEVEL = 18.0
