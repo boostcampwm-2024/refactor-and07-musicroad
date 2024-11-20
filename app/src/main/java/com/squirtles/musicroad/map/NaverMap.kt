@@ -25,6 +25,7 @@ import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import com.naver.maps.geometry.LatLng
 import com.naver.maps.map.CameraAnimation
+import com.naver.maps.map.CameraPosition
 import com.naver.maps.map.CameraUpdate
 import com.naver.maps.map.LocationTrackingMode
 import com.naver.maps.map.MapView
@@ -89,6 +90,9 @@ fun NaverMap(
         lifecycleOwner.lifecycle.addObserver(mapLifecycleObserver)
 
         onDispose {
+            naverMap.value?.let {
+                mapViewModel.setLastCameraPosition(it.cameraPosition)
+            }
             lifecycleOwner.lifecycle.removeObserver(mapLifecycleObserver)
             mapView.onDestroy()
         }
@@ -106,7 +110,7 @@ fun NaverMap(
 
                     naverMap.value?.run {
                         initMapSettings()
-                        initDeviceLocation(context, circleOverlay, fusedLocationClient)
+                        initDeviceLocation(context, circleOverlay, fusedLocationClient, mapViewModel.lastCameraPosition)
                         initLocationOverlay(locationSource, locationOverlay)
                         setLocationChangeListener(circleOverlay, mapViewModel)
                         setMapClickListener { mapViewModel.resetSelectedPickState() }
@@ -169,20 +173,25 @@ private fun NaverMap.initLocationOverlay(
         isVisible = true
         icon = OverlayImage.fromResource(R.drawable.ic_location)
     }
-    moveCamera(CameraUpdate.zoomTo(INITIAL_CAMERA_ZOOM))
 }
 
 private fun NaverMap.initDeviceLocation(
     context: Context,
     circleOverlay: CircleOverlay,
     fusedLocationClient: FusedLocationProviderClient,
+    lastCameraPosition: CameraPosition?
 ) {
     if (checkSelfPermission(context)) {
         fusedLocationClient.lastLocation.addOnSuccessListener { location ->
             if (location != null) {
                 locationOverlay.position = LatLng(location)
                 setCircleOverlay(circleOverlay, location)
-                moveCamera(CameraUpdate.scrollTo(LatLng(location)))
+                lastCameraPosition?.let {
+                    moveCamera(CameraUpdate.toCameraPosition(it))
+                } ?: run {
+                    moveCamera(CameraUpdate.scrollTo(LatLng(location)))
+                    moveCamera(CameraUpdate.zoomTo(INITIAL_CAMERA_ZOOM))
+                }
             }
         }
     }

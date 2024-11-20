@@ -4,6 +4,7 @@ import android.location.Location
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.naver.maps.map.CameraPosition
 import com.squirtles.domain.usecase.FetchLastLocationUseCase
 import com.squirtles.domain.usecase.FetchPickInAreaUseCase
 import com.squirtles.domain.usecase.FetchPicksInBoundsUseCase
@@ -28,6 +29,9 @@ class MapViewModel @Inject constructor(
     private val fetchPicksInBoundsUseCase: FetchPicksInBoundsUseCase
 ) : ViewModel() {
 
+    private var _lastCameraPosition: CameraPosition? = null
+    val lastCameraPosition get() = _lastCameraPosition
+
     private val _pickMarkers = MutableStateFlow<Map<String, MusicRoadMarker>>(emptyMap())
     val pickMarkers = _pickMarkers.asStateFlow()
 
@@ -44,6 +48,10 @@ class MapViewModel @Inject constructor(
     // LocalDataSource에 저장되는 위치 정보
     // Firestore 데이터 쿼리 작업 최소화 및 위치데이터 공유 용도
     val lastLocation: StateFlow<Location?> = fetchLastLocationUseCase()
+
+    fun setLastCameraPosition(cameraPosition: CameraPosition) {
+        _lastCameraPosition = cameraPosition
+    }
 
     fun updateCurLocation(location: Location) {
         _currentLocation = location
