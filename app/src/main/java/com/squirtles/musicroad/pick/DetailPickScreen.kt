@@ -43,6 +43,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
@@ -97,14 +98,14 @@ fun DetailPickScreen(
     val username = "짱구"
     val isFavorite = false
     val pick by pickViewModel.pick.collectAsStateWithLifecycle()
-    var showMusicVideo by remember { mutableStateOf(false) }
+    var isMusicVideoAvailable by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
         pickViewModel.fetchPick(pickId)
     }
 
     LaunchedEffect(pick) {
-        showMusicVideo = pick.musicVideoUrl.isNotEmpty()
+        isMusicVideoAvailable = pick.musicVideoUrl.isNotEmpty()
     }
 
     Box(modifier = Modifier.fillMaxSize()) {
@@ -113,22 +114,22 @@ fun DetailPickScreen(
             username = username,
             pick = pick,
             isFavorite = isFavorite,
-            showMusicVideo = showMusicVideo,
+            isMusicVideoAvailable = isMusicVideoAvailable,
             swipeableModifier = swipeableModifier,
             onBackClick = onBackClick
         )
 
-        if (showMusicVideo) {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
+        if (isMusicVideoAvailable) {
+            val isPlaying = swipeableState.offset.value < contentHeightPx * 0.8f
+            val alpha = (1 - (swipeableState.offset.value / contentHeightPx)).coerceIn(0f, 1f)
+
+            MusicVideoScreen(
+                videoUri = pick.musicVideoUrl,
+                isPlaying = isPlaying,
+                modifier = swipeableModifier
                     .offset { IntOffset(0, swipeableState.offset.value.roundToInt()) }
-            ) {
-                MusicVideoScreen(
-                    videoUri = pick.musicVideoUrl,
-                    modifier = swipeableModifier
-                )
-            }
+                    .graphicsLayer { this.alpha = alpha }
+            )
         }
     }
 }
@@ -140,7 +141,7 @@ private fun DetailPickScreen(
     username: String,
     pick: Pick,
     isFavorite: Boolean,
-    showMusicVideo: Boolean,
+    isMusicVideoAvailable: Boolean,
     swipeableModifier: Modifier,
     onBackClick: () -> Unit,
 ) {
@@ -260,7 +261,7 @@ private fun DetailPickScreen(
                 )
             }
 
-            if (showMusicVideo) {
+            if (isMusicVideoAvailable) {
                 Box(
                     modifier = swipeableModifier
                         .fillMaxWidth()
@@ -327,7 +328,7 @@ private fun DetailPickScreenPreview() {
             musicVideoUrl = "",
         ),
         isFavorite = false,
-        showMusicVideo = true,
+        isMusicVideoAvailable = true,
         swipeableModifier = Modifier,
         onBackClick = {}
     )
