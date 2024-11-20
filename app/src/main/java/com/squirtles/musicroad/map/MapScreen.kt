@@ -81,13 +81,11 @@ fun MapScreen(
 
                 BottomNavigation(
                     modifier = Modifier.padding(bottom = 16.dp),
+                    lastLocation = lastLocation,
                     onFavoriteClick = onFavoriteClick,
                     onCenterClick = {
-                        // 마지막으로 저장된 위치값이 없으면 화면전환 X
-                        if (lastLocation != null) {
-                            onCenterClick()
-                            mapViewModel.saveCurLocationForced()
-                        }
+                        onCenterClick()
+                        mapViewModel.saveCurLocationForced()
                     },
                     onSettingClick = onSettingClick
                 )

@@ -1,6 +1,7 @@
 package com.squirtles.musicroad.map
 
 import android.content.res.Configuration
+import android.location.Location
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -18,6 +19,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -28,6 +30,7 @@ import com.squirtles.musicroad.ui.theme.MusicRoadTheme
 @Composable
 fun BottomNavigation(
     modifier: Modifier = Modifier,
+    lastLocation: Location?,
     onFavoriteClick: () -> Unit,
     onCenterClick: () -> Unit,
     onSettingClick: () -> Unit
@@ -80,8 +83,14 @@ fun BottomNavigation(
             modifier = Modifier
                 .size(82.dp)
                 .clip(CircleShape)
-                .background(color = MaterialTheme.colorScheme.primary)
-                .clickable { onCenterClick() },
+                .background(
+                    color = lastLocation?.let {
+                        MaterialTheme.colorScheme.primary
+                    } ?: Color.Gray
+                )
+                .clickable {
+                    if (lastLocation != null) onCenterClick()
+                },
             contentAlignment = Alignment.Center
         ) {
             Icon(
@@ -100,6 +109,7 @@ fun BottomNavigationLightPreview() {
     MusicRoadTheme {
         BottomNavigation(
             onFavoriteClick = {},
+            lastLocation = null,
             onCenterClick = {},
             onSettingClick = {}
         )
@@ -112,10 +122,11 @@ fun BottomNavigationDarkPreview() {
     MusicRoadTheme {
         BottomNavigation(
             onFavoriteClick = {},
+            lastLocation = null,
             onCenterClick = {},
             onSettingClick = {}
         )
     }
 }
 
-private val BottomNavigationHorizontalPadding = 10.dp
+private val BottomNavigationHorizontalPadding = 32.dp
