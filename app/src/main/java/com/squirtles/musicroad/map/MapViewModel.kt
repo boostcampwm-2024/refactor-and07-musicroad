@@ -116,7 +116,7 @@ class MapViewModel @Inject constructor(
     fun resetSelectedPickState() {
         viewModelScope.launch {
             val lastSelectedPick = selectedPickState.value.current
-            _selectedPickState.emit(PickState(lastSelectedPick, ""))
+            _selectedPickState.emit(PickState(lastSelectedPick, null))
         }
     }
 
