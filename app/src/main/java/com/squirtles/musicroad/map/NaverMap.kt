@@ -4,7 +4,6 @@ import android.Manifest
 import android.app.Activity
 import android.content.Context
 import android.location.Location
-import android.util.Size
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -251,6 +250,3 @@ private val PERMISSIONS = arrayOf(
     Manifest.permission.ACCESS_FINE_LOCATION,
     Manifest.permission.ACCESS_COARSE_LOCATION
 )
-
-private const val MARKER_SCALE = 1.5
-private val REQUEST_IMAGE_SIZE = Size(300, 300)

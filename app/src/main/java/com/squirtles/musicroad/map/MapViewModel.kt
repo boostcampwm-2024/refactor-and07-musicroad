@@ -60,9 +60,7 @@ class MapViewModel @Inject constructor(
 
     fun saveCurLocationForced() {
         _currentLocation?.let { location ->
-            viewModelScope.launch {
-                saveCurLocation(location)
-            }
+            saveCurLocation(location)
         }
     }
 
