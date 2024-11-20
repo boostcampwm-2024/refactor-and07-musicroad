@@ -9,6 +9,7 @@ import dagger.hilt.components.SingletonComponent
 import kotlinx.serialization.json.Json
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
+import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Converter
 import retrofit2.Retrofit
 import retrofit2.converter.kotlinx.serialization.asConverterFactory
@@ -24,6 +25,8 @@ internal object ApiModule {
     @Provides
     @Singleton
     fun provideAppleOkhttpClient(): OkHttpClient {
+        val loggingInterceptor = HttpLoggingInterceptor()
+        loggingInterceptor.setLevel(HttpLoggingInterceptor.Level.BODY)
         return OkHttpClient.Builder()
             .addInterceptor { chain ->
                 val newRequest = chain.request().newBuilder()
@@ -31,6 +34,7 @@ internal object ApiModule {
                     .build()
                 chain.proceed(newRequest)
             }
+            .addInterceptor(loggingInterceptor)
             .build()
     }
 
