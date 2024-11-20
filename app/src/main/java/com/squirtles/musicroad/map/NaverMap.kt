@@ -3,6 +3,7 @@ package com.squirtles.musicroad.map
 import android.Manifest
 import android.app.Activity
 import android.content.Context
+import android.graphics.PointF
 import android.location.Location
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
@@ -66,13 +67,8 @@ fun NaverMap(
     }
 
     LaunchedEffect(lastLocation) {
-        // 5미터 이상 차이가 날때만 주변 픽 정보 Firestore로부터 호출
+        // 현재 위치와 마지막 위치가 5미터 이상 차이가 날때만 현위치 기준 반경 100m 픽 정보 개수 불러오기
         lastLocation?.let {
-            mapViewModel.fetchPickInArea(
-                lastLocation.latitude,
-                lastLocation.longitude,
-                PICK_RADIUS_METER
-            )
             mapViewModel.requestPickNotificationArea(lastLocation, CIRCLE_RADIUS_METER)
         }
     }
@@ -114,6 +110,9 @@ fun NaverMap(
                         initLocationOverlay(locationSource, locationOverlay)
                         setLocationChangeListener(circleOverlay, mapViewModel)
                         setMapClickListener { mapViewModel.resetSelectedPickState() }
+                        setCameraIdleListener { lat1, lng1, lat2, lng2 ->
+                            mapViewModel.fetchPicksInBounds(lat1, lng1, lat2, lng2)
+                        }
                     }
                 }
             }
@@ -230,6 +229,23 @@ private fun NaverMap.setMapClickListener(
 ) {
     this.setOnMapClickListener { _, _ ->
         resetSelectedMarkerAndPick()
+    }
+}
+
+// 카메라 대기 이벤트 설정
+private fun NaverMap.setCameraIdleListener(
+    fetchPicksInBounds: (Double, Double, Double, Double) -> Unit
+) {
+    addOnCameraIdleListener {
+        val leftTop = projection.fromScreenLocation(PointF(0f, 0f))
+        val rightBottom =
+            projection.fromScreenLocation(PointF(contentWidth.toFloat(), contentHeight.toFloat()))
+        fetchPicksInBounds(
+            leftTop.latitude,
+            leftTop.longitude,
+            rightBottom.latitude,
+            rightBottom.longitude
+        )
     }
 }
 

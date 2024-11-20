@@ -102,6 +102,19 @@ class FirebaseDataSourceImpl @Inject constructor(
         return matchingPicks
     }
 
+    override suspend fun fetchPicksInBounds(
+        lat1: Double,
+        lng1: Double,
+        lat2: Double,
+        lng2: Double
+    ): List<Pick> {
+        val center = GeoLocation((lat1 + lat2) / 2, (lng1 + lng2) / 2)
+        val radiusInM = GeoFireUtils.getDistanceBetween(GeoLocation(lat1, lng1), GeoLocation(lat2, lng2)) / 2
+
+        val result = fetchPicksInArea(center.latitude, center.longitude, radiusInM)
+        return result
+    }
+
     /**
      * GeoHash의 FP 문제 - Geohash의 쿼리가 정확하지 않으며 클라이언트 측에서 거짓양성 결과를 필터링해야 합니다.
      * 이러한 추가 읽기로 인해 앱에 비용과 지연 시간이 추가됩니다.

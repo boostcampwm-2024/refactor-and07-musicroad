@@ -1,10 +1,12 @@
 package com.squirtles.musicroad.map
 
 import android.location.Location
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.squirtles.domain.usecase.FetchLastLocationUseCase
 import com.squirtles.domain.usecase.FetchPickInAreaUseCase
+import com.squirtles.domain.usecase.FetchPicksInBoundsUseCase
 import com.squirtles.domain.usecase.SaveLastLocationUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -22,7 +24,8 @@ data class PickState(
 class MapViewModel @Inject constructor(
     fetchLastLocationUseCase: FetchLastLocationUseCase,
     private val saveLastLocationUseCase: SaveLastLocationUseCase,
-    private val fetchPickInAreaUseCase: FetchPickInAreaUseCase
+    private val fetchPickInAreaUseCase: FetchPickInAreaUseCase,
+    private val fetchPicksInBoundsUseCase: FetchPicksInBoundsUseCase
 ) : ViewModel() {
 
     private val _pickMarkers = MutableStateFlow<Map<String, MusicRoadMarker>>(emptyMap())
@@ -110,6 +113,33 @@ class MapViewModel @Inject constructor(
         viewModelScope.launch {
             val lastSelectedPick = selectedPickState.value.current
             _selectedPickState.emit(PickState(lastSelectedPick, null))
+        }
+    }
+
+    fun fetchPicksInBounds(lat1: Double, lng1: Double, lat2: Double, lng2: Double) {
+        viewModelScope.launch {
+            val picks = fetchPicksInBoundsUseCase(lat1, lng1, lat2, lng2)
+
+            picks.onSuccess { pickList ->
+                val newMarkerMap = mutableMapOf<String, MusicRoadMarker>()
+                Log.d("MapViewModel", "$pickList")
+                pickList.forEach { pick ->
+                    newMarkerMap[pick.id] =
+                        _pickMarkers.value[pick.id] ?: MusicRoadMarker(pick = pick)
+                }
+                _pickMarkers.value.forEach { (_, marker) ->
+                    if(marker.pick !in pickList) {
+                        marker.clearMap()
+                    }
+                }
+                _pickMarkers.value = newMarkerMap
+            }
+            picks.onFailure {
+                // TODO: NoSuchPickInRadiusException일 때
+            }
+
+            Log.d("MapViewModel", "개수: ${_pickMarkers.value.size}")
+            Log.d("MapViewModel", "값: ${_pickMarkers.value}")
         }
     }
 
