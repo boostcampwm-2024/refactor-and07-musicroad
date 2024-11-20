@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBars
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -43,7 +44,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.luminance
-import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
@@ -63,8 +63,8 @@ import androidx.wear.compose.material.FractionalThreshold
 import androidx.wear.compose.material.rememberSwipeableState
 import androidx.wear.compose.material.swipeable
 import coil3.compose.AsyncImage
+import com.squirtles.domain.model.LocationPoint
 import com.squirtles.domain.model.Pick
-import com.squirtles.domain.model.PickLocation
 import com.squirtles.domain.model.Song
 import com.squirtles.musicroad.R
 import com.squirtles.musicroad.ui.theme.Black
@@ -153,7 +153,6 @@ private fun DetailPickScreen(
             val windowInsetsController = WindowInsetsControllerCompat(window, view)
             val isLightStatusBar = dynamicBackgroundColor.luminance() >= 0.5f
 
-            window.statusBarColor = dynamicBackgroundColor.toArgb()
             windowInsetsController.isAppearanceLightStatusBars = isLightStatusBar
         }
     }
@@ -168,6 +167,7 @@ private fun DetailPickScreen(
                         style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold)
                     )
                 },
+                modifier = Modifier.statusBarsPadding(),
                 navigationIcon = {
                     IconButton(onClick = onBackClick) {
                         Icon(
@@ -179,7 +179,8 @@ private fun DetailPickScreen(
                 },
                 actions = {
                     IconButton(onClick = { /*TODO*/ }) {
-                        val iconPainter = if (isMine) R.drawable.ic_delete else if (isFavorite) R.drawable.ic_favorite_true else R.drawable.ic_favorite_false
+                        val iconPainter =
+                            if (isMine) R.drawable.ic_delete else if (isFavorite) R.drawable.ic_favorite_true else R.drawable.ic_favorite_false
                         val iconDescription =
                             if (isMine) R.string.pick_delete_icon_description else if (isFavorite) R.string.pick_favorite_true_icon_description else R.string.pick_favorite_false_icon_description
                         Icon(
@@ -318,7 +319,7 @@ private fun DetailPickScreenPreview() {
             createdAt = "2024.11.02",
             createdBy = "짱구",
             favoriteCount = 100,
-            location = PickLocation(1.0, 1.0),
+            location = LocationPoint(1.0, 1.0),
             musicVideoUrl = "",
         ),
         isFavorite = false,

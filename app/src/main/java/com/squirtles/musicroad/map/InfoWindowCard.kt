@@ -1,6 +1,7 @@
 package com.squirtles.musicroad.map
 
 import android.content.res.Configuration.UI_MODE_NIGHT_YES
+import android.util.Size
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -24,6 +25,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.painter.ColorPainter
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
@@ -31,8 +33,10 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.core.graphics.toColorInt
 import coil3.compose.AsyncImage
+import coil3.request.ImageRequest
+import coil3.request.crossfade
+import com.squirtles.domain.model.LocationPoint
 import com.squirtles.domain.model.Pick
-import com.squirtles.domain.model.PickLocation
 import com.squirtles.domain.model.Song
 import com.squirtles.musicroad.R
 import com.squirtles.musicroad.ui.theme.Gray
@@ -42,13 +46,15 @@ import com.squirtles.musicroad.ui.theme.Primary
 @Composable
 fun InfoWindow(
     pick: Pick,
-    navigateToPick: (String) -> Unit
+    navigateToPick: (String) -> Unit,
+    calculateDistance: (Double, Double) -> String
 ) {
     ElevatedCard(
         onClick = { navigateToPick(pick.id) },
         modifier = Modifier
             .fillMaxWidth()
             .height(122.dp)
+            .padding(horizontal = 16.dp)
     ) {
         Row(
             modifier = Modifier
@@ -57,7 +63,10 @@ fun InfoWindow(
             horizontalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             AsyncImage(
-                model = pick.song.imageUrl,
+                model = ImageRequest.Builder(LocalContext.current)
+                    .data(pick.song.getImageUrlWithSize(RequestImageSize))
+                    .crossfade(true)
+                    .build(),
                 contentDescription = stringResource(R.string.map_info_window_album_description),
                 modifier = Modifier
                     .size(90.dp)
@@ -131,7 +140,7 @@ fun InfoWindow(
             }
 
             Text(
-                text = "${100}m", // TODO pick.distance 값
+                text = calculateDistance(pick.location.latitude, pick.location.longitude),
                 style = MaterialTheme.typography.bodyMedium.copy(Gray)
             )
         }
@@ -161,10 +170,15 @@ private fun InfoWindowPreview() {
                 createdAt = "1970.01.21",
                 createdBy = "짱구",
                 favoriteCount = 100,
-                location = PickLocation(1.0, 1.0),
+                location = LocationPoint(1.0, 1.0),
                 musicVideoUrl = "",
             ),
-            navigateToPick = {}
+            navigateToPick = { },
+            calculateDistance =  { _, _ ->
+                TODO()
+            }
         )
     }
 }
+
+private val RequestImageSize = Size(400, 400)

@@ -6,7 +6,6 @@ import android.graphics.Canvas
 import android.graphics.Paint
 import android.graphics.Rect
 import android.util.AttributeSet
-import android.util.Log
 import android.view.View
 import androidx.annotation.ColorInt
 import coil3.SingletonImageLoader
@@ -69,20 +68,17 @@ class MarkerIconView(
         strokePaint.color = color
     }
 
-    fun loadImage(url: String, onImageLoaded: () -> Unit) {
-        Log.d(TAG_LOG, "loader : $imageLoader")
+    fun loadImage(url: String?, onImageLoaded: () -> Unit) {
         val request = ImageRequest.Builder(context)
             .data(url)
             .allowHardware(false)
             .transformations(CircleCropTransformation())
             .listener(
                 onSuccess = { _, result ->
-                    Log.d(TAG_LOG, "onSuccess $result")
                     bitmap = result.image.toBitmap()
                     onImageLoaded()
                 },
                 onError = { _, error ->
-                    Log.d(TAG_LOG, "onError $error")
                     onImageLoaded()
                 }
             )

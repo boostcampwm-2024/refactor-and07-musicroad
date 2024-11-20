@@ -10,11 +10,11 @@ data class Pick(
     val favoriteCount: Int = 0,
     val createdBy: String,
     val createdAt: String,
-    val location: PickLocation,
+    val location: LocationPoint,
     val musicVideoUrl: String = "",
 )
 
-data class PickLocation(
+data class LocationPoint(
     val latitude: Double,
     val longitude: Double
 ) {
