@@ -127,6 +127,7 @@ fun DetailPickScreen(
                 videoUri = pick.musicVideoUrl,
                 isPlaying = isPlaying,
                 modifier = swipeableModifier
+                    .fillMaxSize()
                     .offset { IntOffset(0, swipeableState.offset.value.roundToInt()) }
                     .graphicsLayer { this.alpha = alpha }
             )
