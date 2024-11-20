@@ -31,7 +31,7 @@ class MapViewModel @Inject constructor(
     private val _pickCount = MutableStateFlow(0)
     val pickCount = _pickCount.asStateFlow()
 
-    private val _selectedPickState = MutableStateFlow(PickState("", ""))
+    private val _selectedPickState = MutableStateFlow(PickState(null, null))
     val selectedPickState = _selectedPickState.asStateFlow()
 
     // FIXME : 네이버맵의 LocationChangeListener에서 실시간으로 변하는 위치 정보 -> 더 나은 방법이 있으면 고쳐주세요
