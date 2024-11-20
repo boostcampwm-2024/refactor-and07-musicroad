@@ -1,88 +1,108 @@
 package com.squirtles.musicroad.map
 
 import android.location.Location
-import android.util.Log
-import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.naver.maps.map.overlay.Marker
-import com.squirtles.domain.model.Pick
+import com.squirtles.domain.usecase.FetchLastLocationUseCase
 import com.squirtles.domain.usecase.FetchPickInAreaUseCase
-import com.squirtles.domain.usecase.FetchPickUseCase
+import com.squirtles.domain.usecase.SaveLastLocationUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 data class PickState(
-    val previous: Pick?,
-    val current: Pick?
+    val previous: String? = null,
+    val current: String? = null
 )
 
 @HiltViewModel
 class MapViewModel @Inject constructor(
-    private val savedStateHandle: SavedStateHandle,
-    private val fetchPickUseCase: FetchPickUseCase,
+    fetchLastLocationUseCase: FetchLastLocationUseCase,
+    private val saveLastLocationUseCase: SaveLastLocationUseCase,
     private val fetchPickInAreaUseCase: FetchPickInAreaUseCase
 ) : ViewModel() {
-    private val _pickMarkers = MutableStateFlow<Map<Pick, Marker>>(emptyMap())
-    val pickMarkers = _pickMarkers.asStateFlow()
 
-    private val _curLocation = MutableStateFlow<Location?>(null)
-    val curLocation = _curLocation.asStateFlow()
+    private val _pickMarkers = MutableStateFlow<Map<String, MusicRoadMarker>>(emptyMap())
+    val pickMarkers = _pickMarkers.asStateFlow()
 
     private val _pickCount = MutableStateFlow(0)
     val pickCount = _pickCount.asStateFlow()
 
-    private val _selectedPickState = MutableStateFlow(PickState(null, null))
+    private val _selectedPickState = MutableStateFlow(PickState("", ""))
     val selectedPickState = _selectedPickState.asStateFlow()
 
+    // FIXME : 네이버맵의 LocationChangeListener에서 실시간으로 변하는 위치 정보 -> 더 나은 방법이 있으면 고쳐주세요
+    private var _currentLocation: Location? = null
+    val curLocation get() = _currentLocation
+
+    // LocalDataSource에 저장되는 위치 정보
+    // Firestore 데이터 쿼리 작업 최소화 및 위치데이터 공유 용도
+    val lastLocation: StateFlow<Location?> = fetchLastLocationUseCase()
+
     fun updateCurLocation(location: Location) {
-        viewModelScope.launch {
-            _curLocation.value = location
+        _currentLocation = location
+
+        if (lastLocation.value == null
+            || calculateDistance(location.latitude, location.longitude) > 5.0
+        ) {
+            saveCurLocation(location)
         }
     }
 
-    fun fetchPick(pickId: String) {
+    private fun saveCurLocation(location: Location) {
         viewModelScope.launch {
-            val pick = fetchPickUseCase(pickId)
-            pick.onSuccess {
-                // TODO: UiState 등 사용할 수 도?
-            }
-            pick.onFailure {
-                // TODO
-            }
-
-            Log.d("MapViewModel", pick.toString())
+            saveLastLocationUseCase(location)
         }
     }
+
+    fun saveCurLocationForced() {
+        _currentLocation?.let { location ->
+            saveCurLocation(location)
+        }
+    }
+
+    fun calculateDistance(
+        lat: Double,
+        lng: Double,
+        from: Location? = lastLocation.value,
+    ): Double {
+        return from?.let {
+            val location = Location("pickLocation").apply {
+                latitude = lat
+                longitude = lng
+            }
+            from.distanceTo(location).toDouble()
+        } ?: -1.0
+    }
+
 
     fun fetchPickInArea(lat: Double, lng: Double, radiusInM: Double) {
         viewModelScope.launch {
-            val picks = fetchPickInAreaUseCase(lat, lng, radiusInM)
+            val fetchPickResult = fetchPickInAreaUseCase(lat, lng, radiusInM)
 
-            picks.onSuccess {
-                val newMap = mutableMapOf<Pick, Marker>()
-                it.forEach { pick ->
-                    newMap[pick] = _pickMarkers.value[pick] ?: Marker()
+            fetchPickResult.onSuccess { pickList ->
+                val newMarkerMap = mutableMapOf<String, MusicRoadMarker>()
+                pickList.forEach { pick ->
+                    newMarkerMap[pick.id] =
+                        _pickMarkers.value[pick.id] ?: MusicRoadMarker(pick = pick)
                 }
-                _pickMarkers.value = newMap
+                _pickMarkers.value = newMarkerMap
             }
-            picks.onFailure {
+            fetchPickResult.onFailure {
                 // TODO
             }
-
-            Log.d("MapViewModel", picks.toString())
         }
     }
 
-    fun setSelectedPickState(pick: Pick) {
+    fun setSelectedPickState(pickId: String) {
         viewModelScope.launch {
             val lastSelectedPick = selectedPickState.value.current
-            if (lastSelectedPick == pick) return@launch
+            if (lastSelectedPick == pickId) return@launch
 
-            _selectedPickState.emit(PickState(lastSelectedPick, pick))
+            _selectedPickState.emit(PickState(lastSelectedPick, pickId))
         }
     }
 

@@ -23,6 +23,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.painter.ColorPainter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -34,8 +35,8 @@ import androidx.core.graphics.toColorInt
 import coil3.compose.AsyncImage
 import coil3.request.ImageRequest
 import coil3.request.crossfade
+import com.squirtles.domain.model.LocationPoint
 import com.squirtles.domain.model.Pick
-import com.squirtles.domain.model.PickLocation
 import com.squirtles.domain.model.Song
 import com.squirtles.musicroad.R
 import com.squirtles.musicroad.ui.theme.Gray
@@ -45,7 +46,8 @@ import com.squirtles.musicroad.ui.theme.Primary
 @Composable
 fun InfoWindow(
     pick: Pick,
-    navigateToPick: (String) -> Unit
+    navigateToPick: (String) -> Unit,
+    calculateDistance: (Double, Double) -> String
 ) {
     ElevatedCard(
         onClick = { navigateToPick(pick.id) },
@@ -69,6 +71,7 @@ fun InfoWindow(
                 modifier = Modifier
                     .size(90.dp)
                     .clip(RoundedCornerShape(4.dp)),
+                placeholder = ColorPainter(Gray),
                 contentScale = ContentScale.Crop,
             )
 
@@ -137,7 +140,7 @@ fun InfoWindow(
             }
 
             Text(
-                text = "${100}m", // TODO pick.distance 값
+                text = calculateDistance(pick.location.latitude, pick.location.longitude),
                 style = MaterialTheme.typography.bodyMedium.copy(Gray)
             )
         }
@@ -167,10 +170,13 @@ private fun InfoWindowPreview() {
                 createdAt = "1970.01.21",
                 createdBy = "짱구",
                 favoriteCount = 100,
-                location = PickLocation(1.0, 1.0),
+                location = LocationPoint(1.0, 1.0),
                 musicVideoUrl = "",
             ),
-            navigateToPick = {}
+            navigateToPick = { },
+            calculateDistance =  { _, _ ->
+                TODO()
+            }
         )
     }
 }

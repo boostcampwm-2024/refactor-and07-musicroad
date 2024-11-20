@@ -7,8 +7,8 @@ import com.google.firebase.Timestamp
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.GeoPoint
 import com.squirtles.data.datasource.remote.firebase.model.FirebasePick
+import com.squirtles.domain.model.LocationPoint
 import com.squirtles.domain.model.Pick
-import com.squirtles.domain.model.PickLocation
 import com.squirtles.domain.model.Song
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -35,7 +35,7 @@ internal fun FirebasePick.toPick(): Pick = Pick(
     comment = comment.toString(),
     createdAt = createdAt?.toDate()?.formatTimestamp() ?: "",
     createdBy = createdBy.toString(),
-    location = PickLocation(
+    location = LocationPoint(
         latitude = location?.latitude ?: 0.0,
         longitude = location?.longitude ?: 0.0
     ),
@@ -67,7 +67,7 @@ private fun Int.toRgbString(): String {
     return String.format("%06X", 0xFFFFFF and this)
 }
 
-private fun PickLocation.toGeoHash(): String {
+private fun LocationPoint.toGeoHash(): String {
     val geoLocation = GeoLocation(this.latitude, this.longitude)
     return GeoFireUtils.getGeoHashForLocation(geoLocation)
 }

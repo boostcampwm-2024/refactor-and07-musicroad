@@ -21,7 +21,7 @@ import com.squirtles.musicroad.setting.SettingScreen
 
 @Composable
 fun MainNavGraph(
-    mapViewModel: MapViewModel,
+    mapViewModel: MapViewModel = hiltViewModel<MapViewModel>(),
     navController: NavHostController,
     navigationActions: MainNavigationActions,
     modifier: Modifier = Modifier,
@@ -37,7 +37,9 @@ fun MainNavGraph(
                 onFavoriteClick = navigationActions.navigateToFavorite,
                 onCenterClick = navigationActions.navigateToSearch,
                 onSettingClick = navigationActions.navigateToSetting,
-                onInfoWindowClick = { navigationActions.navigateToPickDetail(it) }
+                onInfoWindowClick = { pickId ->
+                    navigationActions.navigateToPickDetail(pickId)
+                }
             )
         }
 
@@ -73,6 +75,9 @@ fun MainNavGraph(
                     createPickViewModel = hiltViewModel<CreatePickViewModel>(parentEntry),
                     onBackClick = {
                         navController.popBackStack()
+                    },
+                    onCreateClick = { pickId ->
+                        navigationActions.navigateToPickDetail(pickId)
                     }
                 )
             }

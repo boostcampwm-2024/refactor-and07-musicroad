@@ -48,8 +48,8 @@ import androidx.core.view.WindowInsetsControllerCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil3.compose.AsyncImage
+import com.squirtles.domain.model.LocationPoint
 import com.squirtles.domain.model.Pick
-import com.squirtles.domain.model.PickLocation
 import com.squirtles.domain.model.Song
 import com.squirtles.musicroad.R
 import com.squirtles.musicroad.ui.theme.Black
@@ -66,6 +66,7 @@ fun DetailPickScreen(
     val userId = ""
     val username = "짱구"
     val isFavorite = false
+
     val pick by pickViewModel.pick.collectAsStateWithLifecycle()
 
     LaunchedEffect(Unit) {
@@ -127,7 +128,8 @@ private fun DetailPickScreen(
                 },
                 actions = {
                     IconButton(onClick = { /*TODO*/ }) {
-                        val iconPainter = if (isMine) R.drawable.ic_delete else if (isFavorite) R.drawable.ic_favorite_true else R.drawable.ic_favorite_false
+                        val iconPainter =
+                            if (isMine) R.drawable.ic_delete else if (isFavorite) R.drawable.ic_favorite_true else R.drawable.ic_favorite_false
                         val iconDescription =
                             if (isMine) R.string.pick_delete_icon_description else if (isFavorite) R.string.pick_favorite_true_icon_description else R.string.pick_favorite_false_icon_description
                         Icon(
@@ -252,7 +254,7 @@ private fun DetailPickScreenPreview() {
             createdAt = "2024.11.02",
             createdBy = "짱구",
             favoriteCount = 100,
-            location = PickLocation(1.0, 1.0),
+            location = LocationPoint(1.0, 1.0),
             musicVideoUrl = "",
         ),
         isFavorite = false,

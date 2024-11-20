@@ -58,7 +58,8 @@ import com.squirtles.musicroad.ui.theme.White
 @Composable
 fun CreatePickScreen(
     createPickViewModel: CreatePickViewModel,
-    onBackClick: () -> Unit
+    onBackClick: () -> Unit,
+    onCreateClick: (String) -> Unit,
 ) {
     val song = createPickViewModel.selectedSong ?: DEFAULT_SONG
     val comment = createPickViewModel.comment.collectAsStateWithLifecycle()
@@ -87,7 +88,9 @@ fun CreatePickScreen(
             createPickViewModel.resetComment()
             onBackClick()
         },
-        onCreateClick = createPickViewModel::createPick,
+        onCreateClick = {
+            createPickViewModel.createPick(onCreateClick)
+        },
         onCommentChange = createPickViewModel::onCommentChange
     )
 }

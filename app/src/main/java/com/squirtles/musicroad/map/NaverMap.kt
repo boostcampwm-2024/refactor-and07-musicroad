@@ -4,14 +4,11 @@ import android.Manifest
 import android.app.Activity
 import android.content.Context
 import android.location.Location
-import android.util.Log
-import android.util.Size
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -23,7 +20,6 @@ import androidx.core.content.PermissionChecker
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import com.naver.maps.geometry.LatLng
@@ -35,12 +31,9 @@ import com.naver.maps.map.NaverMap
 import com.naver.maps.map.UiSettings
 import com.naver.maps.map.overlay.CircleOverlay
 import com.naver.maps.map.overlay.LocationOverlay
-import com.naver.maps.map.overlay.Marker
 import com.naver.maps.map.overlay.OverlayImage
 import com.naver.maps.map.util.FusedLocationSource
-import com.squirtles.domain.model.Pick
 import com.squirtles.musicroad.R
-import com.squirtles.musicroad.ui.theme.Blue
 import com.squirtles.musicroad.ui.theme.Primary
 import com.squirtles.musicroad.ui.theme.Purple15
 import kotlinx.coroutines.launch
@@ -49,7 +42,10 @@ import kotlin.coroutines.suspendCoroutine
 
 @Composable
 fun NaverMap(
-    mapViewModel: MapViewModel
+    mapViewModel: MapViewModel,
+    lastLocation: Location?,
+    pickMarkers: Map<String, MusicRoadMarker>,
+    selectedPickState: PickState,
 ) {
     val context = LocalContext.current
     val mapView = remember { MapView(context) }
@@ -64,12 +60,21 @@ fun NaverMap(
     val lifecycleOwner = LocalLifecycleOwner.current
     val coroutineScope = rememberCoroutineScope()
 
-    val pickMarkers by mapViewModel.pickMarkers.collectAsStateWithLifecycle()
-    val selectedPickState by mapViewModel.selectedPickState.collectAsStateWithLifecycle()
-
     LaunchedEffect(selectedPickState) {
         pickMarkers[selectedPickState.current]?.toggleSizeByClick(context, true)
         pickMarkers[selectedPickState.previous]?.toggleSizeByClick(context, false)
+    }
+
+    LaunchedEffect(lastLocation) {
+        // 5미터 이상 차이가 날때만 주변 픽 정보 Firestore로부터 호출
+        lastLocation?.let {
+            mapViewModel.fetchPickInArea(
+                lastLocation.latitude,
+                lastLocation.longitude,
+                PICK_RADIUS_METER
+            )
+            mapViewModel.requestPickNotificationArea(lastLocation, CIRCLE_RADIUS_METER)
+        }
     }
 
     DisposableEffect(lifecycleOwner) {
@@ -109,7 +114,6 @@ fun NaverMap(
                         initLocationOverlay(locationSource, locationOverlay)
                         setLocationChangeListener(circleOverlay, mapViewModel)
                         setMapClickListener { mapViewModel.resetSelectedPickState() }
-                        pickMarkers.forEach { (_, marker) -> marker.map = this }
                     }
                 }
             }
@@ -119,12 +123,10 @@ fun NaverMap(
         naverMap.value?.let {
             pickMarkers.forEach { (pick, marker) ->
                 if (marker.map == null) {
-                    Log.d("NaverMap", "새로 마커 만들기")
                     it.createMarker(
                         context = context,
                         marker = marker,
-                        pick = pick,
-                        setSelectedPickState = { selectedPick -> mapViewModel.setSelectedPickState(selectedPick) }
+                        setSelectedPickState = mapViewModel::setSelectedPickState
                     )
                 }
             }
@@ -134,48 +136,27 @@ fun NaverMap(
 
 private fun NaverMap.createMarker(
     context: Context,
-    marker: Marker,
-    pick: Pick,
-    setSelectedPickState: (Pick) -> Unit
+    marker: MusicRoadMarker,
+    setSelectedPickState: (String) -> Unit
 ) {
-    val markerIconView = MarkerIconView(context)
-
-    markerIconView.setPaintColor(Blue.toArgb()) // TODO: 내가 생성한 마커인지 확인하여 내가 생성한 것 - Primary, 아니면 - Blue로 설정해야함
-
-    markerIconView.loadImage(pick.song.getImageUrlWithSize(REQUEST_IMAGE_SIZE)) {
-        marker.position = LatLng(pick.location.latitude, pick.location.longitude)
-        marker.icon = OverlayImage.fromView(markerIconView)
-        marker.setOnClickListener {
-            onMarkerClick(
-                clickedMarker = marker,
-                clickedPick = pick,
-                setSelectedPickState = setSelectedPickState
-            )
-            true
-        }
-        marker.map = this
+    marker.loadMarkerImage(context = context, map = this) {
+        onMarkerClick(
+            clickedMarker = marker,
+            setSelectedPickState = setSelectedPickState
+        )
     }
 }
 
-private fun Marker.toggleSizeByClick(context: Context, isClicked: Boolean) {
-    val defaultIconWidth = this.icon.getIntrinsicWidth(context)
-    val defaultIconHeight = this.icon.getIntrinsicHeight(context)
-
-    width = if (isClicked) (defaultIconWidth * MARKER_SCALE).toInt() else defaultIconWidth
-    height = if (isClicked) (defaultIconHeight * MARKER_SCALE).toInt() else defaultIconHeight
-}
-
 private fun NaverMap.onMarkerClick(
-    clickedMarker: Marker,
-    clickedPick: Pick,
-    setSelectedPickState: (Pick) -> Unit
+    clickedMarker: MusicRoadMarker,
+    setSelectedPickState: (String) -> Unit
 ) {
     val cameraUpdate = CameraUpdate
         .scrollTo(clickedMarker.position)
         .animate(CameraAnimation.Easing)
     this.moveCamera(cameraUpdate)
 
-    setSelectedPickState(clickedPick)
+    setSelectedPickState(clickedMarker.pick.id)
 }
 
 private fun NaverMap.initLocationOverlay(
@@ -215,8 +196,6 @@ private fun NaverMap.setLocationChangeListener(
     addOnLocationChangeListener { location ->
         this.setCircleOverlay(circleOverlay, location)
         mapViewModel.updateCurLocation(location)
-        mapViewModel.fetchPickInArea(location.latitude, location.longitude, PICK_RADIUS_METER)
-        mapViewModel.requestPickNotificationArea(location, CIRCLE_RADIUS_METER)
     }
 }
 
@@ -271,6 +250,3 @@ private val PERMISSIONS = arrayOf(
     Manifest.permission.ACCESS_FINE_LOCATION,
     Manifest.permission.ACCESS_COARSE_LOCATION
 )
-
-private const val MARKER_SCALE = 1.5
-private val REQUEST_IMAGE_SIZE = Size(300, 300)
