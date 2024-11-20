@@ -3,30 +3,26 @@ package com.squirtles.musicroad.map
 import android.location.Location
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.squirtles.domain.usecase.FetchLocationUseCase
+import com.squirtles.domain.usecase.FetchLastLocationUseCase
 import com.squirtles.domain.usecase.FetchPickInAreaUseCase
-import com.squirtles.domain.usecase.FetchPickUseCase
-import com.squirtles.domain.usecase.SaveLocationUseCase
+import com.squirtles.domain.usecase.SaveLastLocationUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import java.util.Locale
 import javax.inject.Inject
 
 data class PickState(
-    val previous: String,
-    val current: String
+    val previous: String? = null,
+    val current: String? = null
 )
 
 @HiltViewModel
 class MapViewModel @Inject constructor(
-    fetchLocationUseCase: FetchLocationUseCase,
-    private val saveLocationUseCase: SaveLocationUseCase,
-    private val fetchPickUseCase: FetchPickUseCase,
+    fetchLastLocationUseCase: FetchLastLocationUseCase,
+    private val saveLastLocationUseCase: SaveLastLocationUseCase,
     private val fetchPickInAreaUseCase: FetchPickInAreaUseCase
 ) : ViewModel() {
 
@@ -39,61 +35,54 @@ class MapViewModel @Inject constructor(
     private val _selectedPickState = MutableStateFlow(PickState("", ""))
     val selectedPickState = _selectedPickState.asStateFlow()
 
-    // FIXME : 네이버맵의 LocationChangeListener에서 실시간으로 변하는 위치 정보
-    // 등록 버튼 눌렀을때 해당 시점에서의 위치정보를 LocalDataSource에 저장하기 위함 -> 더 나은 방법이 있으면 고쳐주세요
-    private var _realTimeLocation: Location? = null
-    val realTimeLocation get() = _realTimeLocation
+    // FIXME : 네이버맵의 LocationChangeListener에서 실시간으로 변하는 위치 정보 -> 더 나은 방법이 있으면 고쳐주세요
+    private var _currentLocation: Location? = null
+    val curLocation get() = _currentLocation
 
     // LocalDataSource에 저장되는 위치 정보
     // Firestore 데이터 쿼리 작업 최소화 및 위치데이터 공유 용도
-    val curLocation: StateFlow<Location> = fetchLocationUseCase()
-        .map { it ?: DEFAULT_LOCATION } // 기본값을 설정
-        .stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5000),
-            initialValue = DEFAULT_LOCATION
-        )
+    val lastLocation: StateFlow<Location?> = fetchLastLocationUseCase()
 
     fun updateCurLocation(location: Location) {
-        _realTimeLocation = location
+        _currentLocation = location
 
-        if (curLocation.value == DEFAULT_LOCATION) {
+        if (lastLocation.value == null
+            || calculateDistance(location.latitude, location.longitude) > 5.0
+        ) {
             saveCurLocation(location)
-        } else {
-            if (calculateDistance(to = location) > 5.0) {
-                saveCurLocation(location)
-            }
         }
     }
 
     private fun saveCurLocation(location: Location) {
         viewModelScope.launch {
-            saveLocationUseCase(location)
+            saveLastLocationUseCase(location)
         }
     }
 
-    fun onCenterButtonClick() {
-        if (_realTimeLocation == null) return
-
-        viewModelScope.launch {
-            saveCurLocation(_realTimeLocation!!)
+    fun saveCurLocationForced() {
+        _currentLocation?.let { location ->
+            viewModelScope.launch {
+                saveCurLocation(location)
+            }
         }
     }
-
-    /* 미터 단위 거리 계산 */
-    fun calculateDistance(from: Location = curLocation.value, to: Location): Double =
-        from.distanceTo(to).toDouble()
 
     fun calculateDistance(
-        from: Location = curLocation.value,
         lat: Double,
         lng: Double,
+        from: Location? = lastLocation.value,
     ): Double {
-        val location = Location("").apply {
-            latitude = lat
-            longitude = lng
-        }
-        return from.distanceTo(location).toDouble()
+        return from?.let {
+            val location = Location("pickLocation").apply {
+                latitude = lat
+                longitude = lng
+            }
+
+            val distanceInMeters = from.distanceTo(location).toDouble()
+            val distanceInKm = distanceInMeters / 1000.0
+
+            String.format(Locale.getDefault(), "%.1f", distanceInKm).toDouble()
+        } ?: -1.0
     }
 
 
@@ -140,9 +129,5 @@ class MapViewModel @Inject constructor(
                     _pickCount.emit(0)
                 }
         }
-    }
-
-    companion object {
-        val DEFAULT_LOCATION = Location("default").apply { latitude = 0.0; longitude = 0.0 }
     }
 }

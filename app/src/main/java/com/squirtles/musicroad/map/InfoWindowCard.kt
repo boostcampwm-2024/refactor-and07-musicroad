@@ -140,7 +140,7 @@ fun InfoWindow(
             }
 
             Text(
-                text = "${calculateDistance(pick.location.latitude, pick.location.longitude)}m",
+                text = calculateDistance(pick.location.latitude, pick.location.longitude),
                 style = MaterialTheme.typography.bodyMedium.copy(Gray)
             )
         }

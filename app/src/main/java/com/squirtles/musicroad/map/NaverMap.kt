@@ -10,7 +10,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -22,7 +21,6 @@ import androidx.core.content.PermissionChecker
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import com.naver.maps.geometry.LatLng
@@ -45,7 +43,10 @@ import kotlin.coroutines.suspendCoroutine
 
 @Composable
 fun NaverMap(
-    mapViewModel: MapViewModel
+    mapViewModel: MapViewModel,
+    lastLocation: Location?,
+    pickMarkers: Map<String, MusicRoadMarker>,
+    selectedPickState: PickState,
 ) {
     val context = LocalContext.current
     val mapView = remember { MapView(context) }
@@ -60,19 +61,21 @@ fun NaverMap(
     val lifecycleOwner = LocalLifecycleOwner.current
     val coroutineScope = rememberCoroutineScope()
 
-    val curLocation by mapViewModel.curLocation.collectAsStateWithLifecycle()
-    val pickMarkers by mapViewModel.pickMarkers.collectAsStateWithLifecycle()
-    val selectedPickState by mapViewModel.selectedPickState.collectAsStateWithLifecycle()
-
     LaunchedEffect(selectedPickState) {
         pickMarkers[selectedPickState.current]?.toggleSizeByClick(context, true)
         pickMarkers[selectedPickState.previous]?.toggleSizeByClick(context, false)
     }
 
-    LaunchedEffect(curLocation) {
+    LaunchedEffect(lastLocation) {
         // 5미터 이상 차이가 날때만 주변 픽 정보 Firestore로부터 호출
-        mapViewModel.fetchPickInArea(curLocation.latitude, curLocation.longitude, PICK_RADIUS_METER)
-        mapViewModel.requestPickNotificationArea(curLocation, CIRCLE_RADIUS_METER)
+        lastLocation?.let {
+            mapViewModel.fetchPickInArea(
+                lastLocation.latitude,
+                lastLocation.longitude,
+                PICK_RADIUS_METER
+            )
+            mapViewModel.requestPickNotificationArea(lastLocation, CIRCLE_RADIUS_METER)
+        }
     }
 
     DisposableEffect(lifecycleOwner) {

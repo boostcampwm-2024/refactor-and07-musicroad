@@ -10,7 +10,7 @@ class LocalRepositoryImpl @Inject constructor(
 ) : LocalRepository {
 
     override val userId get() = localDataSource.userId
-    override val currentLocation get() = localDataSource.currentLocation
+    override val lastLocation get() = localDataSource.lastLocation
 
     override suspend fun saveUserId(userId: String) {
         localDataSource.saveUserId(userId)

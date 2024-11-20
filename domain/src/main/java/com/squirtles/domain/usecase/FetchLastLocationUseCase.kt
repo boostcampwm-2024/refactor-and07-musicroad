@@ -3,8 +3,8 @@ package com.squirtles.domain.usecase
 import com.squirtles.domain.repository.LocalRepository
 import javax.inject.Inject
 
-class FetchLocationUseCase @Inject constructor(
+class FetchLastLocationUseCase @Inject constructor(
     private val localRepository: LocalRepository
 ) {
-    operator fun invoke() = localRepository.currentLocation
+    operator fun invoke() = localRepository.lastLocation
 }

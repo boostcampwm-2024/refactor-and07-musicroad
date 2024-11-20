@@ -1,28 +1,17 @@
 package com.squirtles.musicroad.map
 
-import android.content.res.Configuration
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.FavoriteBorder
-import androidx.compose.material.icons.outlined.AccountCircle
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -31,7 +20,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalConfiguration
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -50,7 +38,8 @@ fun MapScreen(
 ) {
     val pickCount by mapViewModel.pickCount.collectAsStateWithLifecycle()
     val pickMarkers by mapViewModel.pickMarkers.collectAsStateWithLifecycle()
-    val selectedPick by mapViewModel.selectedPickState.collectAsStateWithLifecycle()
+    val selectedPickState by mapViewModel.selectedPickState.collectAsStateWithLifecycle()
+    val lastLocation by mapViewModel.lastLocation.collectAsStateWithLifecycle()
 
     Scaffold(
         contentWindowInsets = WindowInsets.navigationBars
@@ -61,7 +50,10 @@ fun MapScreen(
                 .padding(innerPadding)
         ) {
             NaverMap(
-                mapViewModel = mapViewModel
+                mapViewModel = mapViewModel,
+                lastLocation = lastLocation,
+                pickMarkers = pickMarkers,
+                selectedPickState = selectedPickState
             )
 
             if (pickCount > 0) {
@@ -73,14 +65,15 @@ fun MapScreen(
                 verticalArrangement = Arrangement.Bottom,
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                pickMarkers[selectedPick.current]?.pick?.let { pick ->
+                pickMarkers[selectedPickState.current]?.pick?.let { pick ->
                     InfoWindow(
                         pick,
                         navigateToPick = { pickId ->
                             onInfoWindowClick(pickId)
                         },
                         calculateDistance = { lat, lng ->
-                            mapViewModel.calculateDistance(lat = lat, lng = lng).toInt().toString()
+                            val distance = mapViewModel.calculateDistance(lat = lat, lng = lng)
+                            if (distance == -1.0) "" else "${distance}km"
                         }
                     )
                     Spacer(Modifier.height(16.dp))
@@ -90,8 +83,11 @@ fun MapScreen(
                     modifier = Modifier.padding(bottom = 16.dp),
                     onFavoriteClick = onFavoriteClick,
                     onCenterClick = {
-                        onCenterClick()
-                        mapViewModel.onCenterButtonClick()
+                        // 마지막으로 저장된 위치값이 없으면 화면전환 X
+                        if (lastLocation != null) {
+                            onCenterClick()
+                            mapViewModel.saveCurLocationForced()
+                        }
                     },
                     onSettingClick = onSettingClick
                 )
@@ -115,99 +111,6 @@ fun PickNotificationBanner(pickCount: Int) {
     }
 }
 
-@Composable
-fun BottomNavigation(
-    modifier: Modifier = Modifier,
-    onFavoriteClick: () -> Unit,
-    onCenterClick: () -> Unit,
-    onSettingClick: () -> Unit
-) {
-    Box(
-        modifier = modifier,
-        contentAlignment = Alignment.Center
-    ) {
-        Row(
-            modifier = Modifier
-                .size(245.dp, 50.dp)
-                .clip(CircleShape)
-                .background(color = MaterialTheme.colorScheme.surface)
-        ) {
-            // 왼쪽 버튼
-            Box(
-                modifier = Modifier
-                    .weight(1f)
-                    .fillMaxHeight()
-                    .clickable { onFavoriteClick() },
-                contentAlignment = Alignment.CenterStart
-            ) {
-                Icon(
-                    imageVector = Icons.Default.FavoriteBorder,
-                    contentDescription = stringResource(R.string.map_navigation_favorite_icon_description),
-                    modifier = Modifier.padding(start = BottomNavigationHorizontalPadding),
-                    tint = MaterialTheme.colorScheme.primary
-                )
-            }
-
-            // 오른쪽 버튼
-            Box(
-                modifier = Modifier
-                    .weight(1f)
-                    .fillMaxHeight()
-                    .clickable { onSettingClick() },
-                contentAlignment = Alignment.CenterEnd
-            ) {
-                Icon(
-                    imageVector = Icons.Outlined.AccountCircle,
-                    contentDescription = stringResource(R.string.map_navigation_setting_icon_description),
-                    modifier = Modifier.padding(end = BottomNavigationHorizontalPadding),
-                    tint = MaterialTheme.colorScheme.primary
-                )
-            }
-        }
-
-        // 중앙 버튼
-        Box(
-            modifier = Modifier
-                .size(82.dp)
-                .clip(CircleShape)
-                .background(color = MaterialTheme.colorScheme.primary)
-                .clickable { onCenterClick() },
-            contentAlignment = Alignment.Center
-        ) {
-            Icon(
-                painter = painterResource(R.drawable.ic_musical_note_64),
-                contentDescription = stringResource(R.string.map_navigation_center_icon_description),
-                modifier = Modifier.size(34.dp),
-                tint = MaterialTheme.colorScheme.onPrimary
-            )
-        }
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun BottomNavigationLightPreview() {
-    MusicRoadTheme {
-        BottomNavigation(
-            onFavoriteClick = {},
-            onCenterClick = {},
-            onSettingClick = {}
-        )
-    }
-}
-
-@Preview(showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES)
-@Composable
-fun BottomNavigationDarkPreview() {
-    MusicRoadTheme {
-        BottomNavigation(
-            onFavoriteClick = {},
-            onCenterClick = {},
-            onSettingClick = {}
-        )
-    }
-}
-
 @Preview
 @Composable
 private fun PickNotificationBannerPreview() {
@@ -215,5 +118,3 @@ private fun PickNotificationBannerPreview() {
         PickNotificationBanner(1)
     }
 }
-
-private val BottomNavigationHorizontalPadding = 32.dp

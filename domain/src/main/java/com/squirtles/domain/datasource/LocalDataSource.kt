@@ -5,7 +5,7 @@ import kotlinx.coroutines.flow.StateFlow
 
 interface LocalDataSource {
     val userId: String?
-    val currentLocation: StateFlow<Location?>
+    val lastLocation: StateFlow<Location?>
     fun saveUserId(userId: String)
     suspend fun saveCurrentLocation(location: Location)
 }

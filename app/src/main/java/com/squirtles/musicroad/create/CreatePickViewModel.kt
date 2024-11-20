@@ -8,10 +8,9 @@ import com.squirtles.domain.model.LocationPoint
 import com.squirtles.domain.model.Pick
 import com.squirtles.domain.model.Song
 import com.squirtles.domain.usecase.CreatePickUseCase
-import com.squirtles.domain.usecase.FetchLocationUseCase
+import com.squirtles.domain.usecase.FetchLastLocationUseCase
 import com.squirtles.domain.usecase.SearchMusicVideoUseCase
 import com.squirtles.domain.usecase.SearchSongsUseCase
-import com.squirtles.musicroad.map.MapViewModel.Companion.DEFAULT_LOCATION
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -20,34 +19,36 @@ import javax.inject.Inject
 
 @HiltViewModel
 class CreatePickViewModel @Inject constructor(
-    fetchLocationUseCase: FetchLocationUseCase,
+    fetchLastLocationUseCase: FetchLastLocationUseCase,
     private val searchSongsUseCase: SearchSongsUseCase,
     private val searchMusicVideoUseCase: SearchMusicVideoUseCase,
     private val createPickUseCase: CreatePickUseCase
 ) : ViewModel() {
 
+    // SearchMusicScreen
     private var _selectedSong: Song? = null
     val selectedSong get() = _selectedSong
-
-    private val _comment = MutableStateFlow("")
-    val comment get() = _comment
 
     private val _searchText = MutableStateFlow("")
     val searchText = _searchText.asStateFlow()
 
-    private val _searchResult = MutableStateFlow<List<Song>>(emptyList())
-    val searchResult = _searchResult.asStateFlow()
-
     private val _isSearching = MutableStateFlow<Boolean>(false)
     val isSearching = _isSearching.asStateFlow()
 
-    private lateinit var curLocation: Location
+    private val _searchResult = MutableStateFlow<List<Song>>(emptyList())
+    val searchResult = _searchResult.asStateFlow()
+
+    // CreatePickScreen
+    private val _comment = MutableStateFlow("")
+    val comment get() = _comment
+
+    private var lastLocation: Location? = null
 
     init {
         // 데이터소스의 위치값을 계속 collect하며 curLocation 변수에 저장
         viewModelScope.launch {
-            fetchLocationUseCase().collect { location ->
-                curLocation = location ?: DEFAULT_LOCATION
+            fetchLastLocationUseCase().collect { location ->
+                lastLocation = location
             }
         }
     }
@@ -58,10 +59,8 @@ class CreatePickViewModel @Inject constructor(
 
             result.onSuccess {
                 _searchResult.value = result.getOrElse { emptyList() }
-                Log.d("SearchViewModel", _searchResult.value.toString())
             }.onFailure {
                 _searchResult.value = emptyList()
-                Log.d("SearchViewModel", _searchResult.value.toString())
             }
         }
     }
@@ -90,8 +89,9 @@ class CreatePickViewModel @Inject constructor(
             viewModelScope.launch {
                 val musicVideoUrl = searchMusicVideoById(song.id)
 
-                if (curLocation == DEFAULT_LOCATION) {
+                if (lastLocation == null) {
                     /* TODO: DEFAULT 인 경우 -> LocalDataSource 위치 데이터 못 불러옴 */
+                    return@launch
                 }
 
                 /* 등록 결과 - pick ID 담긴 Result */
@@ -103,7 +103,7 @@ class CreatePickViewModel @Inject constructor(
                         comment = _comment.value,
                         createdAt = "",
                         createdBy = "",
-                        location = LocationPoint(curLocation.latitude, curLocation.longitude),
+                        location = LocationPoint(lastLocation!!.latitude, lastLocation!!.longitude),
                         musicVideoUrl = musicVideoUrl
                     )
                 )
@@ -111,7 +111,7 @@ class CreatePickViewModel @Inject constructor(
                 createResult.onSuccess { pickId ->
                     onSuccess(pickId)
                 }.onFailure {
-                    /* TODO: 실패처리 */
+                    /* TODO: Firestore 등록 실패처리 */
                     Log.d("CreatePickViewModel", createResult.exceptionOrNull()?.message.toString())
                 }
             }
