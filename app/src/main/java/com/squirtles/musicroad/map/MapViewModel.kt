@@ -81,25 +81,6 @@ class MapViewModel @Inject constructor(
         } ?: -1.0
     }
 
-
-    fun fetchPickInArea(lat: Double, lng: Double, radiusInM: Double) {
-        viewModelScope.launch {
-            val fetchPickResult = fetchPickInAreaUseCase(lat, lng, radiusInM)
-
-            fetchPickResult.onSuccess { pickList ->
-                val newMarkerMap = mutableMapOf<String, MusicRoadMarker>()
-                pickList.forEach { pick ->
-                    newMarkerMap[pick.id] =
-                        _pickMarkers.value[pick.id] ?: MusicRoadMarker(pick = pick)
-                }
-                _pickMarkers.value = newMarkerMap
-            }
-            fetchPickResult.onFailure {
-                // TODO
-            }
-        }
-    }
-
     fun setSelectedPickState(pickId: String) {
         viewModelScope.launch {
             val lastSelectedPick = selectedPickState.value.current
