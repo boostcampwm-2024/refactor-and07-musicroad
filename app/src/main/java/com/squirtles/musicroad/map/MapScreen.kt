@@ -72,8 +72,13 @@ fun MapScreen(
                             onInfoWindowClick(pickId)
                         },
                         calculateDistance = { lat, lng ->
-                            val distance = mapViewModel.calculateDistance(lat = lat, lng = lng)
-                            if (distance == -1.0) "" else "${distance}km"
+                            mapViewModel.calculateDistance(lat, lng).let { distance ->
+                                when {
+                                    distance >= 1000.0 -> "%.1fkm".format(distance / 1000.0)
+                                    distance >= 0 -> "%.0fm".format(distance)
+                                    else -> ""
+                                }
+                            }
                         }
                     )
                     Spacer(Modifier.height(16.dp))

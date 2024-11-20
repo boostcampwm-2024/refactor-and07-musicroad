@@ -11,7 +11,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import java.util.Locale
 import javax.inject.Inject
 
 data class PickState(
@@ -77,11 +76,7 @@ class MapViewModel @Inject constructor(
                 latitude = lat
                 longitude = lng
             }
-
-            val distanceInMeters = from.distanceTo(location).toDouble()
-            val distanceInKm = distanceInMeters / 1000.0
-
-            String.format(Locale.getDefault(), "%.1f", distanceInKm).toDouble()
+            from.distanceTo(location).toDouble()
         } ?: -1.0
     }
 
