@@ -10,10 +10,10 @@
 
 ## 👨‍👩‍👧‍👦 팀원 소개
 
-|K002 강민주|K009 김승규|K018 김희준|K050 주윤겸|
-|:---:|:---:|:---:|:---:|
-|<img src="https://avatars.githubusercontent.com/u/88606886?v=4" width="300">|<img src="https://avatars.githubusercontent.com/u/31722615?v=4" width="300">|<img src="https://avatars.githubusercontent.com/u/69344306?v=4" width="300">|<img src="https://avatars.githubusercontent.com/u/30407907?v=4" width="300">|
-|[@meanjoo](https://github.com/meanjoo)|[@miler198](https://github.com/miller198)|[@Heejun-0219](https://github.com/Heejun-0219)|[@yuni-ju](https://github.com/yuni-ju)|
+|K002 강민주|K009 김승규|K050 주윤겸|
+|:---:|:---:|:---:|
+|<img src="https://avatars.githubusercontent.com/u/88606886?v=4" width="300">|<img src="https://avatars.githubusercontent.com/u/31722615?v=4" width="300">|<img src="https://avatars.githubusercontent.com/u/30407907?v=4" width="300">|
+|[@meanjoo](https://github.com/meanjoo)|[@miler198](https://github.com/miller198)|[@yuni-ju](https://github.com/yuni-ju)|
 
 
 ## 📜 바로가기
