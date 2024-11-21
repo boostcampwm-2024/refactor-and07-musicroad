@@ -31,14 +31,29 @@ android {
     }
 
     buildTypes {
+        debug {
+            isMinifyEnabled = false
+
+            buildConfigField(
+                "String",
+                "FIRESTORE_DB_ID",
+                "\"${properties.getProperty("FIRESTORE_DB_ID_DEBUG")}\""
+            )
+        }
+
         release {
             isMinifyEnabled = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
-        }
 
+            buildConfigField(
+                "String",
+                "FIRESTORE_DB_ID",
+                "\"${properties.getProperty("FIRESTORE_DB_ID_RELEASE")}\""
+            )
+        }
     }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_1_8
