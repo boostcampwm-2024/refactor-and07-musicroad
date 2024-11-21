@@ -33,13 +33,14 @@ internal fun FirebasePick.toPick(): Pick = Pick(
         previewUrl = previewUrl.toString(),
     ),
     comment = comment.toString(),
-    createdAt = createdAt?.toDate()?.formatTimestamp() ?: "",
+    favoriteCount = favoriteCount,
     createdBy = createdBy.toString(),
+    createdAt = createdAt?.toDate()?.formatTimestamp() ?: "",
     location = LocationPoint(
         latitude = location?.latitude ?: 0.0,
         longitude = location?.longitude ?: 0.0
     ),
-    favoriteCount = favoriteCount,
+    musicVideoUrl = musicVideoUrl ?: ""
 )
 
 /**
