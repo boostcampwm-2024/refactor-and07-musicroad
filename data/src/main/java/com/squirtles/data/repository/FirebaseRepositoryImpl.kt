@@ -29,18 +29,6 @@ class FirebaseRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun fetchPicksInBounds(
-        lat1: Double,
-        lng1: Double,
-        lat2: Double,
-        lng2: Double
-    ): Result<List<Pick>> {
-        val pickList = firebaseRemoteDataSource.fetchPicksInBounds(lat1, lng1, lat2, lng2)
-        return handleResult(FirebaseException.NoSuchPickInRadiusException()) {
-            pickList.ifEmpty { null }
-        }
-    }
-
     override suspend fun createPick(pick: Pick): Result<String> {
         return handleResult {
             firebaseRemoteDataSource.createPick(pick)

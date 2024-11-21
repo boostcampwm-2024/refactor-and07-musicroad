@@ -4,10 +4,10 @@ import android.location.Location
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.naver.maps.geometry.LatLng
 import com.naver.maps.map.CameraPosition
 import com.squirtles.domain.usecase.FetchLastLocationUseCase
 import com.squirtles.domain.usecase.FetchPickInAreaUseCase
-import com.squirtles.domain.usecase.FetchPicksInBoundsUseCase
 import com.squirtles.domain.usecase.SaveLastLocationUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -25,8 +25,7 @@ data class PickState(
 class MapViewModel @Inject constructor(
     fetchLastLocationUseCase: FetchLastLocationUseCase,
     private val saveLastLocationUseCase: SaveLastLocationUseCase,
-    private val fetchPickInAreaUseCase: FetchPickInAreaUseCase,
-    private val fetchPicksInBoundsUseCase: FetchPicksInBoundsUseCase
+    private val fetchPickInAreaUseCase: FetchPickInAreaUseCase
 ) : ViewModel() {
 
     private var _lastCameraPosition: CameraPosition? = null
@@ -105,9 +104,14 @@ class MapViewModel @Inject constructor(
         }
     }
 
-    fun fetchPicksInBounds(lat1: Double, lng1: Double, lat2: Double, lng2: Double) {
+    fun fetchPicksInBounds(leftTop: LatLng, rightBottom: LatLng) {
         viewModelScope.launch {
-            val picks = fetchPicksInBoundsUseCase(lat1, lng1, lat2, lng2)
+            val center = LatLng(
+                (leftTop.latitude + rightBottom.latitude) / 2,
+                (leftTop.longitude + rightBottom.longitude) / 2
+            )
+            val radiusInM = leftTop.distanceTo(rightBottom)
+            val picks = fetchPickInAreaUseCase(center.latitude, center.longitude, radiusInM)
 
             picks.onSuccess { pickList ->
                 val newMarkerMap = mutableMapOf<String, MusicRoadMarker>()

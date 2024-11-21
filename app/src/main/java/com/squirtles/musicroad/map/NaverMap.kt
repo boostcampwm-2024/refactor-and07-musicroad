@@ -114,8 +114,8 @@ fun NaverMap(
                         initLocationOverlay(locationSource, locationOverlay)
                         setLocationChangeListener(circleOverlay, mapViewModel)
                         setMapClickListener { mapViewModel.resetSelectedPickState() }
-                        setCameraIdleListener { lat1, lng1, lat2, lng2 ->
-                            mapViewModel.fetchPicksInBounds(lat1, lng1, lat2, lng2)
+                        setCameraIdleListener { leftTop, rightBottom ->
+                            mapViewModel.fetchPicksInBounds(leftTop, rightBottom)
                         }
                     }
                 }
@@ -243,18 +243,13 @@ private fun NaverMap.setMapClickListener(
 
 // 카메라 대기 이벤트 설정
 private fun NaverMap.setCameraIdleListener(
-    fetchPicksInBounds: (Double, Double, Double, Double) -> Unit
+    fetchPicksInBounds: (LatLng, LatLng) -> Unit
 ) {
     addOnCameraIdleListener {
         val leftTop = projection.fromScreenLocation(PointF(0f, 0f))
         val rightBottom =
             projection.fromScreenLocation(PointF(contentWidth.toFloat(), contentHeight.toFloat()))
-        fetchPicksInBounds(
-            leftTop.latitude,
-            leftTop.longitude,
-            rightBottom.latitude,
-            rightBottom.longitude
-        )
+        fetchPicksInBounds(leftTop, rightBottom)
     }
 }
 
