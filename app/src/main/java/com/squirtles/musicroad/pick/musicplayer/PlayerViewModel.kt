@@ -36,7 +36,7 @@ class PlayerViewModel @Inject constructor() : ViewModel() {
 
     fun initializePlayer(context: Context, sourceUrl: String) {
         if (player != null) {
-            releasePlayer()
+            return
         }
 
         val exoPlayer = ExoPlayer.Builder(context).build().also {
@@ -44,7 +44,7 @@ class PlayerViewModel @Inject constructor() : ViewModel() {
             it.setMediaItem(mediaItem)
             it.prepare()
             it.playWhenReady = false
-//            it.seekTo(_currentPosition.value)
+            it.seekTo(_playerState.value.currentPosition)
             it.addListener(object : Player.Listener {
                 override fun onPlayerError(error: PlaybackException) {
                     handleError(error)
@@ -54,7 +54,7 @@ class PlayerViewModel @Inject constructor() : ViewModel() {
 
         this.player = exoPlayer
 
-        _playerState.value = PlayerState()
+        _playerState.value = _playerState.value.copy(isReady = true)
 
         viewModelScope.launch {
             while (_playerState.value.isReady) {
