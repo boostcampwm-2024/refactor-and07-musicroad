@@ -1,7 +1,9 @@
 package com.squirtles.musicroad.pick
 
 import android.app.Activity
+import android.util.Log
 import android.util.Size
+import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -37,6 +39,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -75,7 +78,7 @@ fun DetailPickScreen(
 
     DetailPickScreen(
         userId = userId,
-        username = username,
+        userName = username,
         pick = pick,
         isFavorite = isFavorite,
         onBackClick = onBackClick
@@ -86,7 +89,7 @@ fun DetailPickScreen(
 @Composable
 private fun DetailPickScreen(
     userId: String,
-    username: String,
+    userName: String,
     pick: Pick,
     isFavorite: Boolean,
     onBackClick: () -> Unit,
@@ -96,6 +99,8 @@ private fun DetailPickScreen(
     val dynamicBackgroundColor = Color(pick.song.bgColor)
     val dynamicOnBackgroundColor = if (dynamicBackgroundColor.luminance() >= 0.5f) Black else White
     val view = LocalView.current
+    val context = LocalContext.current
+
     if (!view.isInEditMode) {
         SideEffect {
             val window = (view.context as Activity).window
@@ -111,7 +116,7 @@ private fun DetailPickScreen(
             CenterAlignedTopAppBar(
                 title = {
                     Text(
-                        text = username + stringResource(id = R.string.pick_app_bar_title_user),
+                        text = userName + stringResource(id = R.string.pick_app_bar_title_user),
                         color = dynamicOnBackgroundColor,
                         style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold)
                     )
@@ -167,16 +172,9 @@ private fun DetailPickScreen(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(10.dp),
             ) {
-                Text(
-                    text = pick.song.songName,
-                    color = dynamicOnBackgroundColor,
-                    style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold)
-                )
-
-                Text(
-                    text = pick.song.artistName,
-                    color = dynamicOnBackgroundColor,
-                    style = MaterialTheme.typography.bodyLarge
+                SongInfo(
+                    song = pick.song,
+                    dynamicOnBackgroundColor = dynamicOnBackgroundColor
                 )
 
                 AsyncImage(
@@ -192,21 +190,39 @@ private fun DetailPickScreen(
 
                 PickInformation(formattedDate = pick.createdAt, favoriteCount = pick.favoriteCount)
 
-                Text(
-                    text = pick.comment,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(100.dp)
-                        .padding(horizontal = 30.dp)
-                        .clip(shape = RoundedCornerShape(10.dp))
-                        .background(Dark)
-                        .verticalScroll(scrollState)
-                        .padding(horizontal = 12.dp, vertical = 8.dp),
-                    style = MaterialTheme.typography.bodyLarge.copy(White)
+                CommentText(
+                    comment = pick.comment,
+                    scrollState = scrollState
                 )
+
+                if (pick.song.previewUrl.isBlank().not()) {
+                    Log.d("DetailPickScreen", "Create Android View Player")
+                    MusicPlayer(
+                        context = context,
+                        previewUrl = pick.song.previewUrl
+                    )
+                }
             }
         }
     }
+}
+
+@Composable
+private fun SongInfo(
+    song: Song,
+    dynamicOnBackgroundColor: Color
+) {
+    Text(
+        text = song.songName,
+        color = dynamicOnBackgroundColor,
+        style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold)
+    )
+
+    Text(
+        text = song.artistName,
+        color = dynamicOnBackgroundColor,
+        style = MaterialTheme.typography.bodyLarge
+    )
 }
 
 @Composable
@@ -231,12 +247,31 @@ private fun PickInformation(formattedDate: String, favoriteCount: Int) {
     }
 }
 
+@Composable
+fun CommentText(
+    comment: String,
+    scrollState: ScrollState
+) {
+    Text(
+        text = comment,
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(100.dp)
+            .padding(horizontal = 30.dp)
+            .clip(shape = RoundedCornerShape(10.dp))
+            .background(Dark)
+            .verticalScroll(scrollState)
+            .padding(horizontal = 12.dp, vertical = 8.dp),
+        style = MaterialTheme.typography.bodyLarge.copy(White)
+    )
+}
+
 @Preview
 @Composable
 private fun DetailPickScreenPreview() {
     DetailPickScreen(
         userId = "",
-        username = "짱구",
+        userName = "짱구",
         pick = Pick(
             id = "",
             song = Song(
