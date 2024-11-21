@@ -27,9 +27,9 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
@@ -59,6 +59,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil3.compose.AsyncImage
 import com.squirtles.domain.model.Song
 import com.squirtles.musicroad.R
+import com.squirtles.musicroad.UiState
 import com.squirtles.musicroad.ui.theme.Black
 import com.squirtles.musicroad.ui.theme.Gray
 import com.squirtles.musicroad.ui.theme.Primary
@@ -72,9 +73,8 @@ fun SearchMusicScreen(
 ) {
     val focusManager = LocalFocusManager.current
 
+    val uiState by createPickViewModel.searchUiState.collectAsStateWithLifecycle()
     val searchText by createPickViewModel.searchText.collectAsStateWithLifecycle()
-    val searchResult by createPickViewModel.searchResult.collectAsStateWithLifecycle()
-    val isSearching by createPickViewModel.isSearching.collectAsStateWithLifecycle()
 
     Scaffold(
         contentWindowInsets = WindowInsets.navigationBars,
@@ -88,10 +88,8 @@ fun SearchMusicScreen(
                 SearchTopBar(
                     keyword = searchText,
                     onValueChange = createPickViewModel::onSearchTextChange,
-                    active = isSearching,
-                    onSearchClick = createPickViewModel::searchSongs,
-                    focusManager = focusManager,
                     onBackClick = onBackClick,
+                    focusManager = focusManager
                 )
             }
         },
@@ -102,15 +100,46 @@ fun SearchMusicScreen(
                 .fillMaxSize()
                 .background(Brush.verticalGradient(colorStops = colorStops))
                 .padding(innerPadding)
+                .addFocusCleaner(focusManager)
         ) {
-            SearchResult(
-                focusManager = focusManager,
-                searchResult = searchResult,
-                onItemClick = { song ->
-                    createPickViewModel.onSongItemClick(song)
-                    onItemClick()
+            when (uiState) {
+                UiState.Init -> {
+                    // TODO: HOT 리스트
                 }
-            )
+
+                is UiState.Loading -> {
+                    LinearProgressIndicator(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(top = 10.dp),
+                        trackColor = Gray
+                    )
+                    (uiState as UiState.Loading).prevData?.let {
+                        SearchResult(
+                            searchResult = it,
+                            onItemClick = { song ->
+                                createPickViewModel.onSongItemClick(song)
+                                onItemClick()
+                            }
+                        )
+                    }
+                }
+
+                is UiState.Success -> {
+                    SearchResult(
+                        searchResult = (uiState as UiState.Success).data,
+                        onItemClick = { song ->
+                            createPickViewModel.onSongItemClick(song)
+                            onItemClick()
+                        }
+                    )
+                }
+
+                UiState.Error -> {
+                    // TODO: 검색 결과가 없는 경우. 일단은 텍스트로만 처리해뒀습니다.
+                    Text("검색 결과가 없습니다.", color = White)
+                }
+            }
         }
     }
 }
@@ -119,8 +148,6 @@ fun SearchMusicScreen(
 private fun SearchTopBar(
     keyword: String,
     onValueChange: (String) -> Unit,
-    active: Boolean, // whether the user is searching or not
-    onSearchClick: () -> Unit,
     onBackClick: () -> Boolean,
     focusManager: FocusManager
 ) {
@@ -149,27 +176,10 @@ private fun SearchTopBar(
         OutlinedTextField(
             value = keyword,
             onValueChange = onValueChange,
-            modifier = Modifier
-                .weight(1f),
+            modifier = Modifier.weight(1f),
             placeholder = {
                 Text("검색")
             },
-            trailingIcon = if (active) {
-                {
-                    IconButton(
-                        onClick = {
-                            focusManager.clearFocus()
-                            onSearchClick()
-                        }
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Search,
-                            contentDescription = stringResource(R.string.search_music_search_button_description),
-                            tint = White
-                        )
-                    }
-                }
-            } else null,
             // 키보드 완료버튼 -> Search로 변경, 누르면 Search 동작 실행
             keyboardOptions = KeyboardOptions(
                 keyboardType = KeyboardType.Text,
@@ -178,7 +188,6 @@ private fun SearchTopBar(
             keyboardActions = KeyboardActions(
                 onSearch = {
                     focusManager.clearFocus()
-                    onSearchClick()
                 }
             ),
             singleLine = true,
@@ -200,14 +209,11 @@ private fun SearchTopBar(
 
 @Composable
 private fun SearchResult(
-    focusManager: FocusManager,
     searchResult: List<Song>,
     onItemClick: (Song) -> Unit
 ) {
     Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .addFocusCleaner(focusManager)
+        modifier = Modifier.fillMaxSize()
     ) {
         VerticalSpacer(20)
 
