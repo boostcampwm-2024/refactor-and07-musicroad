@@ -6,5 +6,5 @@ import com.squirtles.domain.model.Song
 interface AppleMusicRemoteDataSource {
     suspend fun searchSongs(searchText: String): List<Song>
     suspend fun searchSongById(songId: String): Song
-    suspend fun searchMusicVideoById(songId: String): List<MusicVideo>
+    suspend fun searchMusicVideos(searchText: String): List<MusicVideo>
 }

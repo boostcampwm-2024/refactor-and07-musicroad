@@ -7,5 +7,5 @@ data class Artwork(
     val width: Int,
     val height: Int,
     val url: String,
-    val bgColor: String,
+    val bgColor: String? = null
 )
