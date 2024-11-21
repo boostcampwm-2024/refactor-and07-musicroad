@@ -88,7 +88,6 @@ fun SearchMusicScreen(
                 SearchTopBar(
                     keyword = searchText,
                     onValueChange = createPickViewModel::onSearchTextChange,
-                    onSearchClick = createPickViewModel::searchSongs,
                     onBackClick = onBackClick,
                     focusManager = focusManager
                 )
@@ -149,7 +148,6 @@ fun SearchMusicScreen(
 private fun SearchTopBar(
     keyword: String,
     onValueChange: (String) -> Unit,
-    onSearchClick: () -> Unit,
     onBackClick: () -> Boolean,
     focusManager: FocusManager
 ) {
@@ -190,7 +188,6 @@ private fun SearchTopBar(
             keyboardActions = KeyboardActions(
                 onSearch = {
                     focusManager.clearFocus()
-                    onSearchClick()
                 }
             ),
             singleLine = true,

@@ -72,13 +72,6 @@ class CreatePickViewModel @Inject constructor(
         }
     }
 
-    fun searchSongs() {
-        searchJob?.cancel()
-        searchJob = viewModelScope.launch {
-            searchSongs(_searchText.value)
-        }
-    }
-
     private suspend fun searchSongs(searchKeyword: String) {
         _searchUiState.value = UiState.Loading(searchResult)
         val result = searchSongsUseCase(searchKeyword)
