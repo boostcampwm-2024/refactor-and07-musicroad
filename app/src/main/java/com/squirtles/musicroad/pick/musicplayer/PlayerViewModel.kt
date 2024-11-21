@@ -56,6 +56,10 @@ class PlayerViewModel @Inject constructor() : ViewModel() {
 
         _playerState.value = _playerState.value.copy(isReady = true)
 
+        updatePlayerStatePeriodically(exoPlayer)
+    }
+
+    private fun updatePlayerStatePeriodically(exoPlayer: ExoPlayer) {
         viewModelScope.launch {
             while (_playerState.value.isReady) {
                 _playerState.value = PlayerState(
