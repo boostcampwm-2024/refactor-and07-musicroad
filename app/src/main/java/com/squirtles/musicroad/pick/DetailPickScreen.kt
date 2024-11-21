@@ -109,15 +109,6 @@ fun DetailPickScreen(
         isMusicVideoAvailable = pick.musicVideoUrl.isNotEmpty()
     }
 
-    // 최초 Swipe 동작 전에 MusicVideoScreen이 생성되지 않도록 함
-    LaunchedEffect(swipeableState.offset.value) {
-        if (swipeableState.offset.value != 0.0f &&
-            contentHeightPx != swipeableState.offset.value
-        ) {
-            showMusicVideo = true
-        }
-    }
-
     Box(modifier = Modifier.fillMaxSize()) {
         DetailPickScreen(
             userId = userId,
@@ -128,6 +119,11 @@ fun DetailPickScreen(
             swipeableModifier = swipeableModifier,
             onBackClick = onBackClick
         )
+
+        // 최초 Swipe 동작 전에 MusicVideoScreen이 생성되지 않도록 함
+        if (swipeableState.offset.value != 0.0f && contentHeightPx != swipeableState.offset.value) {
+            showMusicVideo = true
+        }
 
         if (isMusicVideoAvailable && showMusicVideo) {
             val isPlaying = swipeableState.offset.value < contentHeightPx * 0.8f
