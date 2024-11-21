@@ -25,10 +25,10 @@ fun MusicPlayer(
     previewUrl: String,
     playerViewModel: PlayerViewModel = hiltViewModel(),
 ) {
+    val lifecycleOwner = LocalLifecycleOwner.current
+
     val playerState by playerViewModel.playerState.collectAsStateWithLifecycle()
     val bufferPercentage by playerViewModel.bufferPercentage.collectAsStateWithLifecycle()
-
-    val lifecycleOwner = LocalLifecycleOwner.current
 
     LaunchedEffect(Unit) {
         playerViewModel.initializePlayer(context, previewUrl)
