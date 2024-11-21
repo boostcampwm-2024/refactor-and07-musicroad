@@ -3,15 +3,20 @@ package com.squirtles.musicroad.pick
 import android.app.Activity
 import android.util.Size
 import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -30,23 +35,34 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.core.graphics.toColorInt
 import androidx.core.view.WindowInsetsControllerCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.wear.compose.material.ExperimentalWearMaterialApi
+import androidx.wear.compose.material.FractionalThreshold
+import androidx.wear.compose.material.rememberSwipeableState
+import androidx.wear.compose.material.swipeable
 import coil3.compose.AsyncImage
 import com.squirtles.domain.model.LocationPoint
 import com.squirtles.domain.model.Pick
@@ -56,30 +72,73 @@ import com.squirtles.musicroad.ui.theme.Black
 import com.squirtles.musicroad.ui.theme.Dark
 import com.squirtles.musicroad.ui.theme.Gray
 import com.squirtles.musicroad.ui.theme.White
+import kotlin.math.roundToInt
 
+@OptIn(ExperimentalWearMaterialApi::class)
 @Composable
 fun DetailPickScreen(
     pickId: String,
     onBackClick: () -> Unit,
     pickViewModel: PickViewModel = hiltViewModel(),
 ) {
+    val screenHeight = LocalConfiguration.current.screenHeightDp.dp
+    val screenHeightPx = with(LocalDensity.current) { screenHeight.toPx() }
+    val statusBarHeight = with(LocalDensity.current) { WindowInsets.statusBars.getTop(this) }
+    val contentHeightPx = screenHeightPx + statusBarHeight
+    val anchors = mapOf(contentHeightPx to 0, 0f to 1)
+    val swipeableState = rememberSwipeableState(initialValue = 0)
+    val swipeableModifier = Modifier.swipeable(
+        state = swipeableState,
+        anchors = anchors,
+        thresholds = { _, _ -> FractionalThreshold(0.3f) },
+        orientation = Orientation.Vertical
+    )
+
     val userId = ""
     val username = "짱구"
     val isFavorite = false
-
     val pick by pickViewModel.pick.collectAsStateWithLifecycle()
+    var isMusicVideoAvailable by remember { mutableStateOf(false) }
+    var showMusicVideo by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
         pickViewModel.fetchPick(pickId)
     }
 
-    DetailPickScreen(
-        userId = userId,
-        username = username,
-        pick = pick,
-        isFavorite = isFavorite,
-        onBackClick = onBackClick
-    )
+    LaunchedEffect(pick) {
+        isMusicVideoAvailable = pick.musicVideoUrl.isNotEmpty()
+    }
+
+    Box(modifier = Modifier.fillMaxSize()) {
+        DetailPickScreen(
+            userId = userId,
+            username = username,
+            pick = pick,
+            isFavorite = isFavorite,
+            isMusicVideoAvailable = isMusicVideoAvailable,
+            swipeableModifier = swipeableModifier,
+            onBackClick = onBackClick
+        )
+
+        // 최초 Swipe 동작 전에 MusicVideoScreen이 생성되지 않도록 함
+        if (swipeableState.offset.value != 0.0f && contentHeightPx != swipeableState.offset.value) {
+            showMusicVideo = true
+        }
+
+        if (isMusicVideoAvailable && showMusicVideo) {
+            val isPlaying = swipeableState.offset.value < contentHeightPx * 0.8f
+            val alpha = (1 - (swipeableState.offset.value / contentHeightPx)).coerceIn(0f, 1f)
+
+            MusicVideoScreen(
+                videoUri = pick.musicVideoUrl,
+                isPlaying = isPlaying,
+                modifier = swipeableModifier
+                    .fillMaxSize()
+                    .offset { IntOffset(0, swipeableState.offset.value.roundToInt()) }
+                    .graphicsLayer { this.alpha = alpha }
+            )
+        }
+    }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -89,6 +148,8 @@ private fun DetailPickScreen(
     username: String,
     pick: Pick,
     isFavorite: Boolean,
+    isMusicVideoAvailable: Boolean,
+    swipeableModifier: Modifier,
     onBackClick: () -> Unit,
 ) {
     val isMine = userId == pick.createdBy
@@ -146,7 +207,7 @@ private fun DetailPickScreen(
         }
     ) { innerPadding ->
 
-        Box(
+        Column(
             modifier = Modifier
                 .fillMaxSize()
                 .background(
@@ -158,12 +219,13 @@ private fun DetailPickScreen(
                     )
                 )
                 .padding(innerPadding)
+                .verticalScroll(scrollState),
+            verticalArrangement = Arrangement.SpaceBetween
         ) {
             Column(
                 modifier = Modifier
                     .fillMaxSize()
-                    .verticalScroll(scrollState)
-                    .padding(vertical = 10.dp),
+                    .padding(top = 10.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(10.dp),
             ) {
@@ -204,6 +266,21 @@ private fun DetailPickScreen(
                         .padding(horizontal = 12.dp, vertical = 8.dp),
                     style = MaterialTheme.typography.bodyLarge.copy(White)
                 )
+            }
+
+            if (isMusicVideoAvailable) {
+                Box(
+                    modifier = swipeableModifier
+                        .fillMaxWidth()
+                        .heightIn(min = 100.dp)
+                ) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.ic_swipe),
+                        contentDescription = stringResource(id = R.string.pick_swipe_icon_description),
+                        modifier = Modifier.align(Alignment.Center),
+                        tint = White
+                    )
+                }
             }
         }
     }
@@ -258,6 +335,8 @@ private fun DetailPickScreenPreview() {
             musicVideoUrl = "",
         ),
         isFavorite = false,
+        isMusicVideoAvailable = true,
+        swipeableModifier = Modifier,
         onBackClick = {}
     )
 }
