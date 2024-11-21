@@ -1,0 +1,101 @@
+package com.squirtles.musicroad.pick.musicplayer
+
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.size
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Forward5
+import androidx.compose.material.icons.filled.Pause
+import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.Replay5
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import com.squirtles.musicroad.ui.theme.MusicRoadTheme
+import com.squirtles.musicroad.ui.theme.White
+
+@Composable
+fun PlayerControls(
+    isPlaying: () -> Boolean,
+    onReplayClick: () -> Unit,
+    onPauseToggle: () -> Unit,
+    onForwardClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val isMusicPlaying = remember(isPlaying()) { isPlaying() }
+
+    Row(
+        modifier = modifier,
+    ) {
+        Box(
+            modifier = modifier
+                .weight(1f),
+            contentAlignment = Alignment.Center
+        ) {
+            IconButton(
+                onClick = onReplayClick
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Replay5,
+                    contentDescription = "Replay 5 seconds",
+                    modifier = Modifier.size(64.dp),
+                    tint = White
+                )
+            }
+        }
+        Box(
+            modifier = modifier
+                .weight(1f),
+            contentAlignment = Alignment.Center
+        ) {
+            IconButton(
+                onClick = onPauseToggle
+            ) {
+                Icon(
+                    imageVector = if (isMusicPlaying) {
+                        Icons.Default.Pause
+                    } else {
+                        Icons.Default.PlayArrow
+                    },
+                    contentDescription = "Play/Pause",
+                    modifier = Modifier.size(64.dp),
+                    tint = White
+                )
+            }
+        }
+
+        Box(
+            modifier = modifier
+                .weight(1f),
+            contentAlignment = Alignment.Center
+        ) {
+            IconButton(
+                onClick = onForwardClick
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Forward5,
+                    contentDescription = "Forward 5 seconds",
+                    modifier = Modifier.size(64.dp),
+                    tint = White
+                )
+            }
+        }
+    }
+}
+
+@Preview
+@Composable
+private fun PlayerControlsPreview() {
+    MusicRoadTheme {
+        PlayerControls(
+            isPlaying = { true },
+            onReplayClick = {},
+            onPauseToggle = {},
+            onForwardClick = {})
+    }
+}
