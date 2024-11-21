@@ -15,6 +15,7 @@ import androidx.media3.common.MediaItem
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
 
+@OptIn(UnstableApi::class)
 @Composable
 fun MusicVideoScreen(
     videoUri: String,
@@ -35,42 +36,28 @@ fun MusicVideoScreen(
         factory = {
             textureView.apply {
                 surfaceTextureListener = object : TextureView.SurfaceTextureListener {
-                    @OptIn(UnstableApi::class)
-                    override fun onSurfaceTextureAvailable(
-                        surfaceTexture: SurfaceTexture,
-                        width: Int,
-                        height: Int
-                    ) {
+                    override fun onSurfaceTextureAvailable(surfaceTexture: SurfaceTexture, width: Int, height: Int) {
                         val surface = Surface(surfaceTexture)
                         val mediaItem = MediaItem.fromUri(videoUri)
                         player.setVideoSurface(surface)
                         player.setMediaItem(mediaItem)
                         player.prepare()
 
-                        // 영상을 화면 크기에 맞게 확대
-                        val matrix = Matrix()
-                        val scaleFactor = height.toFloat() / width.toFloat()
-                        matrix.setScale(scaleFactor, 1f)
-
-                        // 영상 중앙 정렬
-                        val translateX = (width - width * scaleFactor) / 2f
-                        matrix.postTranslate(translateX, 0f)
-                        textureView.setTransform(matrix)
-
+                        setVideoSize(width, height, textureView)
                     }
 
-                    override fun onSurfaceTextureSizeChanged(
-                        surfaceTexture: SurfaceTexture,
-                        width: Int,
-                        height: Int
-                    ) = Unit
+                    override fun onSurfaceTextureSizeChanged(surfaceTexture: SurfaceTexture, width: Int, height: Int) {
+                        // TODO
+                    }
 
                     override fun onSurfaceTextureDestroyed(surfaceTexture: SurfaceTexture): Boolean {
                         player.setVideoSurface(null)
                         return true
                     }
 
-                    override fun onSurfaceTextureUpdated(surfaceTexture: SurfaceTexture) = Unit
+                    override fun onSurfaceTextureUpdated(surfaceTexture: SurfaceTexture) {
+                        // TODO
+                    }
                 }
             }
         },
@@ -79,4 +66,16 @@ fun MusicVideoScreen(
         if (isPlaying) player.play()
         else player.pause()
     }
+}
+
+private fun setVideoSize(width: Int, height: Int, textureView: TextureView) {
+    // 영상을 화면 크기에 맞게 확대
+    val matrix = Matrix()
+    val scaleFactor = height.toFloat() / width.toFloat()
+    matrix.setScale(scaleFactor, 1f)
+
+    // 영상 중앙 정렬
+    val translateX = (width - width * scaleFactor) / 2f
+    matrix.postTranslate(translateX, 0f)
+    textureView.setTransform(matrix)
 }
