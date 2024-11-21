@@ -3,6 +3,7 @@ package com.squirtles.musicroad.map
 import android.Manifest
 import android.app.Activity
 import android.content.Context
+import android.graphics.PointF
 import android.location.Location
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
@@ -24,6 +25,7 @@ import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import com.naver.maps.geometry.LatLng
 import com.naver.maps.map.CameraAnimation
+import com.naver.maps.map.CameraPosition
 import com.naver.maps.map.CameraUpdate
 import com.naver.maps.map.LocationTrackingMode
 import com.naver.maps.map.MapView
@@ -66,13 +68,8 @@ fun NaverMap(
     }
 
     LaunchedEffect(lastLocation) {
-        // 5미터 이상 차이가 날때만 주변 픽 정보 Firestore로부터 호출
+        // 현재 위치와 마지막 위치가 5미터 이상 차이가 날때만 현위치 기준 반경 100m 픽 정보 개수 불러오기
         lastLocation?.let {
-            mapViewModel.fetchPickInArea(
-                lastLocation.latitude,
-                lastLocation.longitude,
-                PICK_RADIUS_METER
-            )
             mapViewModel.requestPickNotificationArea(lastLocation, CIRCLE_RADIUS_METER)
         }
     }
@@ -93,6 +90,9 @@ fun NaverMap(
         lifecycleOwner.lifecycle.addObserver(mapLifecycleObserver)
 
         onDispose {
+            naverMap.value?.let {
+                mapViewModel.setLastCameraPosition(it.cameraPosition)
+            }
             lifecycleOwner.lifecycle.removeObserver(mapLifecycleObserver)
             mapView.onDestroy()
         }
@@ -110,10 +110,13 @@ fun NaverMap(
 
                     naverMap.value?.run {
                         initMapSettings()
-                        initDeviceLocation(context, circleOverlay, fusedLocationClient)
+                        initDeviceLocation(context, circleOverlay, fusedLocationClient, mapViewModel.lastCameraPosition)
                         initLocationOverlay(locationSource, locationOverlay)
                         setLocationChangeListener(circleOverlay, mapViewModel)
                         setMapClickListener { mapViewModel.resetSelectedPickState() }
+                        setCameraIdleListener { leftTop, rightBottom ->
+                            mapViewModel.fetchPicksInBounds(leftTop, rightBottom)
+                        }
                     }
                 }
             }
@@ -170,20 +173,25 @@ private fun NaverMap.initLocationOverlay(
         isVisible = true
         icon = OverlayImage.fromResource(R.drawable.ic_location)
     }
-    moveCamera(CameraUpdate.zoomTo(INITIAL_CAMERA_ZOOM))
 }
 
 private fun NaverMap.initDeviceLocation(
     context: Context,
     circleOverlay: CircleOverlay,
     fusedLocationClient: FusedLocationProviderClient,
+    lastCameraPosition: CameraPosition?
 ) {
     if (checkSelfPermission(context)) {
         fusedLocationClient.lastLocation.addOnSuccessListener { location ->
             if (location != null) {
                 locationOverlay.position = LatLng(location)
                 setCircleOverlay(circleOverlay, location)
-                moveCamera(CameraUpdate.scrollTo(LatLng(location)))
+                lastCameraPosition?.let {
+                    moveCamera(CameraUpdate.toCameraPosition(it))
+                } ?: run {
+                    moveCamera(CameraUpdate.scrollTo(LatLng(location)))
+                    moveCamera(CameraUpdate.zoomTo(INITIAL_CAMERA_ZOOM))
+                }
             }
         }
     }
@@ -233,6 +241,18 @@ private fun NaverMap.setMapClickListener(
     }
 }
 
+// 카메라 대기 이벤트 설정
+private fun NaverMap.setCameraIdleListener(
+    fetchPicksInBounds: (LatLng, LatLng) -> Unit
+) {
+    addOnCameraIdleListener {
+        val leftTop = projection.fromScreenLocation(PointF(0f, 0f))
+        val rightBottom =
+            projection.fromScreenLocation(PointF(contentWidth.toFloat(), contentHeight.toFloat()))
+        fetchPicksInBounds(leftTop, rightBottom)
+    }
+}
+
 private fun checkSelfPermission(context: Context): Boolean {
     return PermissionChecker.checkSelfPermission(context, PERMISSIONS[0]) ==
             PermissionChecker.PERMISSION_GRANTED &&
@@ -242,7 +262,6 @@ private fun checkSelfPermission(context: Context): Boolean {
 
 private const val LOCATION_PERMISSION_REQUEST_CODE = 1000
 private const val CIRCLE_RADIUS_METER = 100.0
-private const val PICK_RADIUS_METER = 5000.0
 private const val INITIAL_CAMERA_ZOOM = 16.5
 private const val MIN_ZOOM_LEVEL = 6.0
 private const val MAX_ZOOM_LEVEL = 18.0
