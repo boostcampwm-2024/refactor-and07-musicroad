@@ -24,6 +24,9 @@
     <string name="pick_favorite_true_icon_description">담은 픽</string>
     <string name="pick_favorite_false_icon_description">픽 담기</string>
     <string name="pick_favorite_count_icon_description">픽을 담은 개수</string>
+    <string name="player_forward_description">5초 앞으로</string>
+    <string name="player_replay_description">5초 뒤로</string>
+    <string name="player_play_pause_description">재생/일시정지</string>
 
     <!-- Search Music -->
     <string name="search_music_album_description">노래 앨범 이미지</string>
