@@ -4,36 +4,38 @@ import android.content.Context
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.media3.common.C.TIME_UNSET
 import androidx.media3.common.MediaItem
 import androidx.media3.common.PlaybackException
 import androidx.media3.common.Player
 import androidx.media3.exoplayer.ExoPlayer
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+data class PlayerState(
+    val isReady: Boolean = true,
+    val isPlaying: Boolean = false,
+    val currentPosition: Long = 0L,
+    val duration: Long = 30_000L,
+)
+
 @HiltViewModel
 class PlayerViewModel @Inject constructor() : ViewModel() {
 
-    private val _playerState = MutableStateFlow<ExoPlayer?>(null)
-    val playerState: StateFlow<ExoPlayer?> = _playerState
+    private var player: ExoPlayer? = null
 
-    private val _isPlaying = MutableSharedFlow<Boolean>()
-    val isPlaying: SharedFlow<Boolean> = _isPlaying
-
-    private val _currentPosition = MutableStateFlow(0L)
-    val currentPosition: StateFlow<Long> = _currentPosition
+    private val _playerState = MutableStateFlow(PlayerState(isReady = false))
+    val playerState: StateFlow<PlayerState> = _playerState
 
     private val _bufferPercentage = MutableStateFlow(0)
     val bufferPercentage: StateFlow<Int> = _bufferPercentage
 
     fun initializePlayer(context: Context, sourceUrl: String) {
-        if (_playerState.value != null) {
+        if (player != null) {
             releasePlayer()
         }
 
@@ -42,65 +44,81 @@ class PlayerViewModel @Inject constructor() : ViewModel() {
             it.setMediaItem(mediaItem)
             it.prepare()
             it.playWhenReady = false
-            it.seekTo(_currentPosition.value)
+//            it.seekTo(_currentPosition.value)
             it.addListener(object : Player.Listener {
                 override fun onPlayerError(error: PlaybackException) {
                     handleError(error)
                 }
             })
         }
-        _playerState.value = exoPlayer
+
+        this.player = exoPlayer
+
+        _playerState.value = PlayerState()
 
         viewModelScope.launch {
-            while (_playerState.value != null) {
-                _currentPosition.value = exoPlayer.currentPosition
+            while (_playerState.value.isReady) {
+                _playerState.value = PlayerState(
+                    isPlaying = exoPlayer.isPlaying,
+                    currentPosition = exoPlayer.currentPosition,
+                    duration = if (exoPlayer.duration == TIME_UNSET) 30_000L else exoPlayer.duration
+                )
                 _bufferPercentage.value = exoPlayer.bufferedPercentage
                 delay(1000)
             }
         }
     }
 
-    fun replay(sec: Long) {
-        _playerState.value?.let {
-            it.seekTo(it.currentPosition - sec)
-        }
-    }
-
-    fun forward(sec: Long) {
-        _playerState.value?.let {
+    fun replayForward(sec: Long) {
+        player?.let {
             it.seekTo(it.currentPosition + sec)
+            viewModelScope.launch {
+                _playerState.value = _playerState.value.copy(currentPosition = it.currentPosition)
+            }
         }
     }
 
     fun togglePlayPause() {
-        _playerState.value?.let {
+        player?.let {
+            viewModelScope.launch {
+                _playerState.value = _playerState.value.copy(isPlaying = true)
+            }
             if (it.isPlaying) it.pause()
             else it.play()
+        }
+    }
 
+    fun pause() {
+        player?.let {
             viewModelScope.launch {
-                _isPlaying.emit(it.isPlaying)
+                _playerState.value = _playerState.value.copy(isPlaying = false)
             }
+            it.pause()
         }
     }
 
     fun playerSeekTo(sec: Long) {
         viewModelScope.launch {
-            _playerState.value?.let {
-                _currentPosition.value = sec
+            player?.let {
+                _playerState.value = _playerState.value.copy(currentPosition = sec)
                 it.seekTo(sec)
             }
         }
     }
 
     fun savePlayerState() {
-        _playerState.value?.let {
-            _currentPosition.value = it.currentPosition
+        player?.let {
+            _playerState.value = _playerState.value.copy(
+                isPlaying = it.isPlaying,
+                currentPosition = it.currentPosition,
+                duration = it.duration
+            )
         }
     }
 
     fun releasePlayer() {
-        _playerState.value?.release()
-        _playerState.value = null
+        player?.release()
+        _playerState.value = PlayerState(isReady = false)
     }
 
     private fun handleError(error: PlaybackException) {
