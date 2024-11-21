@@ -27,9 +27,9 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
@@ -91,8 +91,8 @@ fun SearchMusicScreen(
                     onValueChange = createPickViewModel::onSearchTextChange,
                     active = isSearching,
                     onSearchClick = createPickViewModel::searchSongs,
-                    focusManager = focusManager,
                     onBackClick = onBackClick,
+                    focusManager = focusManager
                 )
             }
         },
@@ -111,6 +111,12 @@ fun SearchMusicScreen(
                 }
 
                 is UiState.Loading -> {
+                    LinearProgressIndicator(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(top = 10.dp),
+                        trackColor = Gray
+                    )
                     (uiState as UiState.Loading).prevData?.let {
                         SearchResult(
                             searchResult = it,
@@ -175,27 +181,10 @@ private fun SearchTopBar(
         OutlinedTextField(
             value = keyword,
             onValueChange = onValueChange,
-            modifier = Modifier
-                .weight(1f),
+            modifier = Modifier.weight(1f),
             placeholder = {
                 Text("검색")
             },
-            trailingIcon = if (active) {
-                {
-                    IconButton(
-                        onClick = {
-                            focusManager.clearFocus()
-                            onSearchClick()
-                        }
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Search,
-                            contentDescription = stringResource(R.string.search_music_search_button_description),
-                            tint = White
-                        )
-                    }
-                }
-            } else null,
             // 키보드 완료버튼 -> Search로 변경, 누르면 Search 동작 실행
             keyboardOptions = KeyboardOptions(
                 keyboardType = KeyboardType.Text,

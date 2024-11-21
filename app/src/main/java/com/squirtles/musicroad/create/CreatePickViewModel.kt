@@ -64,11 +64,11 @@ class CreatePickViewModel @Inject constructor(
             _searchText
                 .debounce(300)
                 .collect { searchKeyword ->
+                    searchJob?.cancel()
                     if (searchKeyword.isBlank()) {
                         searchResult = null
                         _searchUiState.value = UiState.Init
                     } else {
-                        searchJob?.cancel()
                         searchJob = launch { searchSongs(searchKeyword) }
                     }
                 }
