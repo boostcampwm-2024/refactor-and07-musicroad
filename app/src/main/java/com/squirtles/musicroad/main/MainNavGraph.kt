@@ -35,9 +35,13 @@ fun MainNavGraph(
         composable(MainDestinations.MAIN_ROUTE) {
             MapScreen(
                 mapViewModel = mapViewModel,
-                onFavoriteClick = navigationActions.navigateToFavorite,
+                onFavoriteClick = {
+                    // FIXME: 임시로 화면 전환 막아놓음
+                },
                 onCenterClick = navigationActions.navigateToSearch,
-                onSettingClick = navigationActions.navigateToSetting,
+                onSettingClick = {
+                    // FIXME: 임시로 화면 전환 막아놓음
+                },
                 onInfoWindowClick = { pickId ->
                     navigationActions.navigateToPickDetail(pickId)
                 }
