@@ -99,6 +99,7 @@ fun DetailPickScreen(
     val isFavorite = false
     val pick by pickViewModel.pick.collectAsStateWithLifecycle()
     var isMusicVideoAvailable by remember { mutableStateOf(false) }
+    var showMusicVideo by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
         pickViewModel.fetchPick(pickId)
@@ -106,6 +107,15 @@ fun DetailPickScreen(
 
     LaunchedEffect(pick) {
         isMusicVideoAvailable = pick.musicVideoUrl.isNotEmpty()
+    }
+
+    // 최초 Swipe 동작 전에 MusicVideoScreen이 생성되지 않도록 함
+    LaunchedEffect(swipeableState.offset.value) {
+        if (swipeableState.offset.value != 0.0f &&
+            contentHeightPx != swipeableState.offset.value
+        ) {
+            showMusicVideo = true
+        }
     }
 
     Box(modifier = Modifier.fillMaxSize()) {
@@ -119,7 +129,7 @@ fun DetailPickScreen(
             onBackClick = onBackClick
         )
 
-        if (isMusicVideoAvailable) {
+        if (isMusicVideoAvailable && showMusicVideo) {
             val isPlaying = swipeableState.offset.value < contentHeightPx * 0.8f
             val alpha = (1 - (swipeableState.offset.value / contentHeightPx)).coerceIn(0f, 1f)
 
