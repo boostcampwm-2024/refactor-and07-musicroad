@@ -13,7 +13,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
@@ -23,7 +22,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 fun MusicPlayer(
     context: Context = LocalContext.current,
     previewUrl: String,
-    playerViewModel: PlayerViewModel = hiltViewModel(),
+    playerViewModel: PlayerViewModel,
 ) {
     val lifecycleOwner = LocalLifecycleOwner.current
 
@@ -36,13 +35,13 @@ fun MusicPlayer(
 
     LaunchedEffect(playerState) {
         Log.d("MusicPlayer", "playerState: $playerState")
+        Log.d("MusicPlayer", "playerViewModel: $playerViewModel")
     }
 
     DisposableEffect(lifecycleOwner) {
         val lifecycleObserver = LifecycleEventObserver { _, event ->
             when (event) {
                 Lifecycle.Event.ON_PAUSE -> playerViewModel.pause()
-                Lifecycle.Event.ON_DESTROY -> playerViewModel.releasePlayer()
                 else -> {}
             }
         }

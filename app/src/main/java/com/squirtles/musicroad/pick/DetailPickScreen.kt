@@ -56,6 +56,7 @@ import com.squirtles.domain.model.Pick
 import com.squirtles.domain.model.Song
 import com.squirtles.musicroad.R
 import com.squirtles.musicroad.pick.musicplayer.MusicPlayer
+import com.squirtles.musicroad.pick.musicplayer.PlayerViewModel
 import com.squirtles.musicroad.ui.theme.Black
 import com.squirtles.musicroad.ui.theme.Dark
 import com.squirtles.musicroad.ui.theme.Gray
@@ -66,6 +67,7 @@ fun DetailPickScreen(
     pickId: String,
     onBackClick: () -> Unit,
     pickViewModel: PickViewModel = hiltViewModel(),
+    playerViewModel: PlayerViewModel
 ) {
     val userId = ""
     val username = "짱구"
@@ -82,7 +84,8 @@ fun DetailPickScreen(
         userName = username,
         pick = pick,
         isFavorite = isFavorite,
-        onBackClick = onBackClick
+        onBackClick = onBackClick,
+        playerViewModel = playerViewModel
     )
 }
 
@@ -94,6 +97,7 @@ private fun DetailPickScreen(
     pick: Pick,
     isFavorite: Boolean,
     onBackClick: () -> Unit,
+    playerViewModel: PlayerViewModel
 ) {
     val isMine = userId == pick.createdBy
     val scrollState = rememberScrollState()
@@ -200,7 +204,8 @@ private fun DetailPickScreen(
                     Log.d("DetailPickScreen", "Create Android View Player")
                     MusicPlayer(
                         context = context,
-                        previewUrl = pick.song.previewUrl
+                        previewUrl = pick.song.previewUrl,
+                        playerViewModel = playerViewModel
                     )
                 }
             }
@@ -294,6 +299,7 @@ private fun DetailPickScreenPreview() {
             musicVideoUrl = "",
         ),
         isFavorite = false,
-        onBackClick = {}
+        onBackClick = {},
+        playerViewModel = PlayerViewModel()
     )
 }

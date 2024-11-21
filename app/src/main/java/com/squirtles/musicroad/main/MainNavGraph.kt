@@ -17,6 +17,7 @@ import com.squirtles.musicroad.favorite.FavoriteScreen
 import com.squirtles.musicroad.map.MapScreen
 import com.squirtles.musicroad.map.MapViewModel
 import com.squirtles.musicroad.pick.DetailPickScreen
+import com.squirtles.musicroad.pick.musicplayer.PlayerViewModel
 import com.squirtles.musicroad.setting.SettingScreen
 
 @Composable
@@ -90,7 +91,8 @@ fun MainNavGraph(
             val pickId = backStackEntry.arguments?.getString("pickId") ?: ""
             DetailPickScreen(
                 pickId = pickId,
-                onBackClick = { navController.navigateUp() }
+                onBackClick = { navController.navigateUp() },
+                playerViewModel = hiltViewModel<PlayerViewModel>()
             )
         }
     }
