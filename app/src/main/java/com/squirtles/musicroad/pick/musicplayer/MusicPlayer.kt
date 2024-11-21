@@ -1,7 +1,6 @@
 package com.squirtles.musicroad.pick.musicplayer
 
 import android.content.Context
-import android.util.Log
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -31,11 +30,6 @@ fun MusicPlayer(
 
     LaunchedEffect(Unit) {
         playerViewModel.initializePlayer(context, previewUrl)
-    }
-
-    LaunchedEffect(playerState) {
-        Log.d("MusicPlayer", "playerState: $playerState")
-        Log.d("MusicPlayer", "playerViewModel: $playerViewModel")
     }
 
     DisposableEffect(lifecycleOwner) {
