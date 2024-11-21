@@ -11,12 +11,17 @@ import com.squirtles.domain.usecase.CreatePickUseCase
 import com.squirtles.domain.usecase.FetchLastLocationUseCase
 import com.squirtles.domain.usecase.GetMusicVideoUrlUseCase
 import com.squirtles.domain.usecase.SearchSongsUseCase
+import com.squirtles.musicroad.UiState
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+@OptIn(FlowPreview::class)
 @HiltViewModel
 class CreatePickViewModel @Inject constructor(
     fetchLastLocationUseCase: FetchLastLocationUseCase,
@@ -26,6 +31,9 @@ class CreatePickViewModel @Inject constructor(
 ) : ViewModel() {
 
     // SearchMusicScreen
+    private val _searchUiState = MutableStateFlow<UiState<List<Song>>>(UiState.Init)
+    val searchUiState = _searchUiState.asStateFlow()
+
     private var _selectedSong: Song? = null
     val selectedSong get() = _selectedSong
 
@@ -35,8 +43,8 @@ class CreatePickViewModel @Inject constructor(
     private val _isSearching = MutableStateFlow<Boolean>(false)
     val isSearching = _isSearching.asStateFlow()
 
-    private val _searchResult = MutableStateFlow<List<Song>>(emptyList())
-    val searchResult = _searchResult.asStateFlow()
+    private var searchResult: List<Song>? = null
+    private var searchJob: Job? = null
 
     // CreatePickScreen
     private val _comment = MutableStateFlow("")
@@ -51,17 +59,38 @@ class CreatePickViewModel @Inject constructor(
                 lastLocation = location
             }
         }
+
+        viewModelScope.launch {
+            _searchText
+                .debounce(300)
+                .collect { searchKeyword ->
+                    if (searchKeyword.isBlank()) {
+                        searchResult = null
+                        _searchUiState.value = UiState.Init
+                    } else {
+                        searchJob?.cancel()
+                        searchJob = launch { searchSongs(searchKeyword) }
+                    }
+                }
+        }
     }
 
     fun searchSongs() {
-        viewModelScope.launch {
-            val result = searchSongsUseCase(_searchText.value)
+        searchJob?.cancel()
+        searchJob = viewModelScope.launch {
+            searchSongs(_searchText.value)
+        }
+    }
 
-            result.onSuccess {
-                _searchResult.value = result.getOrElse { emptyList() }
-            }.onFailure {
-                _searchResult.value = emptyList()
-            }
+    private suspend fun searchSongs(searchKeyword: String) {
+        _searchUiState.value = UiState.Loading(searchResult)
+        val result = searchSongsUseCase(searchKeyword)
+
+        result.onSuccess {
+            searchResult = it
+            _searchUiState.value = UiState.Success(it)
+        }.onFailure {
+            _searchUiState.value = UiState.Error // NotFoundException(message=No such resource)
         }
     }
 

@@ -59,6 +59,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil3.compose.AsyncImage
 import com.squirtles.domain.model.Song
 import com.squirtles.musicroad.R
+import com.squirtles.musicroad.UiState
 import com.squirtles.musicroad.ui.theme.Black
 import com.squirtles.musicroad.ui.theme.Gray
 import com.squirtles.musicroad.ui.theme.Primary
@@ -72,8 +73,8 @@ fun SearchMusicScreen(
 ) {
     val focusManager = LocalFocusManager.current
 
+    val uiState by createPickViewModel.searchUiState.collectAsStateWithLifecycle()
     val searchText by createPickViewModel.searchText.collectAsStateWithLifecycle()
-    val searchResult by createPickViewModel.searchResult.collectAsStateWithLifecycle()
     val isSearching by createPickViewModel.isSearching.collectAsStateWithLifecycle()
 
     Scaffold(
@@ -102,15 +103,40 @@ fun SearchMusicScreen(
                 .fillMaxSize()
                 .background(Brush.verticalGradient(colorStops = colorStops))
                 .padding(innerPadding)
+                .addFocusCleaner(focusManager)
         ) {
-            SearchResult(
-                focusManager = focusManager,
-                searchResult = searchResult,
-                onItemClick = { song ->
-                    createPickViewModel.onSongItemClick(song)
-                    onItemClick()
+            when (uiState) {
+                UiState.Init -> {
+                    // TODO: HOT 리스트
                 }
-            )
+
+                is UiState.Loading -> {
+                    (uiState as UiState.Loading).prevData?.let {
+                        SearchResult(
+                            searchResult = it,
+                            onItemClick = { song ->
+                                createPickViewModel.onSongItemClick(song)
+                                onItemClick()
+                            }
+                        )
+                    }
+                }
+
+                is UiState.Success -> {
+                    SearchResult(
+                        searchResult = (uiState as UiState.Success).data,
+                        onItemClick = { song ->
+                            createPickViewModel.onSongItemClick(song)
+                            onItemClick()
+                        }
+                    )
+                }
+
+                UiState.Error -> {
+                    // TODO: 검색 결과가 없는 경우. 일단은 텍스트로만 처리해뒀습니다.
+                    Text("검색 결과가 없습니다.", color = White)
+                }
+            }
         }
     }
 }
@@ -200,14 +226,11 @@ private fun SearchTopBar(
 
 @Composable
 private fun SearchResult(
-    focusManager: FocusManager,
     searchResult: List<Song>,
     onItemClick: (Song) -> Unit
 ) {
     Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .addFocusCleaner(focusManager)
+        modifier = Modifier.fillMaxSize()
     ) {
         VerticalSpacer(20)
 
