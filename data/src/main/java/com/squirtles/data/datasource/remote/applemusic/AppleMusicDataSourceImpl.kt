@@ -1,6 +1,7 @@
 package com.squirtles.data.datasource.remote.applemusic
 
 import com.squirtles.data.datasource.remote.applemusic.api.AppleMusicApi
+import com.squirtles.data.datasource.remote.applemusic.model.SearchResponse
 import com.squirtles.data.mapper.toMusicVideo
 import com.squirtles.data.mapper.toSong
 import com.squirtles.domain.datasource.AppleMusicRemoteDataSource
@@ -17,20 +18,7 @@ class AppleMusicDataSourceImpl @Inject constructor(
      * Apple Music API Search
      */
     override suspend fun searchSongs(searchText: String): List<Song> {
-        val queryMap = mapOf(
-            "types" to "songs",
-            "term" to searchText.replace(" ", "+"),
-            "limit" to "10",
-            "offset" to "0"
-        )
-
-        val searchResult = checkResponse(
-            appleMusicApi.searchSongs(
-                storefront = DEFAULT_STOREFRONT,
-                queryMap = queryMap
-            )
-        )
-
+        val searchResult = requestSearchApi(searchText, "songs")
         return searchResult.results.songs?.data?.map {
             it.toSong()
         } ?: emptyList()
@@ -40,14 +28,27 @@ class AppleMusicDataSourceImpl @Inject constructor(
         TODO("Not yet implemented")
     }
 
-    override suspend fun searchMusicVideoById(songId: String): List<MusicVideo> {
-        val musicVideoResult = checkResponse(
-            appleMusicApi.searchMusicVideo(DEFAULT_STOREFRONT, songId)
+    override suspend fun searchMusicVideos(searchText: String): List<MusicVideo> {
+        val searchResult = requestSearchApi(searchText, "music-videos")
+        return searchResult.results.musicVideos?.data?.map {
+            it.toMusicVideo()
+        } ?: emptyList()
+    }
+
+    private suspend fun requestSearchApi(searchText: String, types: String): SearchResponse {
+        val queryMap = mapOf(
+            "term" to searchText.replace(" ", "+"),
+            "limit" to "10",
+            "offset" to "0"
         )
 
-        return musicVideoResult.data.map {
-            it.toMusicVideo()
-        }
+        return checkResponse(
+            appleMusicApi.searchSongs(
+                storefront = DEFAULT_STOREFRONT,
+                types = types,
+                queryMap = queryMap
+            )
+        )
     }
 
     private fun <T> checkResponse(response: Response<T>): T {

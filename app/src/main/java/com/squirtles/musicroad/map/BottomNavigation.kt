@@ -88,8 +88,8 @@ fun BottomNavigation(
                         MaterialTheme.colorScheme.primary
                     } ?: Color.Gray
                 )
-                .clickable {
-                    if (lastLocation != null) onCenterClick()
+                .clickable(enabled = lastLocation != null) {
+                    onCenterClick()
                 },
             contentAlignment = Alignment.Center
         ) {

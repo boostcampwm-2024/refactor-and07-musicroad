@@ -9,7 +9,7 @@ import com.squirtles.domain.model.Pick
 import com.squirtles.domain.model.Song
 import com.squirtles.domain.usecase.CreatePickUseCase
 import com.squirtles.domain.usecase.FetchLastLocationUseCase
-import com.squirtles.domain.usecase.SearchMusicVideoUseCase
+import com.squirtles.domain.usecase.GetMusicVideoUrlUseCase
 import com.squirtles.domain.usecase.SearchSongsUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -21,7 +21,7 @@ import javax.inject.Inject
 class CreatePickViewModel @Inject constructor(
     fetchLastLocationUseCase: FetchLastLocationUseCase,
     private val searchSongsUseCase: SearchSongsUseCase,
-    private val searchMusicVideoUseCase: SearchMusicVideoUseCase,
+    private val getMusicVideoUrlUseCase: GetMusicVideoUrlUseCase,
     private val createPickUseCase: CreatePickUseCase
 ) : ViewModel() {
 
@@ -87,7 +87,7 @@ class CreatePickViewModel @Inject constructor(
     ) {
         _selectedSong?.let { song ->
             viewModelScope.launch {
-                val musicVideoUrl = searchMusicVideoById(song.id)
+                val musicVideoUrl = getMusicVideoUrlUseCase(song)
 
                 if (lastLocation == null) {
                     /* TODO: DEFAULT 인 경우 -> LocalDataSource 위치 데이터 못 불러옴 */
@@ -116,14 +116,5 @@ class CreatePickViewModel @Inject constructor(
                 }
             }
         }
-    }
-
-    private suspend fun searchMusicVideoById(songId: String): String {
-        val result = searchMusicVideoUseCase(songId)
-
-        val musicVideoUrl = result.getOrElse { emptyList() }
-            .sortedBy { it.releaseDate }
-
-        return musicVideoUrl.firstOrNull()?.previewUrl.orEmpty()  // 결과가 없으면 빈 문자열 반환
     }
 }
