@@ -40,9 +40,6 @@ class CreatePickViewModel @Inject constructor(
     private val _searchText = MutableStateFlow("")
     val searchText = _searchText.asStateFlow()
 
-    private val _isSearching = MutableStateFlow<Boolean>(false)
-    val isSearching = _isSearching.asStateFlow()
-
     private var searchResult: List<Song>? = null
     private var searchJob: Job? = null
 
@@ -90,6 +87,7 @@ class CreatePickViewModel @Inject constructor(
             searchResult = it
             _searchUiState.value = UiState.Success(it)
         }.onFailure {
+            searchResult = null
             _searchUiState.value = UiState.Error // NotFoundException(message=No such resource)
         }
     }
@@ -108,7 +106,6 @@ class CreatePickViewModel @Inject constructor(
 
     fun onSearchTextChange(text: String) {
         _searchText.value = text
-        _isSearching.value = true
     }
 
     fun createPick(

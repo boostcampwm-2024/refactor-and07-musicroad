@@ -75,7 +75,6 @@ fun SearchMusicScreen(
 
     val uiState by createPickViewModel.searchUiState.collectAsStateWithLifecycle()
     val searchText by createPickViewModel.searchText.collectAsStateWithLifecycle()
-    val isSearching by createPickViewModel.isSearching.collectAsStateWithLifecycle()
 
     Scaffold(
         contentWindowInsets = WindowInsets.navigationBars,
@@ -89,7 +88,6 @@ fun SearchMusicScreen(
                 SearchTopBar(
                     keyword = searchText,
                     onValueChange = createPickViewModel::onSearchTextChange,
-                    active = isSearching,
                     onSearchClick = createPickViewModel::searchSongs,
                     onBackClick = onBackClick,
                     focusManager = focusManager
@@ -151,7 +149,6 @@ fun SearchMusicScreen(
 private fun SearchTopBar(
     keyword: String,
     onValueChange: (String) -> Unit,
-    active: Boolean, // whether the user is searching or not
     onSearchClick: () -> Unit,
     onBackClick: () -> Boolean,
     focusManager: FocusManager
