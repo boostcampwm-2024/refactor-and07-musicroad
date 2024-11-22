@@ -1,6 +1,7 @@
 package com.squirtles.musicroad.pick.musicplayer
 
 import android.content.Context
+import android.util.Log
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -27,15 +28,24 @@ fun MusicPlayer(
 
     val playerState by playerViewModel.playerState.collectAsStateWithLifecycle()
     val bufferPercentage by playerViewModel.bufferPercentage.collectAsStateWithLifecycle()
+    val duration by playerViewModel.duration.collectAsStateWithLifecycle()
 
     LaunchedEffect(Unit) {
-        playerViewModel.initializePlayer(context, previewUrl)
+        playerViewModel.initializePlayer(context)
+        playerViewModel.readyPlayer(sourceUrl = previewUrl)
+        playerViewModel.updatePlayerStatePeriodically()
+        Log.d("MusicPlayer", "initializePlayer")
+    }
+
+    LaunchedEffect(playerState) {
+        Log.d("MusicPlayer", "playerState: $playerState")
     }
 
     DisposableEffect(lifecycleOwner) {
         val lifecycleObserver = LifecycleEventObserver { _, event ->
             when (event) {
                 Lifecycle.Event.ON_PAUSE -> playerViewModel.pause()
+//                Lifecycle.Event.ON_STOP -> playerViewModel.releasePlayer()
                 else -> {}
             }
         }
@@ -48,6 +58,7 @@ fun MusicPlayer(
         }
     }
 
+
     if (playerState.isReady) {
         Column(
             modifier = Modifier
@@ -56,7 +67,7 @@ fun MusicPlayer(
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             PlayBar(
-                duration = playerState.duration,
+                duration = duration,
                 currentTime = { playerState.currentPosition },
                 bufferPercentage = { bufferPercentage },
                 onSeekChanged = { timeMs -> playerViewModel.playerSeekTo(timeMs.toLong()) },

@@ -6,6 +6,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.naver.maps.geometry.LatLng
 import com.naver.maps.map.CameraPosition
+import com.squirtles.domain.model.Pick
 import com.squirtles.domain.usecase.FetchLastLocationUseCase
 import com.squirtles.domain.usecase.FetchPickInAreaUseCase
 import com.squirtles.domain.usecase.SaveLastLocationUseCase
@@ -34,8 +35,8 @@ class MapViewModel @Inject constructor(
     private val _pickMarkers = MutableStateFlow<Map<String, MusicRoadMarker>>(emptyMap())
     val pickMarkers = _pickMarkers.asStateFlow()
 
-    private val _pickCount = MutableStateFlow(0)
-    val pickCount = _pickCount.asStateFlow()
+    private val _nearPicks = MutableStateFlow<List<Pick>>(emptyList())
+    val nearPicks = _nearPicks.asStateFlow()
 
     private val _selectedPickState = MutableStateFlow(PickState(null, null))
     val selectedPickState = _selectedPickState.asStateFlow()
@@ -121,7 +122,7 @@ class MapViewModel @Inject constructor(
                         _pickMarkers.value[pick.id] ?: MusicRoadMarker(pick = pick)
                 }
                 _pickMarkers.value.forEach { (_, marker) ->
-                    if(marker.pick !in pickList) {
+                    if (marker.pick !in pickList) {
                         marker.clearMap()
                     }
                 }
@@ -140,9 +141,9 @@ class MapViewModel @Inject constructor(
         viewModelScope.launch {
             fetchPickInAreaUseCase(location.latitude, location.longitude, notiRadius)
                 .onSuccess {
-                    _pickCount.emit(it.count())
+                    _nearPicks.emit(it)
                 }.onFailure {
-                    _pickCount.emit(0)
+                    _nearPicks.emit(emptyList())
                 }
         }
     }
