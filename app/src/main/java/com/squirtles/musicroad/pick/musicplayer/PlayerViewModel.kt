@@ -59,20 +59,35 @@ class PlayerViewModel @Inject constructor() : ViewModel() {
             it.prepare()
             it.playWhenReady = false
             it.seekTo(_playerState.value.currentPosition)
+            it.volume = 0.5f
 
             _playerState.value = PlayerState(isReady = true)
         }
     }
 
-    fun bannerClick(sourceUrl: String) {
-        viewModelScope.launch {
-            if (player != null) {
-                player!!.stop()
-                _playerState.value = PlayerState(isReady = true, isPlaying = false)
+    fun readyPlayerSetList(sourceUrls: List<String>) {
+        player?.let {
+            sourceUrls.forEach { url ->
+                it.addMediaItem(MediaItem.fromUri(url))
             }
-            Log.d("PlayerViewModel", "playerReady: ${player != null}")
-            readyPlayer(sourceUrl)
-            player?.play()
+            it.prepare()
+            it.playWhenReady = false
+            it.repeatMode = Player.REPEAT_MODE_OFF
+        }
+    }
+
+    fun shuffleNextItem() {
+        viewModelScope.launch {
+            player?.let {
+                if (it.isPlaying) {
+                    _playerState.value = PlayerState(isPlaying = false)
+                    it.pause()
+                } else {
+                    _playerState.value = PlayerState(isPlaying = true)
+                    it.seekToNextMediaItem()
+                    it.play()
+                }
+            }
         }
     }
 

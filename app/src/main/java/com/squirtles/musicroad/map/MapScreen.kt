@@ -20,6 +20,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -53,26 +56,38 @@ fun MapScreen(
     val selectedPickState by mapViewModel.selectedPickState.collectAsStateWithLifecycle()
     val lastLocation by mapViewModel.lastLocation.collectAsStateWithLifecycle()
 
+    val playerState by playerViewModel.playerState.collectAsStateWithLifecycle()
+
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
+
+    var isPlaying: Boolean by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
         playerViewModel.initializePlayer(context)
         Log.d("MapScreen", "initializePlayer")
     }
 
+    LaunchedEffect(nearPicks) {
+        if (nearPicks.isNotEmpty()) {
+            playerViewModel.readyPlayerSetList(nearPicks.map { it.song.previewUrl })
+        }
+    }
+
+    LaunchedEffect(playerState) {
+        isPlaying = playerState.isPlaying
+    }
+
     DisposableEffect(lifecycleOwner) {
         val lifecycleObserver = LifecycleEventObserver { _, event ->
             when (event) {
                 Lifecycle.Event.ON_PAUSE -> playerViewModel.pause()
-                Lifecycle.Event.ON_STOP -> playerViewModel.releasePlayer()
+                Lifecycle.Event.ON_STOP -> playerViewModel.pause()
                 Lifecycle.Event.ON_DESTROY -> playerViewModel.releasePlayer()
                 else -> {}
             }
         }
-
         lifecycleOwner.lifecycle.addObserver(lifecycleObserver)
-
         onDispose {
             playerViewModel.releasePlayer()
         }
@@ -96,8 +111,9 @@ fun MapScreen(
             if (nearPicks.isNotEmpty()) {
                 PickNotificationBanner(
                     nearPicks = nearPicks,
-                    onClick = { previewUrl ->
-                        playerViewModel.bannerClick(previewUrl)
+                    isPlaying = isPlaying,
+                    onClick = {
+                        playerViewModel.shuffleNextItem()
                     }
                 )
             }
@@ -144,21 +160,26 @@ fun MapScreen(
 @Composable
 fun PickNotificationBanner(
     modifier: Modifier = Modifier,
+    isPlaying: Boolean = false,
     nearPicks: List<Pick>,
-    onClick: (String) -> Unit,
+    onClick: () -> Unit,
 ) {
     Box(
         modifier = modifier
             .fillMaxSize()
     ) {
         Text(
-            text = stringResource(id = R.string.map_pick_notification, nearPicks.count()),
+            text = if (isPlaying) {
+                stringResource(id = R.string.map_pick_notification_stop, nearPicks.count())
+            } else {
+                stringResource(id = R.string.map_pick_notification_play, nearPicks.count())
+            },
             modifier = Modifier
                 .align(Alignment.TopCenter)
                 .offset(y = (LocalConfiguration.current.screenHeightDp * 0.08).dp)
                 .clip(RoundedCornerShape(30.dp))
                 .clickable {
-                    onClick(nearPicks.random().song.previewUrl)
+                    onClick()
                 }
                 .background(White.copy(alpha = 0.8f))
                 .padding(vertical = 10.dp, horizontal = 23.dp)
