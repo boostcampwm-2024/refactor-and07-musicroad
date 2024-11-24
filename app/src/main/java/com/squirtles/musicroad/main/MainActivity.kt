@@ -6,9 +6,11 @@ import android.widget.Toast
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.runtime.remember
 import androidx.core.content.PermissionChecker
+import androidx.core.splashscreen.SplashScreen
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.navigation.compose.rememberNavController
 import com.squirtles.musicroad.R
@@ -17,7 +19,7 @@ import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
-
+    private val mainViewModel by viewModels<MainViewModel>()
     private val permissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()
     ) { permissions ->
@@ -32,9 +34,10 @@ class MainActivity : AppCompatActivity() {
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        installSplashScreen()
+        val splashScreen = installSplashScreen()
         super.onCreate(savedInstanceState)
 
+        setKeepOnScreenCondition(splashScreen)
         enableEdgeToEdge()
         setContent {
             MusicRoadTheme {
@@ -51,6 +54,13 @@ class MainActivity : AppCompatActivity() {
 
         if (!checkSelfPermission()) {
             permissionLauncher.launch(PERMISSIONS)
+        }
+    }
+
+    private fun setKeepOnScreenCondition(splashScreen: SplashScreen) {
+        splashScreen.setKeepOnScreenCondition {
+            // 유저 정보가 null이 아닐 때까지 splash screen이 보여짐
+            mainViewModel.user.value == null
         }
     }
 
