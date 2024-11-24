@@ -9,6 +9,8 @@ import androidx.media3.common.MediaItem
 import androidx.media3.common.PlaybackException
 import androidx.media3.common.Player
 import androidx.media3.exoplayer.ExoPlayer
+import com.squirtles.musicroad.pick.musicplayer.PlayerState.Companion.PLAYER_STATE_INITIAL
+import com.squirtles.musicroad.pick.musicplayer.PlayerState.Companion.PLAYER_STATE_STOP
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -20,16 +22,19 @@ data class PlayerState(
     val isReady: Boolean = true,
     val isPlaying: Boolean = false,
     val currentPosition: Long = 0L,
-)
-
-private val INITIAL_PLAYER_STATE = PlayerState(isReady = false)
+) {
+    companion object {
+        val PLAYER_STATE_INITIAL = PlayerState(isReady = false)
+        val PLAYER_STATE_STOP = PlayerState(isReady = true, isPlaying = false)
+    }
+}
 
 @HiltViewModel
 class PlayerViewModel @Inject constructor() : ViewModel() {
 
     private var player: ExoPlayer? = null
 
-    private val _playerState = MutableStateFlow(INITIAL_PLAYER_STATE)
+    private val _playerState = MutableStateFlow(PLAYER_STATE_INITIAL)
     val playerState: StateFlow<PlayerState> = _playerState
 
     private val _bufferPercentage = MutableStateFlow(0)
@@ -41,28 +46,10 @@ class PlayerViewModel @Inject constructor() : ViewModel() {
     private var playList: List<String> = emptyList()
 
     fun initializePlayer(context: Context) {
-        releasePlayer()
-
         val exoPlayer = ExoPlayer.Builder(context).build().also {
             it.addListener(object : Player.Listener {
                 override fun onPlayerError(error: PlaybackException) {
                     handleError(error)
-                }
-
-                override fun onPlaybackStateChanged(playbackState: Int) {
-                    super.onPlaybackStateChanged(playbackState)
-                }
-
-                override fun onMediaItemTransition(mediaItem: MediaItem?, reason: Int) {
-                    // 현재 선택된 노래가 플레이리스트의 마지막 노래라면 플레이리스트 재설정
-                    if (reason == Player.MEDIA_ITEM_TRANSITION_REASON_AUTO) {
-                        if (it.hasNextMediaItem().not() && playList.isNotEmpty()) {
-                            it.clearMediaItems()
-                            it.setMediaItems(playList.map { url ->
-                                MediaItem.fromUri(url)
-                            })
-                        }
-                    }
                 }
             })
         }
@@ -77,9 +64,14 @@ class PlayerViewModel @Inject constructor() : ViewModel() {
             it.prepare()
             it.playWhenReady = false
             it.seekTo(_playerState.value.currentPosition)
-            it.volume = 0.5f
 
-            _playerState.value = PlayerState(isReady = true)
+            _playerState.value =
+                PlayerState(isReady = true, currentPosition = _playerState.value.currentPosition)
+
+            _duration.value =
+                if (it.duration == TIME_UNSET) 30_000L else it.duration
+
+            updatePlayerStatePeriodically(it)
         }
     }
 
@@ -90,39 +82,29 @@ class PlayerViewModel @Inject constructor() : ViewModel() {
             })
             it.prepare()
             it.playWhenReady = false
-            it.repeatMode = Player.REPEAT_MODE_OFF
+            it.repeatMode = Player.REPEAT_MODE_ALL
             playList = sourceUrls
+        }
+    }
+
+    private fun updatePlayerStatePeriodically(exoPlayer: ExoPlayer) {
+        viewModelScope.launch {
+            while (_playerState.value.isReady) {
+                _playerState.value = _playerState.value.copy(
+                    isPlaying = exoPlayer.isPlaying,
+                    currentPosition = exoPlayer.currentPosition,
+                )
+                _bufferPercentage.value = exoPlayer.bufferedPercentage
+                delay(1000)
+            }
         }
     }
 
     fun shuffleNextItem() {
         viewModelScope.launch {
             player?.let {
-                if (it.isPlaying) {
-                    _playerState.value = PlayerState(isPlaying = false)
-                    it.pause()
-                } else {
-                    _playerState.value = PlayerState(isPlaying = true)
-                    it.seekToNextMediaItem()
-                    it.play()
-                }
-            }
-        }
-    }
-
-    fun updatePlayerStatePeriodically(exoPlayer: ExoPlayer? = this.player) {
-        exoPlayer?.let {
-            viewModelScope.launch {
-                while (_playerState.value.isReady) {
-                    _playerState.value = _playerState.value.copy(
-                        isPlaying = exoPlayer.isPlaying,
-                        currentPosition = exoPlayer.currentPosition,
-                    )
-                    _duration.value =
-                        if (exoPlayer.duration == TIME_UNSET) 30_000L else exoPlayer.duration
-                    _bufferPercentage.value = exoPlayer.bufferedPercentage
-                    delay(1000)
-                }
+                if (!it.isPlaying) it.seekToNextMediaItem()
+                togglePlayPause(it)
             }
         }
     }
@@ -131,35 +113,47 @@ class PlayerViewModel @Inject constructor() : ViewModel() {
         player?.let {
             it.seekTo(it.currentPosition + sec)
             viewModelScope.launch {
-                _playerState.value = _playerState.value.copy(currentPosition = it.currentPosition)
+                _playerState.value =
+                    _playerState.value.copy(currentPosition = it.currentPosition)
             }
         }
     }
 
     fun togglePlayPause() {
         player?.let {
-            viewModelScope.launch {
-                _playerState.value =
-                    _playerState.value.copy(isPlaying = _playerState.value.isPlaying.not())
-            }
-            if (it.isPlaying) it.pause()
-            else it.play()
+            togglePlayPause(it)
         }
+    }
+
+    private fun togglePlayPause(exoPlayer: ExoPlayer) {
+        if (exoPlayer.isPlaying) pause(exoPlayer)
+        else play(exoPlayer)
+    }
+
+    private fun play(exoPlayer: ExoPlayer) {
+        viewModelScope.launch {
+            _playerState.value = _playerState.value.copy(isPlaying = true)
+        }
+        exoPlayer.play()
     }
 
     fun pause() {
         player?.let {
-            viewModelScope.launch {
-                _playerState.value = _playerState.value.copy(isPlaying = false)
-            }
-            it.pause()
+            pause(it)
         }
+    }
+
+    private fun pause(exoPlayer: ExoPlayer) {
+        viewModelScope.launch {
+            _playerState.value = _playerState.value.copy(isPlaying = false)
+        }
+        exoPlayer.pause()
     }
 
     fun stop() {
         player?.let {
             viewModelScope.launch {
-                _playerState.value = PlayerState(isReady = false, isPlaying = false)
+                _playerState.value = PLAYER_STATE_STOP
             }
             it.stop()
         }
@@ -177,15 +171,15 @@ class PlayerViewModel @Inject constructor() : ViewModel() {
     fun savePlayerState() {
         player?.let {
             _playerState.value = _playerState.value.copy(
-                isPlaying = it.isPlaying,
+                isReady = false,
+                isPlaying = false,
                 currentPosition = it.currentPosition,
             )
         }
     }
 
-    fun releasePlayer() {
+    private fun releasePlayer() {
         player?.release()
-        _playerState.value = INITIAL_PLAYER_STATE
     }
 
     private fun handleError(error: PlaybackException) {
@@ -210,5 +204,10 @@ class PlayerViewModel @Inject constructor() : ViewModel() {
                 Log.d("PlayerViewModel", "${error.message}")
             }
         }
+    }
+
+    override fun onCleared() {
+        releasePlayer()
+        super.onCleared()
     }
 }

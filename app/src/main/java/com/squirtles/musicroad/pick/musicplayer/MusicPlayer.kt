@@ -33,20 +33,17 @@ fun MusicPlayer(
     LaunchedEffect(Unit) {
         playerViewModel.initializePlayer(context)
         playerViewModel.readyPlayer(sourceUrl = previewUrl)
-        playerViewModel.updatePlayerStatePeriodically()
-        Log.d("MusicPlayer", "initializePlayer")
+        Log.d("MusicPlayer", "$playerViewModel")
     }
 
     LaunchedEffect(playerState) {
         Log.d("MusicPlayer", "playerState: $playerState")
     }
 
-
     DisposableEffect(lifecycleOwner) {
         val lifecycleObserver = LifecycleEventObserver { _, event ->
             when (event) {
-                Lifecycle.Event.ON_STOP -> playerViewModel.stop()
-//                Lifecycle.Event.ON_DESTROY -> playerViewModel.stop()
+                Lifecycle.Event.ON_STOP -> playerViewModel.pause()
                 else -> {}
             }
         }
@@ -54,10 +51,8 @@ fun MusicPlayer(
         onDispose {
             lifecycleOwner.lifecycle.removeObserver(lifecycleObserver)
             playerViewModel.savePlayerState()
-            playerViewModel.stop()
         }
     }
-
 
     if (playerState.isReady) {
         Column(
