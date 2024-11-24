@@ -22,29 +22,19 @@ class MainActivity : AppCompatActivity() {
         ActivityResultContracts.RequestMultiplePermissions()
     ) { permissions ->
         val allPermissionsGranted = permissions.all { it.value }
-        if (allPermissionsGranted) {
-            startMainScreen()
-        } else {
+        if (!allPermissionsGranted) {
             Toast.makeText(
                 this,
                 getString(R.string.main_permission_deny_message),
                 Toast.LENGTH_LONG
             ).show()
-            finish()
         }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         installSplashScreen()
         super.onCreate(savedInstanceState)
-        if (checkSelfPermission()) {
-            startMainScreen()
-        } else {
-            permissionLauncher.launch(PERMISSIONS)
-        }
-    }
 
-    private fun startMainScreen() {
         enableEdgeToEdge()
         setContent {
             MusicRoadTheme {
@@ -57,6 +47,10 @@ class MainActivity : AppCompatActivity() {
                     navigationActions = navigationActions
                 )
             }
+        }
+
+        if (!checkSelfPermission()) {
+            permissionLauncher.launch(PERMISSIONS)
         }
     }
 
