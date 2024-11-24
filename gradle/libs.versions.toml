@@ -6,6 +6,7 @@ coil = "3.0.0"
 composeBom = "2024.10.01"
 constraintlayout = "2.2.0"
 coreKtx = "1.13.1"
+datastorePreferences = "1.1.1"
 espressoCore = "3.6.1"
 firebaseBom = "33.5.1"
 firebaseDynamicModuleSupportVersion = "16.0.0-beta03"
@@ -35,6 +36,7 @@ composeMaterial = "1.4.0"
 [libraries]
 # AndroidX
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
+androidx-datastore-preferences = { module = "androidx.datastore:datastore-preferences", version.ref = "datastorePreferences" }
 androidx-hilt-navigation-compose = { module = "androidx.hilt:hilt-navigation-compose", version.ref = "hiltNavigationCompose" }
 androidx-hilt-navigation-fragment = { module = "androidx.hilt:hilt-navigation-fragment", version.ref = "hiltNavigationCompose" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }

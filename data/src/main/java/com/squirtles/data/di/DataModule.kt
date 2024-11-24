@@ -1,5 +1,6 @@
 package com.squirtles.data.di
 
+import android.content.Context
 import com.google.firebase.firestore.FirebaseFirestore
 import com.squirtles.data.datasource.local.LocalDataSourceImpl
 import com.squirtles.data.datasource.remote.applemusic.AppleMusicDataSourceImpl
@@ -17,6 +18,7 @@ import com.squirtles.domain.repository.LocalRepository
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
+import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import javax.inject.Singleton
 
@@ -31,8 +33,8 @@ internal object DataModule {
 
     @Provides
     @Singleton
-    fun provideLocalDataSource(): LocalDataSource =
-        LocalDataSourceImpl()
+    fun provideLocalDataSource(@ApplicationContext context: Context): LocalDataSource =
+        LocalDataSourceImpl(context)
 
     @Provides
     @Singleton

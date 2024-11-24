@@ -11,10 +11,13 @@ import com.google.firebase.firestore.Query
 import com.google.firebase.firestore.QuerySnapshot
 import com.google.firebase.firestore.toObject
 import com.squirtles.data.datasource.remote.firebase.model.FirebasePick
+import com.squirtles.data.datasource.remote.firebase.model.FirebaseUser
 import com.squirtles.data.mapper.toFirebasePick
 import com.squirtles.data.mapper.toPick
+import com.squirtles.data.mapper.toUser
 import com.squirtles.domain.datasource.FirebaseRemoteDataSource
 import com.squirtles.domain.model.Pick
+import com.squirtles.domain.model.User
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
@@ -26,6 +29,42 @@ import kotlin.coroutines.resumeWithException
 class FirebaseDataSourceImpl @Inject constructor(
     private val db: FirebaseFirestore
 ) : FirebaseRemoteDataSource {
+
+    override suspend fun createUser(): User {
+        return suspendCancellableCoroutine { continuation ->
+            val randomNum = (1..100).random()
+            db.collection("users").add(FirebaseUser("유저$randomNum"))
+                .addOnSuccessListener { documentReference ->
+                    documentReference.get()
+                        .addOnSuccessListener { documentSnapshot ->
+                            val savedUser = documentSnapshot.toObject(FirebaseUser::class.java)
+                            if (savedUser != null) {
+                                continuation.resume(savedUser.toUser().copy(userId = documentReference.id))
+                            } else {
+                                throw Exception("Failed to create a user")
+                            }
+                        }
+                        .addOnFailureListener { exception ->
+                            continuation.resumeWithException(exception)
+                        }
+                }
+                .addOnFailureListener { exception ->
+                    Log.e("FirebaseDataSourceImpl", exception.message.toString())
+                    continuation.resumeWithException(exception)
+                }
+        }
+    }
+
+    override suspend fun fetchUser(userId: String): User {
+        return try {
+            val documentSnapshot = db.collection("users").document(userId).get().await()
+            val firebaseUser = documentSnapshot.toObject<FirebaseUser>()
+            firebaseUser?.toUser()?.copy(userId = userId) ?: throw Exception("Failed to fetch a user")
+        } catch (exception: Exception) {
+            Log.e("FirebaseDataSourceImpl", exception.message.toString())
+            throw exception
+        }
+    }
 
     /**
      * Fetches a pick by ID from Firestore.

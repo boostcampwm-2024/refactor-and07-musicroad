@@ -7,9 +7,11 @@ import com.google.firebase.Timestamp
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.GeoPoint
 import com.squirtles.data.datasource.remote.firebase.model.FirebasePick
+import com.squirtles.data.datasource.remote.firebase.model.FirebaseUser
 import com.squirtles.domain.model.LocationPoint
 import com.squirtles.domain.model.Pick
 import com.squirtles.domain.model.Song
+import com.squirtles.domain.model.User
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -62,6 +64,11 @@ internal fun Pick.toFirebasePick(): FirebasePick = FirebasePick(
     musicVideoUrl = musicVideoUrl,
     songId = song.id,
     songName = song.songName,
+)
+
+internal fun FirebaseUser.toUser(): User = User(
+    userId = "",
+    userName = name ?: ""
 )
 
 private fun Int.toRgbString(): String {
