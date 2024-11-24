@@ -7,8 +7,10 @@ import androidx.lifecycle.viewModelScope
 import com.squirtles.domain.model.LocationPoint
 import com.squirtles.domain.model.Pick
 import com.squirtles.domain.model.Song
+import com.squirtles.domain.model.User
 import com.squirtles.domain.usecase.CreatePickUseCase
 import com.squirtles.domain.usecase.FetchLastLocationUseCase
+import com.squirtles.domain.usecase.GetCurrentUserUseCase
 import com.squirtles.domain.usecase.GetMusicVideoUrlUseCase
 import com.squirtles.domain.usecase.SearchSongsUseCase
 import com.squirtles.musicroad.UiState
@@ -27,7 +29,8 @@ class CreatePickViewModel @Inject constructor(
     fetchLastLocationUseCase: FetchLastLocationUseCase,
     private val searchSongsUseCase: SearchSongsUseCase,
     private val getMusicVideoUrlUseCase: GetMusicVideoUrlUseCase,
-    private val createPickUseCase: CreatePickUseCase
+    private val createPickUseCase: CreatePickUseCase,
+    private val getCurrentUserUseCase: GetCurrentUserUseCase
 ) : ViewModel() {
 
     // SearchMusicScreen
@@ -114,14 +117,14 @@ class CreatePickViewModel @Inject constructor(
                 }
 
                 /* 등록 결과 - pick ID 담긴 Result */
-                /* FIXME : createdBy 임시값 */
+                val user = getCurrentUserUseCase()
                 val createResult = createPickUseCase(
                     Pick(
                         id = "",
                         song = song,
                         comment = _comment.value,
                         createdAt = "",
-                        createdBy = "",
+                        createdBy = User(userId = user.userId, userName = user.userName),
                         location = LocationPoint(lastLocation!!.latitude, lastLocation!!.longitude),
                         musicVideoUrl = musicVideoUrl
                     )

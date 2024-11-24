@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.squirtles.domain.model.LocationPoint
 import com.squirtles.domain.model.Pick
 import com.squirtles.domain.model.Song
+import com.squirtles.domain.model.User
 import com.squirtles.domain.usecase.FetchPickUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -46,7 +47,7 @@ class PickViewModel @Inject constructor(
                 ),
                 comment = "",
                 createdAt = "",
-                createdBy = "",
+                createdBy = User(userId = "", userName = "짱구"),
                 favoriteCount = 0,
                 location = LocationPoint(1.0, 1.0),
                 musicVideoUrl = "",

@@ -8,7 +8,7 @@ data class Pick(
     val song: Song,
     val comment: String,
     val favoriteCount: Int = 0,
-    val createdBy: String,
+    val createdBy: User,
     val createdAt: String,
     val location: LocationPoint,
     val musicVideoUrl: String = "",

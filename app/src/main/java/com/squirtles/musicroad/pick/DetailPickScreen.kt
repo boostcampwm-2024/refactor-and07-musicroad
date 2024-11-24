@@ -67,6 +67,7 @@ import coil3.compose.AsyncImage
 import com.squirtles.domain.model.LocationPoint
 import com.squirtles.domain.model.Pick
 import com.squirtles.domain.model.Song
+import com.squirtles.domain.model.User
 import com.squirtles.musicroad.R
 import com.squirtles.musicroad.ui.theme.Black
 import com.squirtles.musicroad.ui.theme.Dark
@@ -94,8 +95,6 @@ fun DetailPickScreen(
         orientation = Orientation.Vertical
     )
 
-    val userId = ""
-    val username = "짱구"
     val isFavorite = false
     val pick by pickViewModel.pick.collectAsStateWithLifecycle()
     var isMusicVideoAvailable by remember { mutableStateOf(false) }
@@ -111,8 +110,8 @@ fun DetailPickScreen(
 
     Box(modifier = Modifier.fillMaxSize()) {
         DetailPickScreen(
-            userId = userId,
-            username = username,
+            userId = pick.createdBy.userId,
+            username = pick.createdBy.userName,
             pick = pick,
             isFavorite = isFavorite,
             isMusicVideoAvailable = isMusicVideoAvailable,
@@ -152,7 +151,7 @@ private fun DetailPickScreen(
     swipeableModifier: Modifier,
     onBackClick: () -> Unit,
 ) {
-    val isMine = userId == pick.createdBy
+    val isMine = userId == pick.createdBy.userId
     val scrollState = rememberScrollState()
     val dynamicBackgroundColor = Color(pick.song.bgColor)
     val dynamicOnBackgroundColor = if (dynamicBackgroundColor.luminance() >= 0.5f) Black else White
@@ -329,7 +328,7 @@ private fun DetailPickScreenPreview() {
             ),
             comment = "강남역 거리는 Super Shy 듣기 좋네요 ^-^!",
             createdAt = "2024.11.02",
-            createdBy = "짱구",
+            createdBy = User(userId = "", userName = "짱구"),
             favoriteCount = 100,
             location = LocationPoint(1.0, 1.0),
             musicVideoUrl = "",
