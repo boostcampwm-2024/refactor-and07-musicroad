@@ -39,6 +39,7 @@ import com.squirtles.domain.model.Pick
 import com.squirtles.musicroad.R
 import com.squirtles.musicroad.pick.PickViewModel.Companion.DEFAULT_PICK
 import com.squirtles.musicroad.pick.musicplayer.PlayerViewModel
+import com.squirtles.musicroad.ui.theme.Black
 import com.squirtles.musicroad.ui.theme.MusicRoadTheme
 import com.squirtles.musicroad.ui.theme.White
 
@@ -81,15 +82,15 @@ fun MapScreen(
     DisposableEffect(lifecycleOwner) {
         val lifecycleObserver = LifecycleEventObserver { _, event ->
             when (event) {
-                Lifecycle.Event.ON_PAUSE -> playerViewModel.pause()
-                Lifecycle.Event.ON_STOP -> playerViewModel.pause()
-                Lifecycle.Event.ON_DESTROY -> playerViewModel.releasePlayer()
+//                Lifecycle.Event.ON_PAUSE -> playerViewModel.pause()
+                Lifecycle.Event.ON_STOP -> playerViewModel.stop()
                 else -> {}
             }
         }
         lifecycleOwner.lifecycle.addObserver(lifecycleObserver)
         onDispose {
-            playerViewModel.releasePlayer()
+            lifecycleOwner.lifecycle.removeObserver(lifecycleObserver)
+            playerViewModel.stop()
         }
     }
 
@@ -164,16 +165,17 @@ fun PickNotificationBanner(
     nearPicks: List<Pick>,
     onClick: () -> Unit,
 ) {
+    val lastPlayedSongId = remember { mutableStateOf("") }
+
     Box(
         modifier = modifier
             .fillMaxSize()
     ) {
         Text(
-            text = if (isPlaying) {
-                stringResource(id = R.string.map_pick_notification_stop, nearPicks.count())
-            } else {
-                stringResource(id = R.string.map_pick_notification_play, nearPicks.count())
-            },
+            text = stringResource(
+                id = if (isPlaying) R.string.map_pick_notification_stop else R.string.map_pick_notification_play,
+                nearPicks.count()
+            ),
             modifier = Modifier
                 .align(Alignment.TopCenter)
                 .offset(y = (LocalConfiguration.current.screenHeightDp * 0.08).dp)
@@ -182,7 +184,8 @@ fun PickNotificationBanner(
                     onClick()
                 }
                 .background(White.copy(alpha = 0.8f))
-                .padding(vertical = 10.dp, horizontal = 23.dp)
+                .padding(vertical = 10.dp, horizontal = 23.dp),
+            color = Black,
         )
     }
 }

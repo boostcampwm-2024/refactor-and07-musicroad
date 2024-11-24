@@ -38,6 +38,8 @@ class PlayerViewModel @Inject constructor() : ViewModel() {
     private val _duration = MutableStateFlow(30_000L)
     val duration: StateFlow<Long> = _duration
 
+    private var playList: List<String> = emptyList()
+
     fun initializePlayer(context: Context) {
         releasePlayer()
 
@@ -45,6 +47,22 @@ class PlayerViewModel @Inject constructor() : ViewModel() {
             it.addListener(object : Player.Listener {
                 override fun onPlayerError(error: PlaybackException) {
                     handleError(error)
+                }
+
+                override fun onPlaybackStateChanged(playbackState: Int) {
+                    super.onPlaybackStateChanged(playbackState)
+                }
+
+                override fun onMediaItemTransition(mediaItem: MediaItem?, reason: Int) {
+                    // 현재 선택된 노래가 플레이리스트의 마지막 노래라면 플레이리스트 재설정
+                    if (reason == Player.MEDIA_ITEM_TRANSITION_REASON_AUTO) {
+                        if (it.hasNextMediaItem().not() && playList.isNotEmpty()) {
+                            it.clearMediaItems()
+                            it.setMediaItems(playList.map { url ->
+                                MediaItem.fromUri(url)
+                            })
+                        }
+                    }
                 }
             })
         }
@@ -67,12 +85,13 @@ class PlayerViewModel @Inject constructor() : ViewModel() {
 
     fun readyPlayerSetList(sourceUrls: List<String>) {
         player?.let {
-            sourceUrls.forEach { url ->
-                it.addMediaItem(MediaItem.fromUri(url))
-            }
+            it.setMediaItems(sourceUrls.map { url ->
+                MediaItem.fromUri(url)
+            })
             it.prepare()
             it.playWhenReady = false
             it.repeatMode = Player.REPEAT_MODE_OFF
+            playList = sourceUrls
         }
     }
 
@@ -121,7 +140,7 @@ class PlayerViewModel @Inject constructor() : ViewModel() {
         player?.let {
             viewModelScope.launch {
                 _playerState.value =
-                    _playerState.value.copy(isPlaying = !(_playerState.value.isPlaying))
+                    _playerState.value.copy(isPlaying = _playerState.value.isPlaying.not())
             }
             if (it.isPlaying) it.pause()
             else it.play()
@@ -134,6 +153,15 @@ class PlayerViewModel @Inject constructor() : ViewModel() {
                 _playerState.value = _playerState.value.copy(isPlaying = false)
             }
             it.pause()
+        }
+    }
+
+    fun stop() {
+        player?.let {
+            viewModelScope.launch {
+                _playerState.value = PlayerState(isReady = false, isPlaying = false)
+            }
+            it.stop()
         }
     }
 

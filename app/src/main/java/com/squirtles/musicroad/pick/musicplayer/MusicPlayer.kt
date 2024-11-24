@@ -41,20 +41,20 @@ fun MusicPlayer(
         Log.d("MusicPlayer", "playerState: $playerState")
     }
 
+
     DisposableEffect(lifecycleOwner) {
         val lifecycleObserver = LifecycleEventObserver { _, event ->
             when (event) {
-                Lifecycle.Event.ON_PAUSE -> playerViewModel.pause()
-//                Lifecycle.Event.ON_STOP -> playerViewModel.releasePlayer()
+                Lifecycle.Event.ON_STOP -> playerViewModel.stop()
+//                Lifecycle.Event.ON_DESTROY -> playerViewModel.stop()
                 else -> {}
             }
         }
-
         lifecycleOwner.lifecycle.addObserver(lifecycleObserver)
-
         onDispose {
+            lifecycleOwner.lifecycle.removeObserver(lifecycleObserver)
             playerViewModel.savePlayerState()
-            playerViewModel.releasePlayer()
+            playerViewModel.stop()
         }
     }
 
