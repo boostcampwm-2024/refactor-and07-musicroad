@@ -75,7 +75,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun showToastAndExit() {
-        Toast.makeText(this, "유저 정보를 불러오지 못했습니다. 앱을 종료합니다.", Toast.LENGTH_LONG).show()
+        Toast.makeText(this, "유저 정보를 불러오지 못했습니다. 앱을 재설치 해주세요", Toast.LENGTH_LONG).show()
         finish()
     }
 
