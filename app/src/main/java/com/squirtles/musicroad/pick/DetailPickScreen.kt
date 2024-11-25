@@ -135,7 +135,6 @@ fun DetailPickScreen(
         if (isMusicVideoAvailable && showMusicVideo) {
             val isPlaying = swipeableState.offset.value < contentHeightPx * 0.8f
             val alpha = (1 - (swipeableState.offset.value / contentHeightPx)).coerceIn(0f, 1f)
-            playerViewModel.pause()
 
             MusicVideoScreen(
                 videoUri = pick.musicVideoUrl,
@@ -145,6 +144,11 @@ fun DetailPickScreen(
                     .offset { IntOffset(0, swipeableState.offset.value.roundToInt()) }
                     .graphicsLayer { this.alpha = alpha }
             )
+
+            LaunchedEffect(isPlaying) {
+                if (isPlaying) playerViewModel.pause()
+                else playerViewModel.play()
+            }
         }
     }
 }

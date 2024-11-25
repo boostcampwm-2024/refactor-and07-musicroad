@@ -46,6 +46,8 @@ class PlayerViewModel @Inject constructor() : ViewModel() {
     private var playList: List<String> = emptyList()
 
     fun initializePlayer(context: Context) {
+        if (player != null) return
+
         val exoPlayer = ExoPlayer.Builder(context).build().also {
             it.addListener(object : Player.Listener {
                 override fun onPlayerError(error: PlaybackException) {
@@ -128,6 +130,12 @@ class PlayerViewModel @Inject constructor() : ViewModel() {
     private fun togglePlayPause(exoPlayer: ExoPlayer) {
         if (exoPlayer.isPlaying) pause(exoPlayer)
         else play(exoPlayer)
+    }
+
+    fun play() {
+        player?.let {
+            play(it)
+        }
     }
 
     private fun play(exoPlayer: ExoPlayer) {
