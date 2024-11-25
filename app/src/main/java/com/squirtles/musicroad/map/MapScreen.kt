@@ -28,7 +28,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.squirtles.musicroad.map.components.BottomNavigation
 import com.squirtles.musicroad.map.components.InfoWindow
 import com.squirtles.musicroad.map.components.PickNotificationBanner
-import com.squirtles.musicroad.pick.musicplayer.PlayerViewModel
+import com.squirtles.musicroad.musicplayer.PlayerViewModel
 
 @Composable
 fun MapScreen(

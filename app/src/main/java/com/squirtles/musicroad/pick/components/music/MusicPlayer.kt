@@ -1,4 +1,4 @@
-package com.squirtles.musicroad.pick.musicplayer
+package com.squirtles.musicroad.pick.components.music
 
 import android.content.Context
 import androidx.compose.foundation.layout.Column
@@ -13,6 +13,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.squirtles.musicroad.musicplayer.PlayerViewModel
 
 @Composable
 fun MusicPlayer(

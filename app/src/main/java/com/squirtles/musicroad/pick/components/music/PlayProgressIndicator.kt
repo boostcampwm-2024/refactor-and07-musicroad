@@ -1,4 +1,4 @@
-package com.squirtles.musicroad.pick.musicplayer
+package com.squirtles.musicroad.pick.components.music
 
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box

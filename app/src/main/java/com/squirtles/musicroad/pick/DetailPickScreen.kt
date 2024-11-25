@@ -68,12 +68,12 @@ import com.squirtles.domain.model.LocationPoint
 import com.squirtles.domain.model.Pick
 import com.squirtles.domain.model.Song
 import com.squirtles.musicroad.R
+import com.squirtles.musicroad.musicplayer.PlayerViewModel
 import com.squirtles.musicroad.pick.components.CommentText
 import com.squirtles.musicroad.pick.components.PickInformation
 import com.squirtles.musicroad.pick.components.SongInfo
 import com.squirtles.musicroad.pick.components.SwipeUpIcon
-import com.squirtles.musicroad.pick.musicplayer.MusicPlayer
-import com.squirtles.musicroad.pick.musicplayer.PlayerViewModel
+import com.squirtles.musicroad.pick.components.music.MusicPlayer
 import com.squirtles.musicroad.ui.theme.Black
 import com.squirtles.musicroad.ui.theme.White
 import kotlin.math.roundToInt
