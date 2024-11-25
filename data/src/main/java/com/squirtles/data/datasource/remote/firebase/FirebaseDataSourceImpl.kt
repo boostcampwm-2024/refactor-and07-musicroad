@@ -13,7 +13,6 @@ import com.google.firebase.firestore.QuerySnapshot
 import com.google.firebase.firestore.toObject
 import com.squirtles.data.datasource.remote.firebase.model.FirebasePick
 import com.squirtles.data.datasource.remote.firebase.model.FirebaseUser
-import com.squirtles.data.exception.FirebaseException
 import com.squirtles.data.mapper.toFirebasePick
 import com.squirtles.data.mapper.toPick
 import com.squirtles.data.mapper.toUser
@@ -32,7 +31,7 @@ class FirebaseDataSourceImpl @Inject constructor(
     private val db: FirebaseFirestore
 ) : FirebaseRemoteDataSource {
 
-    override suspend fun createUser(): User {
+    override suspend fun createUser(): User? {
         return suspendCancellableCoroutine { continuation ->
             val randomNum = (1..100).random()
             db.collection("users").add(FirebaseUser("유저$randomNum"))
@@ -40,11 +39,7 @@ class FirebaseDataSourceImpl @Inject constructor(
                     documentReference.get()
                         .addOnSuccessListener { documentSnapshot ->
                             val savedUser = documentSnapshot.toObject<FirebaseUser>()
-                            if (savedUser != null) {
-                                continuation.resume(savedUser.toUser().copy(userId = documentReference.id))
-                            } else {
-                                throw Exception("Failed to create a user")
-                            }
+                            continuation.resume(savedUser?.toUser()?.copy(userId = documentReference.id))
                         }
                         .addOnFailureListener { exception ->
                             continuation.resumeWithException(exception)
@@ -181,7 +176,9 @@ class FirebaseDataSourceImpl @Inject constructor(
                             if (task.isSuccessful) {
                                 continuation.resume(pickId)
                             } else {
-                                continuation.resumeWithException(task.exception ?: Exception("Failed to updating user pick info"))
+                                continuation.resumeWithException(
+                                    task.exception ?: Exception("Failed to updating user pick info")
+                                )
                             }
                         }
                 }

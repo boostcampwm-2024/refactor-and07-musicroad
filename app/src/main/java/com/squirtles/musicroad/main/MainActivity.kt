@@ -2,6 +2,7 @@ package com.squirtles.musicroad.main
 
 import android.Manifest
 import android.os.Bundle
+import android.util.Log
 import android.widget.Toast
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -12,16 +13,13 @@ import androidx.compose.runtime.remember
 import androidx.core.content.PermissionChecker
 import androidx.core.splashscreen.SplashScreen
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.compose.rememberNavController
-import com.squirtles.data.exception.FirebaseException
 import com.squirtles.musicroad.R
 import com.squirtles.musicroad.ui.theme.MusicRoadTheme
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.TimeoutCancellationException
-import kotlinx.coroutines.cancel
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeout
 
@@ -67,37 +65,75 @@ class MainActivity : AppCompatActivity() {
 
     private fun setKeepOnScreenCondition(splashScreen: SplashScreen) {
         lifecycleScope.launch {
-            try {
-                launch {
-                    mainViewModel.error.collect { exception ->
-                        exception?.let { throw it }
-                    }
-                }
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                mainViewModel.loadingState.collect { state ->
+                    when (state) {
+                        is LoadingState.Loading -> {
+                            withTimeout(10_000L) {
 
-                withTimeout(10_000L) {
-                    mainViewModel.user
-                        .onEach { user ->
-                            splashScreen.setKeepOnScreenCondition { user == null }
-                            if (user != null) cancel() // 유저 정보 불러오면 타임아웃 취소
+                            }
                         }
-                        .launchIn(this)
-                }
-            } catch (e: Exception) {
-                when (e) {
-                    is FirebaseException.UserNotFoundException -> {
-                        Toast.makeText(this@MainActivity, getString(R.string.main_user_not_found_message), Toast.LENGTH_LONG).show()
-                        finish()
-                    }
 
-                    is TimeoutCancellationException,
-                    is com.google.firebase.FirebaseException -> {
-                        Toast.makeText(this@MainActivity, getString(R.string.main_network_error_message), Toast.LENGTH_LONG).show()
-                        finish()
+                        is LoadingState.Success -> {
+                            Log.d("MainActivity", "Success: ${state.userId}")
+                            splashScreen.setKeepOnScreenCondition { false }
+                        }
+
+                        is LoadingState.NetworkError -> {
+                            Toast.makeText(this@MainActivity, getString(R.string.main_network_error_message), Toast.LENGTH_LONG).show()
+                            finish()
+                        }
+
+                        is LoadingState.UserNotFoundError -> {
+                            Toast.makeText(this@MainActivity, getString(R.string.main_user_not_found_message), Toast.LENGTH_LONG).show()
+                            finish()
+                        }
+
+                        is LoadingState.CreatedUserError -> {
+                            Toast.makeText(this@MainActivity, getString(R.string.main_create_user_fail_message), Toast.LENGTH_LONG).show()
+                            finish()
+                        }
                     }
                 }
             }
         }
     }
+
+//    private fun setKeepOnScreenCondition(splashScreen: SplashScreen) {
+//        lifecycleScope.launch {
+//            try {
+//                launch {
+//                    mainViewModel.error.collect { exception ->
+//                        exception?.let { throw it }
+//                    }
+//                }
+//
+//                withTimeout(10_000L) {
+//                    mainViewModel.user
+//                        .onEach { user ->
+//                            splashScreen.setKeepOnScreenCondition { user == null }
+//                            if (user != null) cancel() // 유저 정보 불러오면 타임아웃 취소
+//                        }
+//                        .launchIn(this)
+//                }
+//            } catch (e: Exception) {
+//                when (e) {
+//                    is FirebaseException.UserNotFoundException -> {
+//                        Toast.makeText(this@MainActivity, getString(R.string.main_user_not_found_message), Toast.LENGTH_LONG)
+//                            .show()
+//                        finish()
+//                    }
+//
+//                    is TimeoutCancellationException,
+//                    is com.google.firebase.FirebaseException -> {
+//                        Toast.makeText(this@MainActivity, getString(R.string.main_network_error_message), Toast.LENGTH_LONG)
+//                            .show()
+//                        finish()
+//                    }
+//                }
+//            }
+//        }
+//    }
 
     private fun checkSelfPermission(): Boolean {
         return PermissionChecker.checkSelfPermission(this, PERMISSIONS[0]) ==

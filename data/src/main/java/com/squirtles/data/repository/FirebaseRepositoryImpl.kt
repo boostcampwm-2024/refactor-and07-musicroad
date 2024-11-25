@@ -1,7 +1,7 @@
 package com.squirtles.data.repository
 
-import com.squirtles.data.exception.FirebaseException
 import com.squirtles.domain.datasource.FirebaseRemoteDataSource
+import com.squirtles.domain.exception.FirebaseException
 import com.squirtles.domain.model.Pick
 import com.squirtles.domain.model.User
 import com.squirtles.domain.repository.FirebaseRepository
@@ -14,7 +14,7 @@ class FirebaseRepositoryImpl @Inject constructor(
 ) : FirebaseRepository {
 
     override suspend fun createUser(): Result<User> {
-        return handleResult {
+        return handleResult(FirebaseException.CreatedUserFailedException()) {
             firebaseRemoteDataSource.createUser()
         }
     }

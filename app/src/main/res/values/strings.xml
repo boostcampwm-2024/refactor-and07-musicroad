@@ -5,6 +5,7 @@
     <string name="main_permission_deny_message">설정에서 위치 권한을 허용해 주세요.</string>
     <string name="main_network_error_message">네트워크 연결이 원활하지 않습니다.</string>
     <string name="main_user_not_found_message">유저 정보가 존재하지 않습니다. 앱을 재설치 해주세요.</string>
+    <string name="main_create_user_fail_message">유저 등록 실패. 문의해주세요</string>
 
     <!-- Map -->
     <string name="map_navigation_favorite_icon_description">픽 보관함 이동 버튼 아이콘</string>
