@@ -93,6 +93,13 @@ class MapViewModel @Inject constructor(
         } ?: -1.0
     }
 
+    fun setClickedMarker(context: Context, marker: Marker) {
+        viewModelScope.launch {
+            marker.toggleSizeByClick(context, true)
+            _clickedMarkerState.emit(_clickedMarkerState.value.copy(prevClickedMarker = marker))
+        }
+    }
+
     fun setClickedMarkerState(context: Context, marker: Marker, pickId: String) {
         viewModelScope.launch {
             val prevClickedMarker = _clickedMarkerState.value.prevClickedMarker

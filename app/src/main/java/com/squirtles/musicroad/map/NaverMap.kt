@@ -132,6 +132,10 @@ fun NaverMap(
                             Log.d("test", "map: ${marker.map}, marker: ${marker.position}, pick: $pick")
                             true
                         }
+                        // 단말 마커를 클릭한 채로 configuration change 시 크기 유지
+                        if (pick.id == mapViewModel.clickedMarkerState.value.curPickId) {
+                            mapViewModel.setClickedMarker(context, marker)
+                        }
                     }
                 }
             })
