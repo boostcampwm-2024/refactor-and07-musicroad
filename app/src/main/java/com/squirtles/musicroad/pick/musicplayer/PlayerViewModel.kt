@@ -45,9 +45,7 @@ class PlayerViewModel @Inject constructor() : ViewModel() {
 
     private var playList: List<String> = emptyList()
 
-    fun initializePlayer(context: Context) {
-        if (player != null) return
-
+    private fun initializePlayer(context: Context) {
         val exoPlayer = ExoPlayer.Builder(context).build().also {
             it.addListener(object : Player.Listener {
                 override fun onPlayerError(error: PlaybackException) {
@@ -59,7 +57,11 @@ class PlayerViewModel @Inject constructor() : ViewModel() {
         this.player = exoPlayer
     }
 
-    fun readyPlayer(sourceUrl: String) {
+    fun readyPlayer(context: Context, sourceUrl: String) {
+        if (player != null) return
+
+        initializePlayer(context)
+
         player?.let {
             val mediaItem = MediaItem.fromUri(sourceUrl)
             it.setMediaItem(mediaItem)
@@ -77,7 +79,11 @@ class PlayerViewModel @Inject constructor() : ViewModel() {
         }
     }
 
-    fun readyPlayerSetList(sourceUrls: List<String>) {
+    fun readyPlayerSetList(context: Context, sourceUrls: List<String>) {
+        if (player != null) return
+
+        initializePlayer(context)
+
         player?.let {
             it.setMediaItems(sourceUrls.map { url ->
                 MediaItem.fromUri(url)

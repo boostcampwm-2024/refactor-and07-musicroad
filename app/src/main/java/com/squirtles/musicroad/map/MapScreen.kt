@@ -1,6 +1,5 @@
 package com.squirtles.musicroad.map
 
-import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -65,14 +64,9 @@ fun MapScreen(
 
     var isPlaying: Boolean by remember { mutableStateOf(false) }
 
-    LaunchedEffect(Unit) {
-        playerViewModel.initializePlayer(context)
-        Log.d("MapScreen", "$playerViewModel")
-    }
-
     LaunchedEffect(nearPicks) {
         if (nearPicks.isNotEmpty()) {
-            playerViewModel.readyPlayerSetList(nearPicks.map { it.song.previewUrl })
+            playerViewModel.readyPlayerSetList(context, nearPicks.map { it.song.previewUrl })
         }
     }
 
@@ -83,15 +77,13 @@ fun MapScreen(
     DisposableEffect(lifecycleOwner) {
         val lifecycleObserver = LifecycleEventObserver { _, event ->
             when (event) {
-//                Lifecycle.Event.ON_PAUSE -> playerViewModel.pause()
-                Lifecycle.Event.ON_STOP -> playerViewModel.stop()
+                Lifecycle.Event.ON_PAUSE -> playerViewModel.pause()
                 else -> {}
             }
         }
         lifecycleOwner.lifecycle.addObserver(lifecycleObserver)
         onDispose {
             lifecycleOwner.lifecycle.removeObserver(lifecycleObserver)
-            playerViewModel.stop()
         }
     }
 

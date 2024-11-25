@@ -1,20 +1,16 @@
 package com.squirtles.musicroad.pick.musicplayer
 
 import android.content.Context
-import android.util.Log
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 
@@ -31,27 +27,7 @@ fun MusicPlayer(
     val duration by playerViewModel.duration.collectAsStateWithLifecycle()
 
     LaunchedEffect(Unit) {
-        playerViewModel.initializePlayer(context)
-        playerViewModel.readyPlayer(sourceUrl = previewUrl)
-        Log.d("MusicPlayer", "$playerViewModel")
-    }
-
-    LaunchedEffect(playerState) {
-        Log.d("MusicPlayer", "playerState: $playerState")
-    }
-
-    DisposableEffect(lifecycleOwner) {
-        val lifecycleObserver = LifecycleEventObserver { _, event ->
-            when (event) {
-                Lifecycle.Event.ON_STOP -> playerViewModel.pause()
-                else -> {}
-            }
-        }
-        lifecycleOwner.lifecycle.addObserver(lifecycleObserver)
-        onDispose {
-            lifecycleOwner.lifecycle.removeObserver(lifecycleObserver)
-            playerViewModel.savePlayerState()
-        }
+        playerViewModel.readyPlayer(context, sourceUrl = previewUrl)
     }
 
     if (playerState.isReady) {
