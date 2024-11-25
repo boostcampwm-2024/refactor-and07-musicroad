@@ -21,9 +21,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.compose.LifecycleEventEffect
-import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.squirtles.musicroad.map.components.BottomNavigation
 import com.squirtles.musicroad.map.components.InfoWindow
@@ -47,7 +44,6 @@ fun MapScreen(
     val playerState by playerViewModel.playerState.collectAsStateWithLifecycle()
 
     val context = LocalContext.current
-    val lifecycleOwner = LocalLifecycleOwner.current
 
     var isPlaying: Boolean by remember { mutableStateOf(false) }
 
@@ -59,10 +55,6 @@ fun MapScreen(
 
     LaunchedEffect(playerState) {
         isPlaying = playerState.isPlaying
-    }
-
-    LifecycleEventEffect(Lifecycle.Event.ON_PAUSE) {
-        playerViewModel.pause()
     }
 
     Scaffold(
@@ -99,6 +91,7 @@ fun MapScreen(
                     InfoWindow(
                         pick,
                         navigateToPick = { pickId ->
+                            playerViewModel.pause()
                             onInfoWindowClick(pickId)
                         },
                         calculateDistance = { lat, lng ->
@@ -117,12 +110,19 @@ fun MapScreen(
                 BottomNavigation(
                     modifier = Modifier.padding(bottom = 16.dp),
                     lastLocation = lastLocation,
-                    onFavoriteClick = onFavoriteClick,
+                    onFavoriteClick = {
+                        playerViewModel.pause()
+                        onFavoriteClick()
+                    },
                     onCenterClick = {
+                        playerViewModel.pause()
                         onCenterClick()
                         mapViewModel.saveCurLocationForced()
                     },
-                    onSettingClick = onSettingClick
+                    onSettingClick = {
+                        playerViewModel.pause()
+                        onSettingClick()
+                    }
                 )
             }
         }
