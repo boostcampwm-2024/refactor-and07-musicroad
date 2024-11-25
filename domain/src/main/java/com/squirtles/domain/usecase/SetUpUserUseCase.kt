@@ -9,14 +9,14 @@ import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.flow
 import javax.inject.Inject
 
-class SetUpUserUseCase @Inject constructor(
+class SetUserUseCase @Inject constructor(
     private val localRepository: LocalRepository,
     private val firebaseRepository: FirebaseRepository
 ) {
     operator fun invoke(): Flow<User> = flow {
         // userId 확인
         val userId = localRepository.userId.firstOrNull()
-        Log.d("SetUpUserUseCase", "기기에 저장된 userId $userId")
+        Log.d("SetUserUseCase", "기기에 저장된 userId $userId")
 
         if (userId == null) {
             // userId가 없으면 새 유저 생성

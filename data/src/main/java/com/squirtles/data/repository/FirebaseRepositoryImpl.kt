@@ -20,7 +20,7 @@ class FirebaseRepositoryImpl @Inject constructor(
     }
 
     override suspend fun fetchUser(userId: String): Result<User> {
-        return handleResult {
+        return handleResult(FirebaseException.UserNotFoundException()) {
             firebaseRemoteDataSource.fetchUser(userId)
         }
     }

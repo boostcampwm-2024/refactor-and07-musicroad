@@ -14,11 +14,16 @@ import androidx.core.splashscreen.SplashScreen
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.compose.rememberNavController
+import com.squirtles.data.exception.FirebaseException
 import com.squirtles.musicroad.R
 import com.squirtles.musicroad.ui.theme.MusicRoadTheme
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.delay
+import kotlinx.coroutines.TimeoutCancellationException
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withTimeout
 
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
@@ -61,22 +66,37 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun setKeepOnScreenCondition(splashScreen: SplashScreen) {
-        splashScreen.setKeepOnScreenCondition {
-            // 유저 정보가 null이 아닐 때까지 splash screen이 보여짐
-            mainViewModel.user.value == null
-        }
-
         lifecycleScope.launch {
-            delay(5_000L) // 5초 대기
-            if (mainViewModel.user.value == null) {
-                showToastAndExit()
+            try {
+                launch {
+                    mainViewModel.error.collect { exception ->
+                        exception?.let { throw it }
+                    }
+                }
+
+                withTimeout(10_000L) {
+                    mainViewModel.user
+                        .onEach { user ->
+                            splashScreen.setKeepOnScreenCondition { user == null }
+                            if (user != null) cancel() // 유저 정보 불러오면 타임아웃 취소
+                        }
+                        .launchIn(this)
+                }
+            } catch (e: Exception) {
+                when (e) {
+                    is FirebaseException.UserNotFoundException -> {
+                        Toast.makeText(this@MainActivity, getString(R.string.main_user_not_found_message), Toast.LENGTH_LONG).show()
+                        finish()
+                    }
+
+                    is TimeoutCancellationException,
+                    is com.google.firebase.FirebaseException -> {
+                        Toast.makeText(this@MainActivity, getString(R.string.main_network_error_message), Toast.LENGTH_LONG).show()
+                        finish()
+                    }
+                }
             }
         }
-    }
-
-    private fun showToastAndExit() {
-        Toast.makeText(this, "유저 정보를 불러오지 못했습니다. 앱을 재설치 해주세요", Toast.LENGTH_LONG).show()
-        finish()
     }
 
     private fun checkSelfPermission(): Boolean {

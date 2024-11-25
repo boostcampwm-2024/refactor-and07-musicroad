@@ -13,6 +13,7 @@ import com.google.firebase.firestore.QuerySnapshot
 import com.google.firebase.firestore.toObject
 import com.squirtles.data.datasource.remote.firebase.model.FirebasePick
 import com.squirtles.data.datasource.remote.firebase.model.FirebaseUser
+import com.squirtles.data.exception.FirebaseException
 import com.squirtles.data.mapper.toFirebasePick
 import com.squirtles.data.mapper.toPick
 import com.squirtles.data.mapper.toUser
@@ -56,14 +57,16 @@ class FirebaseDataSourceImpl @Inject constructor(
         }
     }
 
-    override suspend fun fetchUser(userId: String): User {
-        return try {
-            val documentSnapshot = db.collection("users").document(userId).get().await()
-            val firebaseUser = documentSnapshot.toObject<FirebaseUser>()
-            firebaseUser?.toUser()?.copy(userId = userId) ?: throw Exception("Failed to fetch a user")
-        } catch (exception: Exception) {
-            Log.e("FirebaseDataSourceImpl", exception.message.toString())
-            throw exception
+    override suspend fun fetchUser(userId: String): User? {
+        return suspendCancellableCoroutine { continuation ->
+            db.collection("users").document(userId).get()
+                .addOnSuccessListener { document ->
+                    val firebaseUser = document.toObject<FirebaseUser>()
+                    continuation.resume(firebaseUser?.toUser()?.copy(userId = userId))
+                }
+                .addOnFailureListener { exception ->
+                    continuation.resumeWithException(exception)
+                }
         }
     }
 
