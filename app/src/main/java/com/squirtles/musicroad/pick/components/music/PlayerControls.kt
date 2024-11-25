@@ -22,7 +22,7 @@ import com.squirtles.musicroad.ui.theme.MusicRoadTheme
 import com.squirtles.musicroad.ui.theme.White
 
 @Composable
-fun PlayerControls(
+internal fun PlayerControls(
     isPlaying: () -> Boolean,
     onReplayClick: () -> Unit,
     onPauseToggle: () -> Unit,

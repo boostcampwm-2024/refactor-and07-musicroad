@@ -4,6 +4,7 @@ import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -14,7 +15,7 @@ import com.squirtles.musicroad.ui.theme.DarkGray
 import com.squirtles.musicroad.ui.theme.White
 
 @Composable
-fun PlayProgressIndicator(
+internal fun PlayProgressIndicator(
     modifier: Modifier = Modifier,
     currentTime: () -> Float,
     bufferPercentage: () -> Float,
@@ -22,6 +23,10 @@ fun PlayProgressIndicator(
     onSeekChanged: (Float) -> Unit
 ) {
     Box(modifier = modifier) {
+
+        CircularProgressIndicator(
+
+        )
 
         LinearProgressIndicator(
             progress = { bufferPercentage() / 100f },

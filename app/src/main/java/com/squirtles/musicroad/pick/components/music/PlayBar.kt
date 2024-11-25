@@ -17,7 +17,7 @@ import com.squirtles.musicroad.ui.theme.MusicRoadTheme
 import java.util.concurrent.TimeUnit
 
 @Composable
-fun PlayBar(
+internal fun PlayBar(
     modifier: Modifier = Modifier,
     duration: Long,
     currentTime: () -> Long,
