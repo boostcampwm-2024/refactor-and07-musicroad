@@ -4,7 +4,6 @@ import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -23,11 +22,6 @@ internal fun PlayProgressIndicator(
     onSeekChanged: (Float) -> Unit
 ) {
     Box(modifier = modifier) {
-
-        CircularProgressIndicator(
-
-        )
-
         LinearProgressIndicator(
             progress = { bufferPercentage() / 100f },
             modifier = Modifier.fillMaxWidth(),
