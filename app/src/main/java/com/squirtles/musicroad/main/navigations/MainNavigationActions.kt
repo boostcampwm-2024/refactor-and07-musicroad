@@ -1,4 +1,4 @@
-package com.squirtles.musicroad.main
+package com.squirtles.musicroad.main.navigations
 
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController

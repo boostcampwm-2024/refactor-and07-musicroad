@@ -8,6 +8,7 @@ import com.naver.maps.map.NaverMap
 import com.naver.maps.map.overlay.Marker
 import com.naver.maps.map.overlay.OverlayImage
 import com.squirtles.domain.model.Pick
+import com.squirtles.musicroad.map.components.MarkerIconView
 import com.squirtles.musicroad.ui.theme.Blue
 
 class MusicRoadMarker(

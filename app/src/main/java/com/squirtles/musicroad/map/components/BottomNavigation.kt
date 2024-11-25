@@ -1,4 +1,4 @@
-package com.squirtles.musicroad.map
+package com.squirtles.musicroad.map.components
 
 import android.content.res.Configuration
 import android.location.Location

@@ -110,7 +110,12 @@ fun NaverMap(
 
                     naverMap.value?.run {
                         initMapSettings()
-                        initDeviceLocation(context, circleOverlay, fusedLocationClient, mapViewModel.lastCameraPosition)
+                        initDeviceLocation(
+                            context,
+                            circleOverlay,
+                            fusedLocationClient,
+                            mapViewModel.lastCameraPosition
+                        )
                         initLocationOverlay(locationSource, locationOverlay)
                         setLocationChangeListener(circleOverlay, mapViewModel)
                         setMapClickListener { mapViewModel.resetSelectedPickState() }
