@@ -6,6 +6,7 @@ import com.firebase.geofire.GeoLocation
 import com.google.android.gms.tasks.Task
 import com.google.android.gms.tasks.Tasks
 import com.google.firebase.firestore.DocumentSnapshot
+import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
 import com.google.firebase.firestore.QuerySnapshot
@@ -170,7 +171,16 @@ class FirebaseDataSourceImpl @Inject constructor(
             // add() 메소드는 Cloud Firestore에서 ID를 자동으로 생성
             db.collection("picks").add(firebasePick)
                 .addOnSuccessListener { documentReference ->
-                    continuation.resume(documentReference.id)
+                    val pickId = documentReference.id
+                    // 유저의 픽 정보 업데이트
+                    updateCurrentUserPick(pick.createdBy.userId, pickId)
+                        .addOnCompleteListener { task ->
+                            if (task.isSuccessful) {
+                                continuation.resume(pickId)
+                            } else {
+                                continuation.resumeWithException(task.exception ?: Exception("Failed to updating user pick info"))
+                            }
+                        }
                 }
                 .addOnFailureListener { exception ->
                     Log.e("FirebaseDataSourceImpl", "Failed to create a pick", exception)
@@ -180,5 +190,10 @@ class FirebaseDataSourceImpl @Inject constructor(
 
     override suspend fun deletePick(pick: Pick): Boolean {
         TODO("Not yet implemented")
+    }
+
+    private fun updateCurrentUserPick(userId: String, pickId: String): Task<Void> {
+        val userDoc = db.collection("users").document(userId)
+        return userDoc.update("myPicks", FieldValue.arrayUnion(pickId))
     }
 }
