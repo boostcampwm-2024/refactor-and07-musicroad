@@ -1,4 +1,4 @@
-package com.squirtles.musicroad.main
+package com.squirtles.musicroad.main.navigations
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember

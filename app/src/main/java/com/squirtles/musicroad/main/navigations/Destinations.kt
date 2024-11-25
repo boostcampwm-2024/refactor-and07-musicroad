@@ -1,4 +1,4 @@
-package com.squirtles.musicroad.main
+package com.squirtles.musicroad.main.navigations
 
 object MainDestinations {
     const val MAIN_ROUTE = "main"
