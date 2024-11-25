@@ -146,7 +146,6 @@ fun DetailPickScreen(
 
             LaunchedEffect(isPlaying) {
                 if (isPlaying) playerViewModel.pause()
-                else playerViewModel.play()
             }
         }
     }
