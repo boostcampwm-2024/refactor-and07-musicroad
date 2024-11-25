@@ -5,14 +5,17 @@ import android.app.Activity
 import android.content.Context
 import android.graphics.PointF
 import android.location.Location
+import android.util.Log
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
@@ -31,11 +34,21 @@ import com.naver.maps.map.LocationTrackingMode
 import com.naver.maps.map.MapView
 import com.naver.maps.map.NaverMap
 import com.naver.maps.map.UiSettings
+import com.naver.maps.map.clustering.ClusterMarkerInfo
+import com.naver.maps.map.clustering.Clusterer
+import com.naver.maps.map.clustering.DefaultClusterMarkerUpdater
+import com.naver.maps.map.clustering.DefaultLeafMarkerUpdater
+import com.naver.maps.map.clustering.LeafMarkerInfo
 import com.naver.maps.map.overlay.CircleOverlay
 import com.naver.maps.map.overlay.LocationOverlay
+import com.naver.maps.map.overlay.Marker
+import com.naver.maps.map.overlay.Overlay
 import com.naver.maps.map.overlay.OverlayImage
 import com.naver.maps.map.util.FusedLocationSource
 import com.squirtles.musicroad.R
+import com.squirtles.musicroad.map.marker.MarkerIconView
+import com.squirtles.musicroad.map.marker.MarkerKey
+import com.squirtles.musicroad.ui.theme.Blue
 import com.squirtles.musicroad.ui.theme.Primary
 import com.squirtles.musicroad.ui.theme.Purple15
 import kotlinx.coroutines.launch
@@ -45,9 +58,7 @@ import kotlin.coroutines.suspendCoroutine
 @Composable
 fun NaverMap(
     mapViewModel: MapViewModel,
-    lastLocation: Location?,
-    pickMarkers: Map<String, MusicRoadMarker>,
-    selectedPickState: PickState,
+    lastLocation: Location?
 ) {
     val context = LocalContext.current
     val mapView = remember { MapView(context) }
@@ -58,19 +69,75 @@ fun NaverMap(
         remember { FusedLocationSource(context as Activity, LOCATION_PERMISSION_REQUEST_CODE) }
     val locationOverlay = remember { mutableStateOf<LocationOverlay?>(null) }
     val circleOverlay = remember { CircleOverlay() }
+    var clusterer by remember { mutableStateOf<Clusterer<MarkerKey>?>(null) }
 
     val lifecycleOwner = LocalLifecycleOwner.current
     val coroutineScope = rememberCoroutineScope()
-
-    LaunchedEffect(selectedPickState) {
-        pickMarkers[selectedPickState.current]?.toggleSizeByClick(context, true)
-        pickMarkers[selectedPickState.previous]?.toggleSizeByClick(context, false)
-    }
 
     LaunchedEffect(lastLocation) {
         // 현재 위치와 마지막 위치가 5미터 이상 차이가 날때만 현위치 기준 반경 100m 픽 정보 개수 불러오기
         lastLocation?.let {
             mapViewModel.requestPickNotificationArea(lastLocation, CIRCLE_RADIUS_METER)
+        }
+    }
+
+    DisposableEffect(Unit) {
+        clusterer = Clusterer.ComplexBuilder<MarkerKey>()
+            .tagMergeStrategy { cluster ->
+                cluster.children.map { it.tag }.joinToString(",")
+            }
+            .clusterMarkerUpdater(object : DefaultClusterMarkerUpdater() {
+                override fun updateClusterMarker(info: ClusterMarkerInfo, marker: Marker) {
+                    super.updateClusterMarker(info, marker)
+
+                    Log.d("test", "updateClustererMarker - info: ${info.tag}")
+                    // 클릭된 마커가 클러스터 마커 안에 포함되면 클릭된 마커 해제
+                    mapViewModel.clickedMarkerState.value.curPickId?.let { curPickId ->
+                        if (info.tag.toString().contains(curPickId)) {
+                            mapViewModel.resetClickedMarkerState(context)
+                        }
+                    }
+                    val markerIconView = MarkerIconView(context).apply {
+                        setPaintColor(Blue.toArgb())
+                    }
+                    marker.icon = OverlayImage.fromView(markerIconView)
+                    marker.onClickListener = Overlay.OnClickListener {
+                        true
+                    }
+                }
+            })
+            .leafMarkerUpdater(object : DefaultLeafMarkerUpdater() {
+                override fun updateLeafMarker(info: LeafMarkerInfo, marker: Marker) {
+                    super.updateLeafMarker(info, marker)
+
+                    Log.d("test", "updateLeafMarker - info: ${info.key}")
+                    val pick = (info.key as MarkerKey).pick
+                    val markerIconView = MarkerIconView(context).apply {
+                        setPaintColor(Blue.toArgb())
+                    }
+                    markerIconView.setLeafMarkerIcon(pick) {
+                        marker.icon = OverlayImage.fromView(markerIconView)
+                        marker.setOnClickListener {
+                            marker.map?.let { map ->
+                                setCameraToMarker(
+                                    map = map,
+                                    clickedMarkerPosition = marker.position
+                                )
+                                mapViewModel.setClickedMarkerState(
+                                    context = context,
+                                    marker = marker,
+                                    pickId = pick.id
+                                )
+                            }
+                            Log.d("test", "map: ${marker.map}, marker: ${marker.position}, pick: $pick")
+                            true
+                        }
+                    }
+                }
+            })
+            .build()
+        onDispose {
+            clusterer?.clear()
         }
     }
 
@@ -110,56 +177,35 @@ fun NaverMap(
 
                     naverMap.value?.run {
                         initMapSettings()
-                        initDeviceLocation(context, circleOverlay, fusedLocationClient, mapViewModel.lastCameraPosition)
+                        initDeviceLocation(
+                            context,
+                            circleOverlay,
+                            fusedLocationClient,
+                            mapViewModel.lastCameraPosition
+                        )
                         initLocationOverlay(locationSource, locationOverlay)
                         setLocationChangeListener(circleOverlay, mapViewModel)
-                        setMapClickListener { mapViewModel.resetSelectedPickState() }
+                        setMapClickListener { mapViewModel.resetClickedMarkerState(context) }
                         setCameraIdleListener { leftTop, rightBottom ->
-                            mapViewModel.fetchPicksInBounds(leftTop, rightBottom)
+                            mapViewModel.fetchPicksInBounds(leftTop, rightBottom, clusterer)
                         }
+                        clusterer?.map = this
                     }
                 }
             }
         },
         modifier = Modifier.fillMaxSize()
-    ) {
-        naverMap.value?.let {
-            pickMarkers.forEach { (pick, marker) ->
-                if (marker.map == null) {
-                    it.createMarker(
-                        context = context,
-                        marker = marker,
-                        setSelectedPickState = mapViewModel::setSelectedPickState
-                    )
-                }
-            }
-        }
-    }
+    )
 }
 
-private fun NaverMap.createMarker(
-    context: Context,
-    marker: MusicRoadMarker,
-    setSelectedPickState: (String) -> Unit
-) {
-    marker.loadMarkerImage(context = context, map = this) {
-        onMarkerClick(
-            clickedMarker = marker,
-            setSelectedPickState = setSelectedPickState
-        )
-    }
-}
-
-private fun NaverMap.onMarkerClick(
-    clickedMarker: MusicRoadMarker,
-    setSelectedPickState: (String) -> Unit
+private fun setCameraToMarker(
+    map: NaverMap,
+    clickedMarkerPosition: LatLng
 ) {
     val cameraUpdate = CameraUpdate
-        .scrollTo(clickedMarker.position)
+        .scrollTo(clickedMarkerPosition)
         .animate(CameraAnimation.Easing)
-    this.moveCamera(cameraUpdate)
-
-    setSelectedPickState(clickedMarker.pick.id)
+    map.moveCamera(cameraUpdate)
 }
 
 private fun NaverMap.initLocationOverlay(

@@ -1,14 +1,19 @@
 package com.squirtles.musicroad.map
 
+import android.content.Context
 import android.location.Location
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.naver.maps.geometry.LatLng
 import com.naver.maps.map.CameraPosition
+import com.naver.maps.map.clustering.Clusterer
+import com.naver.maps.map.overlay.Marker
+import com.squirtles.domain.model.Pick
 import com.squirtles.domain.usecase.FetchLastLocationUseCase
 import com.squirtles.domain.usecase.FetchPickInAreaUseCase
 import com.squirtles.domain.usecase.SaveLastLocationUseCase
+import com.squirtles.musicroad.map.marker.MarkerKey
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -16,9 +21,9 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-data class PickState(
-    val previous: String? = null,
-    val current: String? = null
+data class MarkerState(
+    val prevClickedMarker: Marker? = null, // 이전에 클릭한 마커
+    val curPickId: String? = null // 현재 선택한 마커의 pick id
 )
 
 @HiltViewModel
@@ -31,14 +36,14 @@ class MapViewModel @Inject constructor(
     private var _lastCameraPosition: CameraPosition? = null
     val lastCameraPosition get() = _lastCameraPosition
 
-    private val _pickMarkers = MutableStateFlow<Map<String, MusicRoadMarker>>(emptyMap())
-    val pickMarkers = _pickMarkers.asStateFlow()
+    private val _picks: MutableMap<String, Pick> = mutableMapOf() // key: pickId, value: Pick
+    val picks: Map<String, Pick> get() = _picks
 
     private val _pickCount = MutableStateFlow(0)
     val pickCount = _pickCount.asStateFlow()
 
-    private val _selectedPickState = MutableStateFlow(PickState(null, null))
-    val selectedPickState = _selectedPickState.asStateFlow()
+    private val _clickedMarkerState = MutableStateFlow(MarkerState())
+    val clickedMarkerState = _clickedMarkerState.asStateFlow()
 
     // FIXME : 네이버맵의 LocationChangeListener에서 실시간으로 변하는 위치 정보 -> 더 나은 방법이 있으면 고쳐주세요
     private var _currentLocation: Location? = null
@@ -88,51 +93,46 @@ class MapViewModel @Inject constructor(
         } ?: -1.0
     }
 
-    fun setSelectedPickState(pickId: String) {
+    fun setClickedMarkerState(context: Context, marker: Marker, pickId: String) {
         viewModelScope.launch {
-            val lastSelectedPick = selectedPickState.value.current
-            if (lastSelectedPick == pickId) return@launch
+            val prevClickedMarker = _clickedMarkerState.value.prevClickedMarker
+            if (prevClickedMarker == marker) return@launch
 
-            _selectedPickState.emit(PickState(lastSelectedPick, pickId))
+            prevClickedMarker?.toggleSizeByClick(context, false)
+            marker.toggleSizeByClick(context, true)
+            _clickedMarkerState.emit(MarkerState(marker, pickId))
         }
     }
 
-    fun resetSelectedPickState() {
+    fun resetClickedMarkerState(context: Context) {
         viewModelScope.launch {
-            val lastSelectedPick = selectedPickState.value.current
-            _selectedPickState.emit(PickState(lastSelectedPick, null))
+            val prevClickedMarker = _clickedMarkerState.value.prevClickedMarker
+            prevClickedMarker?.toggleSizeByClick(context, false)
+            _clickedMarkerState.emit(MarkerState(null, null))
         }
     }
 
-    fun fetchPicksInBounds(leftTop: LatLng, rightBottom: LatLng) {
+    fun fetchPicksInBounds(leftTop: LatLng, rightBottom: LatLng, clusterer: Clusterer<MarkerKey>?) {
         viewModelScope.launch {
             val center = LatLng(
                 (leftTop.latitude + rightBottom.latitude) / 2,
                 (leftTop.longitude + rightBottom.longitude) / 2
             )
             val radiusInM = leftTop.distanceTo(rightBottom)
-            val picks = fetchPickInAreaUseCase(center.latitude, center.longitude, radiusInM)
+            val fetchPicks = fetchPickInAreaUseCase(center.latitude, center.longitude, radiusInM)
 
-            picks.onSuccess { pickList ->
-                val newMarkerMap = mutableMapOf<String, MusicRoadMarker>()
+            fetchPicks.onSuccess { pickList ->
+                val newKeyTagMap: MutableMap<MarkerKey, String> = mutableMapOf()
                 Log.d("MapViewModel", "$pickList")
                 pickList.forEach { pick ->
-                    newMarkerMap[pick.id] =
-                        _pickMarkers.value[pick.id] ?: MusicRoadMarker(pick = pick)
+                    newKeyTagMap[MarkerKey(pick)] = pick.id
+                    _picks[pick.id] = pick
                 }
-                _pickMarkers.value.forEach { (_, marker) ->
-                    if(marker.pick !in pickList) {
-                        marker.clearMap()
-                    }
-                }
-                _pickMarkers.value = newMarkerMap
+                clusterer?.addAll(newKeyTagMap)
             }
-            picks.onFailure {
+            fetchPicks.onFailure {
                 // TODO: NoSuchPickInRadiusException일 때
             }
-
-            Log.d("MapViewModel", "개수: ${_pickMarkers.value.size}")
-            Log.d("MapViewModel", "값: ${_pickMarkers.value}")
         }
     }
 
@@ -145,5 +145,19 @@ class MapViewModel @Inject constructor(
                     _pickCount.emit(0)
                 }
         }
+    }
+
+    private fun Marker.toggleSizeByClick(context: Context, isClicked: Boolean) {
+        val defaultIconWidth = this.icon.getIntrinsicWidth(context)
+        val defaultIconHeight = this.icon.getIntrinsicHeight(context)
+
+        this.width =
+            if (isClicked) (defaultIconWidth * MARKER_SCALE).toInt() else defaultIconWidth
+        this.height =
+            if (isClicked) (defaultIconHeight * MARKER_SCALE).toInt() else defaultIconHeight
+    }
+
+    companion object {
+        private const val MARKER_SCALE = 1.5
     }
 }

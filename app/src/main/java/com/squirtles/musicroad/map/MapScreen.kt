@@ -37,8 +37,7 @@ fun MapScreen(
     onInfoWindowClick: (String) -> Unit
 ) {
     val pickCount by mapViewModel.pickCount.collectAsStateWithLifecycle()
-    val pickMarkers by mapViewModel.pickMarkers.collectAsStateWithLifecycle()
-    val selectedPickState by mapViewModel.selectedPickState.collectAsStateWithLifecycle()
+    val clickedMarkerState by mapViewModel.clickedMarkerState.collectAsStateWithLifecycle()
     val lastLocation by mapViewModel.lastLocation.collectAsStateWithLifecycle()
 
     Scaffold(
@@ -51,9 +50,7 @@ fun MapScreen(
         ) {
             NaverMap(
                 mapViewModel = mapViewModel,
-                lastLocation = lastLocation,
-                pickMarkers = pickMarkers,
-                selectedPickState = selectedPickState
+                lastLocation = lastLocation
             )
 
             if (pickCount > 0) {
@@ -65,7 +62,7 @@ fun MapScreen(
                 verticalArrangement = Arrangement.Bottom,
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                pickMarkers[selectedPickState.current]?.pick?.let { pick ->
+                mapViewModel.picks[clickedMarkerState.curPickId]?.let { pick ->
                     InfoWindow(
                         pick,
                         navigateToPick = { pickId ->
