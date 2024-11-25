@@ -64,6 +64,7 @@ import androidx.wear.compose.material.FractionalThreshold
 import androidx.wear.compose.material.rememberSwipeableState
 import androidx.wear.compose.material.swipeable
 import coil3.compose.AsyncImage
+import com.squirtles.domain.model.Creator
 import com.squirtles.domain.model.LocationPoint
 import com.squirtles.domain.model.Pick
 import com.squirtles.domain.model.Song
@@ -328,7 +329,7 @@ private fun DetailPickScreenPreview() {
             ),
             comment = "강남역 거리는 Super Shy 듣기 좋네요 ^-^!",
             createdAt = "2024.11.02",
-            createdBy = User(userId = "", userName = "짱구"),
+            createdBy = Creator(userId = "", userName = "짱구"),
             favoriteCount = 100,
             location = LocationPoint(1.0, 1.0),
             musicVideoUrl = "",

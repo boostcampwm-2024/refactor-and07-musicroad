@@ -4,6 +4,7 @@ import android.location.Location
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.squirtles.domain.model.Creator
 import com.squirtles.domain.model.LocationPoint
 import com.squirtles.domain.model.Pick
 import com.squirtles.domain.model.Song
@@ -124,7 +125,10 @@ class CreatePickViewModel @Inject constructor(
                         song = song,
                         comment = _comment.value,
                         createdAt = "",
-                        createdBy = User(userId = user.userId, userName = user.userName),
+                        createdBy = Creator(
+                            userId = user.userId,
+                            userName = user.userName
+                        ),
                         location = LocationPoint(lastLocation!!.latitude, lastLocation!!.longitude),
                         musicVideoUrl = musicVideoUrl
                     )

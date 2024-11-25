@@ -8,6 +8,7 @@ import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.GeoPoint
 import com.squirtles.data.datasource.remote.firebase.model.FirebasePick
 import com.squirtles.data.datasource.remote.firebase.model.FirebaseUser
+import com.squirtles.domain.model.Creator
 import com.squirtles.domain.model.LocationPoint
 import com.squirtles.domain.model.Pick
 import com.squirtles.domain.model.Song
@@ -36,7 +37,10 @@ internal fun FirebasePick.toPick(): Pick = Pick(
     ),
     comment = comment.toString(),
     favoriteCount = favoriteCount,
-    createdBy = User(userId = createdBy?.get("userId") ?: "", userName = createdBy?.get("userName") ?: ""),
+    createdBy = Creator(
+        userId = createdBy?.get("userId") ?: "",
+        userName = createdBy?.get("userName") ?: ""
+    ),
     createdAt = createdAt?.toDate()?.formatTimestamp() ?: "",
     location = LocationPoint(
         latitude = location?.latitude ?: 0.0,
@@ -68,7 +72,8 @@ internal fun Pick.toFirebasePick(): FirebasePick = FirebasePick(
 
 internal fun FirebaseUser.toUser(): User = User(
     userId = "",
-    userName = name ?: ""
+    userName = name ?: "",
+    myPicks = myPicks
 )
 
 private fun Int.toRgbString(): String {

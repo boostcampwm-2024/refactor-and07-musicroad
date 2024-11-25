@@ -35,6 +35,7 @@ import androidx.core.graphics.toColorInt
 import coil3.compose.AsyncImage
 import coil3.request.ImageRequest
 import coil3.request.crossfade
+import com.squirtles.domain.model.Creator
 import com.squirtles.domain.model.LocationPoint
 import com.squirtles.domain.model.Pick
 import com.squirtles.domain.model.Song
@@ -169,7 +170,7 @@ private fun InfoWindowPreview() {
                 ),
                 comment = "강남역 거리는 ditto 듣기 좋네요 ^-^!",
                 createdAt = "1970.01.21",
-                createdBy = User(userId = "", userName = "짱구"),
+                createdBy = Creator(userId = "", userName = "짱구"),
                 favoriteCount = 100,
                 location = LocationPoint(1.0, 1.0),
                 musicVideoUrl = "",

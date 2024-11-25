@@ -8,7 +8,7 @@ data class Pick(
     val song: Song,
     val comment: String,
     val favoriteCount: Int = 0,
-    val createdBy: User,
+    val createdBy: Creator,
     val createdAt: String,
     val location: LocationPoint,
     val musicVideoUrl: String = "",
@@ -20,3 +20,8 @@ data class LocationPoint(
 ) {
     /* TODO: Location 변환 함수 */
 }
+
+data class Creator(
+    val userId: String,
+    val userName: String,
+)

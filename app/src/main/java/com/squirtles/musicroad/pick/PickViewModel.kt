@@ -3,6 +3,7 @@ package com.squirtles.musicroad.pick
 import androidx.core.graphics.toColorInt
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.squirtles.domain.model.Creator
 import com.squirtles.domain.model.LocationPoint
 import com.squirtles.domain.model.Pick
 import com.squirtles.domain.model.Song
@@ -47,7 +48,7 @@ class PickViewModel @Inject constructor(
                 ),
                 comment = "",
                 createdAt = "",
-                createdBy = User(userId = "", userName = "짱구"),
+                createdBy = Creator(userId = "", userName = "짱구"),
                 favoriteCount = 0,
                 location = LocationPoint(1.0, 1.0),
                 musicVideoUrl = "",
