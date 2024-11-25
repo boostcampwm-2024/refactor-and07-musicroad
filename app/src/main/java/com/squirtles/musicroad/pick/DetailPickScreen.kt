@@ -52,6 +52,7 @@ import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
@@ -232,12 +233,14 @@ private fun DetailPickScreen(
                 Text(
                     text = pick.song.songName,
                     color = dynamicOnBackgroundColor,
+                    textAlign = TextAlign.Center,
                     style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold)
                 )
 
                 Text(
                     text = pick.song.artistName,
                     color = dynamicOnBackgroundColor,
+                    textAlign = TextAlign.Center,
                     style = MaterialTheme.typography.bodyLarge
                 )
 
