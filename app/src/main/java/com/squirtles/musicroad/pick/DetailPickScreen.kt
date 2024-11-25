@@ -3,18 +3,15 @@ package com.squirtles.musicroad.pick
 import android.app.Activity
 import android.util.Log
 import android.util.Size
-import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
@@ -71,11 +68,13 @@ import com.squirtles.domain.model.LocationPoint
 import com.squirtles.domain.model.Pick
 import com.squirtles.domain.model.Song
 import com.squirtles.musicroad.R
+import com.squirtles.musicroad.pick.components.CommentText
+import com.squirtles.musicroad.pick.components.PickInformation
+import com.squirtles.musicroad.pick.components.SongInfo
+import com.squirtles.musicroad.pick.components.SwipeUpIcon
 import com.squirtles.musicroad.pick.musicplayer.MusicPlayer
 import com.squirtles.musicroad.pick.musicplayer.PlayerViewModel
 import com.squirtles.musicroad.ui.theme.Black
-import com.squirtles.musicroad.ui.theme.Dark
-import com.squirtles.musicroad.ui.theme.Gray
 import com.squirtles.musicroad.ui.theme.White
 import kotlin.math.roundToInt
 
@@ -278,80 +277,14 @@ private fun DetailPickScreen(
             }
 
             if (isMusicVideoAvailable) {
-                Box(
-                    modifier = swipeableModifier
+                SwipeUpIcon(
+                    swipeableModifier
                         .fillMaxWidth()
                         .heightIn(min = 100.dp)
-                ) {
-                    Icon(
-                        painter = painterResource(id = R.drawable.ic_swipe),
-                        contentDescription = stringResource(id = R.string.pick_swipe_icon_description),
-                        modifier = Modifier.align(Alignment.Center),
-                        tint = White
-                    )
-                }
+                )
             }
         }
     }
-}
-
-@Composable
-private fun SongInfo(
-    song: Song,
-    dynamicOnBackgroundColor: Color
-) {
-    Text(
-        text = song.songName,
-        color = dynamicOnBackgroundColor,
-        style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold)
-    )
-
-    Text(
-        text = song.artistName,
-        color = dynamicOnBackgroundColor,
-        style = MaterialTheme.typography.bodyLarge
-    )
-}
-
-@Composable
-private fun PickInformation(formattedDate: String, favoriteCount: Int) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 30.dp, vertical = 4.dp),
-        horizontalArrangement = Arrangement.spacedBy(4.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        if (formattedDate.isNotBlank()) {
-            Text(text = formattedDate, style = MaterialTheme.typography.titleMedium.copy(Gray))
-            Icon(
-                painter = painterResource(id = R.drawable.ic_favorite),
-                contentDescription = stringResource(R.string.pick_favorite_count_icon_description),
-                modifier = Modifier.padding(start = 4.dp),
-                tint = Gray
-            )
-            Text(text = "$favoriteCount", style = MaterialTheme.typography.titleMedium.copy(Gray))
-        }
-    }
-}
-
-@Composable
-fun CommentText(
-    comment: String,
-    scrollState: ScrollState
-) {
-    Text(
-        text = comment,
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(100.dp)
-            .padding(horizontal = 30.dp)
-            .clip(shape = RoundedCornerShape(10.dp))
-            .background(Dark)
-            .verticalScroll(scrollState)
-            .padding(horizontal = 12.dp, vertical = 8.dp),
-        style = MaterialTheme.typography.bodyLarge.copy(White)
-    )
 }
 
 @Preview
