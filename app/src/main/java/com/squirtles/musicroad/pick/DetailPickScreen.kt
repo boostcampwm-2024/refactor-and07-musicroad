@@ -85,7 +85,7 @@ fun DetailPickScreen(
     pickId: String,
     onBackClick: () -> Unit,
     pickViewModel: PickViewModel = hiltViewModel(),
-    playerViewModel: PlayerViewModel
+    playerViewModel: PlayerViewModel = hiltViewModel()
 ) {
     val screenHeight = LocalConfiguration.current.screenHeightDp.dp
     val screenHeightPx = with(LocalDensity.current) { screenHeight.toPx() }

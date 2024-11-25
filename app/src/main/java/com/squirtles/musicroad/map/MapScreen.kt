@@ -31,6 +31,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
@@ -46,11 +47,11 @@ import com.squirtles.musicroad.ui.theme.White
 @Composable
 fun MapScreen(
     mapViewModel: MapViewModel,
-    playerViewModel: PlayerViewModel,
     onFavoriteClick: () -> Unit,
     onCenterClick: () -> Unit,
     onSettingClick: () -> Unit,
-    onInfoWindowClick: (String) -> Unit
+    onInfoWindowClick: (String) -> Unit,
+    playerViewModel: PlayerViewModel = hiltViewModel()
 ) {
     val nearPicks by mapViewModel.nearPicks.collectAsStateWithLifecycle()
     val pickMarkers by mapViewModel.pickMarkers.collectAsStateWithLifecycle()
@@ -66,7 +67,7 @@ fun MapScreen(
 
     LaunchedEffect(Unit) {
         playerViewModel.initializePlayer(context)
-        Log.d("MapScreen", "initializePlayer")
+        Log.d("MapScreen", "$playerViewModel")
     }
 
     LaunchedEffect(nearPicks) {
