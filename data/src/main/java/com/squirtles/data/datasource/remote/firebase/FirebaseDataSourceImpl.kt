@@ -38,7 +38,7 @@ class FirebaseDataSourceImpl @Inject constructor(
                 .addOnSuccessListener { documentReference ->
                     documentReference.get()
                         .addOnSuccessListener { documentSnapshot ->
-                            val savedUser = documentSnapshot.toObject(FirebaseUser::class.java)
+                            val savedUser = documentSnapshot.toObject<FirebaseUser>()
                             if (savedUser != null) {
                                 continuation.resume(savedUser.toUser().copy(userId = documentReference.id))
                             } else {

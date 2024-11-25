@@ -13,7 +13,7 @@ class SetUpUserUseCase @Inject constructor(
     private val localRepository: LocalRepository,
     private val firebaseRepository: FirebaseRepository
 ) {
-    suspend operator fun invoke(): Flow<User> = flow {
+    operator fun invoke(): Flow<User> = flow {
         // userId 확인
         val userId = localRepository.userId.firstOrNull()
         Log.d("SetUpUserUseCase", "기기에 저장된 userId $userId")
