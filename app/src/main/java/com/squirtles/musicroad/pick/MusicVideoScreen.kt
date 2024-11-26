@@ -4,6 +4,7 @@ import android.graphics.Matrix
 import android.graphics.SurfaceTexture
 import android.view.Surface
 import android.view.TextureView
+import android.widget.Toast
 import androidx.annotation.OptIn
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.tween
@@ -50,8 +51,10 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.core.content.ContextCompat.getString
 import androidx.core.graphics.toColorInt
 import androidx.media3.common.MediaItem
+import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
 import com.squirtles.domain.model.Creator
@@ -232,6 +235,16 @@ private fun MusicVideoPlayer(
                         player.prepare()
 
                         setVideoSize(width, height, textureView)
+
+                        player.addListener(object : Player.Listener {
+                            override fun onPlaybackStateChanged(state: Int) {
+                                if (state == Player.STATE_ENDED) {
+                                    Toast.makeText(context, getString(context, R.string.video_player_ended_message), Toast.LENGTH_SHORT).show()
+                                    playerPlayState.value = false
+                                    player.seekTo(0)
+                                }
+                            }
+                        })
                     }
 
                     override fun onSurfaceTextureSizeChanged(surfaceTexture: SurfaceTexture, width: Int, height: Int) {
