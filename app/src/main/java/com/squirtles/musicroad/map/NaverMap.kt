@@ -135,6 +135,12 @@ fun NaverMap(
                         }
                         true
                     }
+                    // 클러스터 마커를 클릭한 채로 configuration change 시 크기 유지
+                    if (info.tag.toString()
+                        == mapViewModel.clickedMarkerState.value.clusterPickList?.joinToString(",") { it.id }
+                    ) {
+                        mapViewModel.setClickedMarker(context, marker)
+                    }
                 }
             })
             .leafMarkerUpdater(object : DefaultLeafMarkerUpdater() {
