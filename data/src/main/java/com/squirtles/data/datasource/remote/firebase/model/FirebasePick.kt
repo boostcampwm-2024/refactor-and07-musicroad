@@ -14,7 +14,7 @@ data class FirebasePick(
     val artwork: Map<String, String>? = null,
     val comment: String? = null,
     @ServerTimestamp val createdAt: Timestamp? = null, // 등록 시 자동으로 서버 시간으로 설정되도록 합니다
-    val createdBy: String? = null,
+    val createdBy: Map<String, String>? = null,
     val externalUrl: String? = null,
     val favoriteCount: Int = 0,
     val genreNames: List<String> = emptyList(),

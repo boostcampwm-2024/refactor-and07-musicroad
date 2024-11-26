@@ -35,9 +35,11 @@ import androidx.core.graphics.toColorInt
 import coil3.compose.AsyncImage
 import coil3.request.ImageRequest
 import coil3.request.crossfade
+import com.squirtles.domain.model.Creator
 import com.squirtles.domain.model.LocationPoint
 import com.squirtles.domain.model.Pick
 import com.squirtles.domain.model.Song
+import com.squirtles.domain.model.User
 import com.squirtles.musicroad.R
 import com.squirtles.musicroad.ui.theme.Gray
 import com.squirtles.musicroad.ui.theme.MusicRoadTheme
@@ -90,7 +92,7 @@ fun InfoWindow(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = pick.createdBy,
+                        text = pick.createdBy.userName,
                         modifier = Modifier.weight(weight = 1f, fill = false),
                         color = MaterialTheme.colorScheme.onSurface,
                         overflow = TextOverflow.Ellipsis,
@@ -168,13 +170,13 @@ private fun InfoWindowPreview() {
                 ),
                 comment = "강남역 거리는 ditto 듣기 좋네요 ^-^!",
                 createdAt = "1970.01.21",
-                createdBy = "짱구",
+                createdBy = Creator(userId = "", userName = "짱구"),
                 favoriteCount = 100,
                 location = LocationPoint(1.0, 1.0),
                 musicVideoUrl = "",
             ),
             navigateToPick = { },
-            calculateDistance =  { _, _ ->
+            calculateDistance = { _, _ ->
                 TODO()
             }
         )

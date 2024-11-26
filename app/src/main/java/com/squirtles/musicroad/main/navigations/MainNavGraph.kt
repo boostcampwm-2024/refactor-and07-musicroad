@@ -21,10 +21,10 @@ import com.squirtles.musicroad.setting.SettingScreen
 
 @Composable
 fun MainNavGraph(
-    mapViewModel: MapViewModel = hiltViewModel<MapViewModel>(),
+    modifier: Modifier = Modifier,
+    mapViewModel: MapViewModel = hiltViewModel(),
     navController: NavHostController,
     navigationActions: MainNavigationActions,
-    modifier: Modifier = Modifier,
 ) {
     NavHost(
         navController = navController,
