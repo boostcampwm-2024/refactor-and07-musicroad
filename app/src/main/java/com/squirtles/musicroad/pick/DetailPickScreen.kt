@@ -137,7 +137,7 @@ fun DetailPickScreen(
 
             MusicVideoScreen(
                 pick = pick,
-                isPlaying = isPlaying,
+                swipePlayState = isPlaying,
                 modifier = swipeableModifier
                     .fillMaxSize()
                     .offset { IntOffset(0, swipeableState.offset.value.roundToInt()) }

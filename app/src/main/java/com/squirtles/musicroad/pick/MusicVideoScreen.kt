@@ -33,6 +33,8 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
@@ -67,18 +69,19 @@ import kotlinx.coroutines.launch
 @Composable
 fun MusicVideoScreen(
     pick: Pick,
-    isPlaying: Boolean,
+    swipePlayState: Boolean,
     modifier: Modifier,
     onBackClick: () -> Unit
 ) {
     val context = LocalContext.current
     val player = remember { ExoPlayer.Builder(context).build() }
+    val playerPlayState = remember { mutableStateOf(true) }
 
     Box(
         modifier = modifier
     ) {
-        MusicVideoPlayer(pick.musicVideoUrl, player, isPlaying)
-        VideoPlayerOverlay(pick, player, onBackClick)
+        MusicVideoPlayer(pick.musicVideoUrl, player, swipePlayState, playerPlayState)
+        VideoPlayerOverlay(pick, playerPlayState, onBackClick)
     }
 }
 
@@ -86,7 +89,7 @@ fun MusicVideoScreen(
 @Composable
 private fun VideoPlayerOverlay(
     pick: Pick,
-    player: ExoPlayer,
+    playerPlayState: MutableState<Boolean>,
     onBackClick: () -> Unit
 ) {
     val alpha = remember { Animatable(0f) }
@@ -143,7 +146,7 @@ private fun VideoPlayerOverlay(
         )
 
         IconButton(
-            onClick = { if (player.isPlaying) player.pause() else player.play() },
+            onClick = { playerPlayState.value = playerPlayState.value.not() },
             modifier = Modifier
                 .align(Alignment.Center)
                 .background(Black.copy(0.5f), shape = CircleShape)
@@ -151,7 +154,7 @@ private fun VideoPlayerOverlay(
             enabled = alpha.value > 0.5f
         ) {
             Icon(
-                imageVector = if (player.isPlaying) Icons.Default.Pause else Icons.Default.PlayArrow,
+                imageVector = if (playerPlayState.value) Icons.Default.Pause else Icons.Default.PlayArrow,
                 contentDescription = stringResource(id = R.string.player_play_pause_description),
                 modifier = Modifier.size(30.dp),
                 tint = White
@@ -205,7 +208,8 @@ private fun VideoPlayerOverlay(
 private fun MusicVideoPlayer(
     videoUri: String,
     player: ExoPlayer,
-    isPlaying: Boolean
+    swipePlayState: Boolean,
+    playerPlayState: MutableState<Boolean>,
 ) {
     val context = LocalContext.current
     val textureView = remember { TextureView(context) }
@@ -246,7 +250,7 @@ private fun MusicVideoPlayer(
             }
         }
     ) {
-        if (isPlaying) player.play()
+        if (swipePlayState && playerPlayState.value) player.play()
         else player.pause()
     }
 }
@@ -287,7 +291,7 @@ private fun VideoPlayerOverlayPreview() {
             location = LocationPoint(1.0, 1.0),
             musicVideoUrl = "",
         ),
-        player = ExoPlayer.Builder(LocalContext.current).build(),
+        playerPlayState = remember { mutableStateOf(false) },
         onBackClick = {}
     )
 }
