@@ -73,6 +73,7 @@ play-services-location = { module = "com.google.android.gms:play-services-locati
 
 # Material Design
 material = { group = "com.google.android.material", name = "material", version.ref = "material" }
+androidx-material-icons-extended = { module = "androidx.compose.material:material-icons-extended" }
 
 # Hilt
 inject = { group = "javax.inject", name = "javax.inject", version.ref = "inject" }

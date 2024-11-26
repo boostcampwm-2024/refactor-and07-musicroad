@@ -1,18 +1,17 @@
 package com.squirtles.musicroad.pick
 
 import android.app.Activity
+import android.util.Log
 import android.util.Size
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
@@ -47,6 +46,7 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.painterResource
@@ -68,9 +68,13 @@ import com.squirtles.domain.model.LocationPoint
 import com.squirtles.domain.model.Pick
 import com.squirtles.domain.model.Song
 import com.squirtles.musicroad.R
+import com.squirtles.musicroad.musicplayer.PlayerViewModel
+import com.squirtles.musicroad.pick.components.CommentText
+import com.squirtles.musicroad.pick.components.PickInformation
+import com.squirtles.musicroad.pick.components.SongInfo
+import com.squirtles.musicroad.pick.components.SwipeUpIcon
+import com.squirtles.musicroad.pick.components.music.MusicPlayer
 import com.squirtles.musicroad.ui.theme.Black
-import com.squirtles.musicroad.ui.theme.Dark
-import com.squirtles.musicroad.ui.theme.Gray
 import com.squirtles.musicroad.ui.theme.White
 import kotlin.math.roundToInt
 
@@ -80,6 +84,7 @@ fun DetailPickScreen(
     pickId: String,
     onBackClick: () -> Unit,
     pickViewModel: PickViewModel = hiltViewModel(),
+    playerViewModel: PlayerViewModel = hiltViewModel()
 ) {
     val screenHeight = LocalConfiguration.current.screenHeightDp.dp
     val screenHeightPx = with(LocalDensity.current) { screenHeight.toPx() }
@@ -112,11 +117,12 @@ fun DetailPickScreen(
     Box(modifier = Modifier.fillMaxSize()) {
         DetailPickScreen(
             userId = userId,
-            username = username,
+            userName = username,
             pick = pick,
             isFavorite = isFavorite,
             isMusicVideoAvailable = isMusicVideoAvailable,
             swipeableModifier = swipeableModifier,
+            playerViewModel = playerViewModel,
             onBackClick = onBackClick
         )
 
@@ -137,6 +143,10 @@ fun DetailPickScreen(
                     .offset { IntOffset(0, swipeableState.offset.value.roundToInt()) }
                     .graphicsLayer { this.alpha = alpha }
             )
+
+            LaunchedEffect(isPlaying) {
+                if (isPlaying) playerViewModel.pause()
+            }
         }
     }
 }
@@ -145,18 +155,21 @@ fun DetailPickScreen(
 @Composable
 private fun DetailPickScreen(
     userId: String,
-    username: String,
+    userName: String,
     pick: Pick,
     isFavorite: Boolean,
     isMusicVideoAvailable: Boolean,
     swipeableModifier: Modifier,
-    onBackClick: () -> Unit,
+    playerViewModel: PlayerViewModel,
+    onBackClick: () -> Unit
 ) {
     val isMine = userId == pick.createdBy
     val scrollState = rememberScrollState()
     val dynamicBackgroundColor = Color(pick.song.bgColor)
     val dynamicOnBackgroundColor = if (dynamicBackgroundColor.luminance() >= 0.5f) Black else White
     val view = LocalView.current
+    val context = LocalContext.current
+
     if (!view.isInEditMode) {
         SideEffect {
             val window = (view.context as Activity).window
@@ -172,7 +185,7 @@ private fun DetailPickScreen(
             CenterAlignedTopAppBar(
                 title = {
                     Text(
-                        text = username + stringResource(id = R.string.pick_app_bar_title_user),
+                        text = userName + stringResource(id = R.string.pick_app_bar_title_user),
                         color = dynamicOnBackgroundColor,
                         style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold)
                     )
@@ -229,16 +242,9 @@ private fun DetailPickScreen(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(10.dp),
             ) {
-                Text(
-                    text = pick.song.songName,
-                    color = dynamicOnBackgroundColor,
-                    style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold)
-                )
-
-                Text(
-                    text = pick.song.artistName,
-                    color = dynamicOnBackgroundColor,
-                    style = MaterialTheme.typography.bodyLarge
+                SongInfo(
+                    song = pick.song,
+                    dynamicOnBackgroundColor = dynamicOnBackgroundColor
                 )
 
                 AsyncImage(
@@ -254,56 +260,28 @@ private fun DetailPickScreen(
 
                 PickInformation(formattedDate = pick.createdAt, favoriteCount = pick.favoriteCount)
 
-                Text(
-                    text = pick.comment,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(100.dp)
-                        .padding(horizontal = 30.dp)
-                        .clip(shape = RoundedCornerShape(10.dp))
-                        .background(Dark)
-                        .verticalScroll(scrollState)
-                        .padding(horizontal = 12.dp, vertical = 8.dp),
-                    style = MaterialTheme.typography.bodyLarge.copy(White)
+                CommentText(
+                    comment = pick.comment,
+                    scrollState = scrollState
                 )
-            }
 
-            if (isMusicVideoAvailable) {
-                Box(
-                    modifier = swipeableModifier
-                        .fillMaxWidth()
-                        .heightIn(min = 100.dp)
-                ) {
-                    Icon(
-                        painter = painterResource(id = R.drawable.ic_swipe),
-                        contentDescription = stringResource(id = R.string.pick_swipe_icon_description),
-                        modifier = Modifier.align(Alignment.Center),
-                        tint = White
+                if (pick.song.previewUrl.isBlank().not()) {
+                    Log.d("DetailPickScreen", "Create Android View Player")
+                    MusicPlayer(
+                        context = context,
+                        previewUrl = pick.song.previewUrl,
+                        playerViewModel = playerViewModel
                     )
                 }
             }
-        }
-    }
-}
 
-@Composable
-private fun PickInformation(formattedDate: String, favoriteCount: Int) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 30.dp, vertical = 4.dp),
-        horizontalArrangement = Arrangement.spacedBy(4.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        if (formattedDate.isNotBlank()) {
-            Text(text = formattedDate, style = MaterialTheme.typography.titleMedium.copy(Gray))
-            Icon(
-                painter = painterResource(id = R.drawable.ic_favorite),
-                contentDescription = stringResource(R.string.pick_favorite_count_icon_description),
-                modifier = Modifier.padding(start = 4.dp),
-                tint = Gray
-            )
-            Text(text = "$favoriteCount", style = MaterialTheme.typography.titleMedium.copy(Gray))
+            if (isMusicVideoAvailable) {
+                SwipeUpIcon(
+                    swipeableModifier
+                        .fillMaxWidth()
+                        .heightIn(min = 100.dp)
+                )
+            }
         }
     }
 }
@@ -313,7 +291,7 @@ private fun PickInformation(formattedDate: String, favoriteCount: Int) {
 private fun DetailPickScreenPreview() {
     DetailPickScreen(
         userId = "",
-        username = "짱구",
+        userName = "짱구",
         pick = Pick(
             id = "",
             song = Song(
@@ -337,6 +315,7 @@ private fun DetailPickScreenPreview() {
         isFavorite = false,
         isMusicVideoAvailable = true,
         swipeableModifier = Modifier,
-        onBackClick = {}
+        playerViewModel = PlayerViewModel(),
+        onBackClick = {},
     )
 }

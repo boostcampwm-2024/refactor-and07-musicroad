@@ -40,8 +40,8 @@ class MapViewModel @Inject constructor(
     private val _picks: MutableMap<String, Pick> = mutableMapOf() // key: pickId, value: Pick
     val picks: Map<String, Pick> get() = _picks
 
-    private val _pickCount = MutableStateFlow(0)
-    val pickCount = _pickCount.asStateFlow()
+    private val _nearPicks = MutableStateFlow<List<Pick>>(emptyList())
+    val nearPicks = _nearPicks.asStateFlow()
 
     private val _clickedMarkerState = MutableStateFlow(MarkerState())
     val clickedMarkerState = _clickedMarkerState.asStateFlow()
@@ -158,9 +158,9 @@ class MapViewModel @Inject constructor(
         viewModelScope.launch {
             fetchPickInAreaUseCase(location.latitude, location.longitude, notiRadius)
                 .onSuccess {
-                    _pickCount.emit(it.count())
+                    _nearPicks.emit(it)
                 }.onFailure {
-                    _pickCount.emit(0)
+                    _nearPicks.emit(emptyList())
                 }
         }
     }

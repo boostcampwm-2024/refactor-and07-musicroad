@@ -106,12 +106,12 @@ class CreatePickViewModel @Inject constructor(
     ) {
         _selectedSong?.let { song ->
             viewModelScope.launch {
-                val musicVideoUrl = getMusicVideoUrlUseCase(song)
-
                 if (lastLocation == null) {
                     /* TODO: DEFAULT 인 경우 -> LocalDataSource 위치 데이터 못 불러옴 */
                     return@launch
                 }
+
+                val musicVideoUrl = getMusicVideoUrlUseCase(song)
 
                 /* 등록 결과 - pick ID 담긴 Result */
                 /* FIXME : createdBy 임시값 */
