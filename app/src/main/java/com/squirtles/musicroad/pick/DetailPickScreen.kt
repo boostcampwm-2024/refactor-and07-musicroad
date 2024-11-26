@@ -7,12 +7,10 @@ import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
@@ -64,13 +62,17 @@ import androidx.wear.compose.material.FractionalThreshold
 import androidx.wear.compose.material.rememberSwipeableState
 import androidx.wear.compose.material.swipeable
 import coil3.compose.AsyncImage
+import com.squirtles.domain.model.Creator
 import com.squirtles.domain.model.LocationPoint
 import com.squirtles.domain.model.Pick
 import com.squirtles.domain.model.Song
 import com.squirtles.musicroad.R
+import com.squirtles.musicroad.musicplayer.PlayerViewModel
+import com.squirtles.musicroad.pick.components.CommentText
+import com.squirtles.musicroad.pick.components.PickInformation
+import com.squirtles.musicroad.pick.components.SongInfo
+import com.squirtles.musicroad.pick.components.SwipeUpIcon
 import com.squirtles.musicroad.ui.theme.Black
-import com.squirtles.musicroad.ui.theme.Dark
-import com.squirtles.musicroad.ui.theme.Gray
 import com.squirtles.musicroad.ui.theme.White
 import kotlin.math.roundToInt
 
@@ -80,6 +82,7 @@ fun DetailPickScreen(
     pickId: String,
     onBackClick: () -> Unit,
     pickViewModel: PickViewModel = hiltViewModel(),
+    playerViewModel: PlayerViewModel = hiltViewModel()
 ) {
     val screenHeight = LocalConfiguration.current.screenHeightDp.dp
     val screenHeightPx = with(LocalDensity.current) { screenHeight.toPx() }
@@ -109,8 +112,8 @@ fun DetailPickScreen(
 
     Box(modifier = Modifier.fillMaxSize()) {
         DetailPickScreen(
-            userId = userId,
-            userName = username,
+            userId = pick.createdBy.userId,
+            userName = pick.createdBy.userName,
             pick = pick,
             isFavorite = isFavorite,
             isMusicVideoAvailable = isMusicVideoAvailable,
@@ -161,7 +164,6 @@ private fun DetailPickScreen(
     val dynamicBackgroundColor = Color(pick.song.bgColor)
     val dynamicOnBackgroundColor = if (dynamicBackgroundColor.luminance() >= 0.5f) Black else White
     val view = LocalView.current
-    val context = LocalContext.current
 
     if (!view.isInEditMode) {
         SideEffect {
