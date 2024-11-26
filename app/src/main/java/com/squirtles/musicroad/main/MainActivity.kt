@@ -20,6 +20,8 @@ import androidx.navigation.compose.rememberNavController
 import com.squirtles.musicroad.R
 import com.squirtles.musicroad.ui.theme.MusicRoadTheme
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.TimeoutCancellationException
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeout
 
@@ -66,74 +68,44 @@ class MainActivity : AppCompatActivity() {
     private fun setKeepOnScreenCondition(splashScreen: SplashScreen) {
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
-                mainViewModel.loadingState.collect { state ->
-                    when (state) {
-                        is LoadingState.Loading -> {
-                            withTimeout(10_000L) {
+                try {
+                    withTimeout(10_000L) {
+                        mainViewModel.loadingState.collect { state ->
+                            when (state) {
+                                is LoadingState.Loading -> {
+                                    splashScreen.setKeepOnScreenCondition { true }
+                                }
 
+                                is LoadingState.Success -> {
+                                    Log.d("MainActivity", "Success: ${state.userId}")
+                                    splashScreen.setKeepOnScreenCondition { false }
+                                    cancel()
+                                }
+
+                                is LoadingState.NetworkError -> {
+                                    Toast.makeText(this@MainActivity, getString(R.string.main_network_error_message), Toast.LENGTH_LONG).show()
+                                    finish()
+                                }
+
+                                is LoadingState.UserNotFoundError -> {
+                                    Toast.makeText(this@MainActivity, getString(R.string.main_user_not_found_message), Toast.LENGTH_LONG).show()
+                                    finish()
+                                }
+
+                                is LoadingState.CreatedUserError -> {
+                                    Toast.makeText(this@MainActivity, getString(R.string.main_create_user_fail_message), Toast.LENGTH_LONG).show()
+                                    finish()
+                                }
                             }
                         }
-
-                        is LoadingState.Success -> {
-                            Log.d("MainActivity", "Success: ${state.userId}")
-                            splashScreen.setKeepOnScreenCondition { false }
-                        }
-
-                        is LoadingState.NetworkError -> {
-                            Toast.makeText(this@MainActivity, getString(R.string.main_network_error_message), Toast.LENGTH_LONG).show()
-                            finish()
-                        }
-
-                        is LoadingState.UserNotFoundError -> {
-                            Toast.makeText(this@MainActivity, getString(R.string.main_user_not_found_message), Toast.LENGTH_LONG).show()
-                            finish()
-                        }
-
-                        is LoadingState.CreatedUserError -> {
-                            Toast.makeText(this@MainActivity, getString(R.string.main_create_user_fail_message), Toast.LENGTH_LONG).show()
-                            finish()
-                        }
                     }
+                } catch (e: TimeoutCancellationException) {
+                    Toast.makeText(this@MainActivity, getString(R.string.main_network_error_message), Toast.LENGTH_LONG).show()
+                    finish()
                 }
             }
         }
     }
-
-//    private fun setKeepOnScreenCondition(splashScreen: SplashScreen) {
-//        lifecycleScope.launch {
-//            try {
-//                launch {
-//                    mainViewModel.error.collect { exception ->
-//                        exception?.let { throw it }
-//                    }
-//                }
-//
-//                withTimeout(10_000L) {
-//                    mainViewModel.user
-//                        .onEach { user ->
-//                            splashScreen.setKeepOnScreenCondition { user == null }
-//                            if (user != null) cancel() // 유저 정보 불러오면 타임아웃 취소
-//                        }
-//                        .launchIn(this)
-//                }
-//            } catch (e: Exception) {
-//                when (e) {
-//                    is FirebaseException.UserNotFoundException -> {
-//                        Toast.makeText(this@MainActivity, getString(R.string.main_user_not_found_message), Toast.LENGTH_LONG)
-//                            .show()
-//                        finish()
-//                    }
-//
-//                    is TimeoutCancellationException,
-//                    is com.google.firebase.FirebaseException -> {
-//                        Toast.makeText(this@MainActivity, getString(R.string.main_network_error_message), Toast.LENGTH_LONG)
-//                            .show()
-//                        finish()
-//                    }
-//                }
-//            }
-//        }
-//    }
 
     private fun checkSelfPermission(): Boolean {
         return PermissionChecker.checkSelfPermission(this, PERMISSIONS[0]) ==
