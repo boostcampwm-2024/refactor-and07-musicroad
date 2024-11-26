@@ -18,6 +18,8 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.compose.rememberNavController
 import com.squirtles.musicroad.R
+import com.squirtles.musicroad.main.navigations.MainNavGraph
+import com.squirtles.musicroad.main.navigations.MainNavigationActions
 import com.squirtles.musicroad.ui.theme.MusicRoadTheme
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.TimeoutCancellationException

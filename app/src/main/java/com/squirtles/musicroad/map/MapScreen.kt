@@ -1,6 +1,5 @@
 package com.squirtles.musicroad.map
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -9,24 +8,24 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBars
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.platform.LocalConfiguration
-import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.squirtles.musicroad.R
-import com.squirtles.musicroad.ui.theme.MusicRoadTheme
-import com.squirtles.musicroad.ui.theme.White
+import com.squirtles.musicroad.map.components.BottomNavigation
+import com.squirtles.musicroad.map.components.InfoWindow
+import com.squirtles.musicroad.map.components.PickNotificationBanner
+import com.squirtles.musicroad.musicplayer.PlayerViewModel
 
 @Composable
 fun MapScreen(
@@ -34,12 +33,29 @@ fun MapScreen(
     onFavoriteClick: () -> Unit,
     onCenterClick: () -> Unit,
     onSettingClick: () -> Unit,
-    onInfoWindowClick: (String) -> Unit
+    onInfoWindowClick: (String) -> Unit,
+    playerViewModel: PlayerViewModel = hiltViewModel()
 ) {
-    val pickCount by mapViewModel.pickCount.collectAsStateWithLifecycle()
+    val nearPicks by mapViewModel.nearPicks.collectAsStateWithLifecycle()
     val pickMarkers by mapViewModel.pickMarkers.collectAsStateWithLifecycle()
     val selectedPickState by mapViewModel.selectedPickState.collectAsStateWithLifecycle()
     val lastLocation by mapViewModel.lastLocation.collectAsStateWithLifecycle()
+
+    val playerState by playerViewModel.playerState.collectAsStateWithLifecycle()
+
+    val context = LocalContext.current
+
+    var isPlaying: Boolean by remember { mutableStateOf(false) }
+
+    LaunchedEffect(nearPicks) {
+        if (nearPicks.isNotEmpty()) {
+            playerViewModel.readyPlayerSetList(context, nearPicks.map { it.song.previewUrl })
+        }
+    }
+
+    LaunchedEffect(playerState) {
+        isPlaying = playerState.isPlaying
+    }
 
     Scaffold(
         contentWindowInsets = WindowInsets.navigationBars
@@ -56,8 +72,14 @@ fun MapScreen(
                 selectedPickState = selectedPickState
             )
 
-            if (pickCount > 0) {
-                PickNotificationBanner(pickCount)
+            if (nearPicks.isNotEmpty()) {
+                PickNotificationBanner(
+                    nearPicks = nearPicks,
+                    isPlaying = isPlaying,
+                    onClick = {
+                        playerViewModel.shuffleNextItem()
+                    }
+                )
             }
 
             Column(
@@ -69,6 +91,7 @@ fun MapScreen(
                     InfoWindow(
                         pick,
                         navigateToPick = { pickId ->
+                            playerViewModel.pause()
                             onInfoWindowClick(pickId)
                         },
                         calculateDistance = { lat, lng ->
@@ -87,37 +110,21 @@ fun MapScreen(
                 BottomNavigation(
                     modifier = Modifier.padding(bottom = 16.dp),
                     lastLocation = lastLocation,
-                    onFavoriteClick = onFavoriteClick,
+                    onFavoriteClick = {
+                        playerViewModel.pause()
+                        onFavoriteClick()
+                    },
                     onCenterClick = {
+                        playerViewModel.pause()
                         onCenterClick()
                         mapViewModel.saveCurLocationForced()
                     },
-                    onSettingClick = onSettingClick
+                    onSettingClick = {
+                        playerViewModel.pause()
+                        onSettingClick()
+                    }
                 )
             }
         }
-    }
-}
-
-@Composable
-fun PickNotificationBanner(pickCount: Int) {
-    Box(Modifier.fillMaxSize()) {
-        Text(
-            text = stringResource(id = R.string.map_pick_notification, pickCount),
-            modifier = Modifier
-                .align(Alignment.TopCenter)
-                .offset(y = (LocalConfiguration.current.screenHeightDp * 0.08).dp)
-                .clip(RoundedCornerShape(30.dp))
-                .background(White.copy(alpha = 0.8f))
-                .padding(vertical = 10.dp, horizontal = 23.dp)
-        )
-    }
-}
-
-@Preview
-@Composable
-private fun PickNotificationBannerPreview() {
-    MusicRoadTheme {
-        PickNotificationBanner(1)
     }
 }
