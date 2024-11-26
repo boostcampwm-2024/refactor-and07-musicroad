@@ -1,6 +1,7 @@
 package com.squirtles.musicroad.pick
 
 import android.app.Activity
+import android.util.Log
 import android.util.Size
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.Orientation
@@ -45,6 +46,7 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.painterResource
@@ -72,6 +74,7 @@ import com.squirtles.musicroad.pick.components.CommentText
 import com.squirtles.musicroad.pick.components.PickInformation
 import com.squirtles.musicroad.pick.components.SongInfo
 import com.squirtles.musicroad.pick.components.SwipeUpIcon
+import com.squirtles.musicroad.pick.components.music.MusicPlayer
 import com.squirtles.musicroad.ui.theme.Black
 import com.squirtles.musicroad.ui.theme.White
 import kotlin.math.roundToInt
@@ -164,6 +167,7 @@ private fun DetailPickScreen(
     val dynamicBackgroundColor = Color(pick.song.bgColor)
     val dynamicOnBackgroundColor = if (dynamicBackgroundColor.luminance() >= 0.5f) Black else White
     val view = LocalView.current
+    val context = LocalContext.current
 
     if (!view.isInEditMode) {
         SideEffect {
@@ -258,6 +262,15 @@ private fun DetailPickScreen(
                 CommentText(
                     comment = pick.comment,
                     scrollState = scrollState
+                )
+            }
+
+            if (pick.song.previewUrl.isBlank().not()) {
+                Log.d("DetailPickScreen", "Create Android View Player")
+                MusicPlayer(
+                    context = context,
+                    previewUrl = pick.song.previewUrl,
+                    playerViewModel = playerViewModel
                 )
             }
 
