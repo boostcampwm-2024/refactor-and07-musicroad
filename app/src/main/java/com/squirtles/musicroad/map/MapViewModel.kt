@@ -22,7 +22,8 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 data class MarkerState(
-    val prevClickedMarker: Marker? = null, // 이전에 클릭한 마커
+    val prevClickedMarker: Marker? = null, // 이전에 클릭한 마커(클러스터 마커 & 단말 마커)
+    val clusterPickList: List<Pick>? = null, // 클러스터 마커의 픽 정보
     val curPickId: String? = null // 현재 선택한 마커의 pick id
 )
 
@@ -100,14 +101,24 @@ class MapViewModel @Inject constructor(
         }
     }
 
-    fun setClickedMarkerState(context: Context, marker: Marker, pickId: String) {
+    fun setClickedMarkerState(
+        context: Context,
+        marker: Marker,
+        clusterTag: String? = null,
+        pickId: String? = null
+    ) {
         viewModelScope.launch {
             val prevClickedMarker = _clickedMarkerState.value.prevClickedMarker
             if (prevClickedMarker == marker) return@launch
 
             prevClickedMarker?.toggleSizeByClick(context, false)
             marker.toggleSizeByClick(context, true)
-            _clickedMarkerState.emit(MarkerState(marker, pickId))
+            val pickList = clusterTag?.let {
+                val pickIds = it.split(",")
+                pickIds.mapNotNull { id -> picks[id] }
+            }
+            Log.d("test", "pickList: $pickList")
+            _clickedMarkerState.emit(MarkerState(marker, pickList, pickId))
         }
     }
 
@@ -115,7 +126,7 @@ class MapViewModel @Inject constructor(
         viewModelScope.launch {
             val prevClickedMarker = _clickedMarkerState.value.prevClickedMarker
             prevClickedMarker?.toggleSizeByClick(context, false)
-            _clickedMarkerState.emit(MarkerState(null, null))
+            _clickedMarkerState.emit(MarkerState(null, null, null))
         }
     }
 

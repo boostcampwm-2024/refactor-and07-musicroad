@@ -37,7 +37,7 @@ fun MainNavGraph(
                 onFavoriteClick = navigationActions.navigateToFavorite,
                 onCenterClick = navigationActions.navigateToSearch,
                 onSettingClick = navigationActions.navigateToSetting,
-                onInfoWindowClick = { pickId ->
+                onPickSummaryClick = { pickId ->
                     navigationActions.navigateToPickDetail(pickId)
                 }
             )

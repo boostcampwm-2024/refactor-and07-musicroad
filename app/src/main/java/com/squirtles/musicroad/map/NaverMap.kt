@@ -102,13 +102,24 @@ fun NaverMap(
                     }
                     marker.icon = OverlayImage.fromView(markerIconView)
                     marker.onClickListener = Overlay.OnClickListener {
+                        marker.map?.let { map ->
+                            setCameraToMarker(
+                                map = map,
+                                clickedMarkerPosition = marker.position
+                            )
+                            mapViewModel.setClickedMarkerState(
+                                context = context,
+                                marker = marker,
+                                clusterTag = info.tag.toString()
+                            )
+                        }
                         true
                     }
                 }
             })
             .leafMarkerUpdater(object : DefaultLeafMarkerUpdater() {
                 override fun updateLeafMarker(info: LeafMarkerInfo, marker: Marker) {
-                    super.updateLeafMarker(info, marker)
+                    super.updateLeafMarker(info, marker) // 얘 있으니까 단말로 될 때 가끔 초록 마커가 보였다가 커스텀 마커가 보여지는 듯?
 
                     Log.d("test", "updateLeafMarker - info: ${info.key}")
                     val pick = (info.key as MarkerKey).pick

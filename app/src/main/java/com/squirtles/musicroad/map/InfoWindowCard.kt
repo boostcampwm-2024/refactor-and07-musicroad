@@ -67,7 +67,7 @@ fun InfoWindow(
                     .data(pick.song.getImageUrlWithSize(RequestImageSize))
                     .crossfade(true)
                     .build(),
-                contentDescription = stringResource(R.string.map_info_window_album_description),
+                contentDescription = stringResource(R.string.map_album_image_description),
                 modifier = Modifier
                     .size(90.dp)
                     .clip(RoundedCornerShape(4.dp)),
