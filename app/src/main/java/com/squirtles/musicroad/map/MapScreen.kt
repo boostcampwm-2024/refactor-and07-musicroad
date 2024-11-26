@@ -166,7 +166,8 @@ fun MapScreen(
                     },
                     modifier = Modifier
                         .fillMaxHeight()
-                        .padding(WindowInsets.statusBars.asPaddingValues())
+                        .padding(WindowInsets.statusBars.asPaddingValues()),
+                    containerColor = MaterialTheme.colorScheme.surface
                 ) {
                     clickedMarkerState.clusterPickList?.let { pickList ->
                         LazyColumn {
