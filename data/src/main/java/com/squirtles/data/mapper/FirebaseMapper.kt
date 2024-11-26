@@ -7,9 +7,12 @@ import com.google.firebase.Timestamp
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.GeoPoint
 import com.squirtles.data.datasource.remote.firebase.model.FirebasePick
+import com.squirtles.data.datasource.remote.firebase.model.FirebaseUser
+import com.squirtles.domain.model.Creator
 import com.squirtles.domain.model.LocationPoint
 import com.squirtles.domain.model.Pick
 import com.squirtles.domain.model.Song
+import com.squirtles.domain.model.User
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -34,7 +37,10 @@ internal fun FirebasePick.toPick(): Pick = Pick(
     ),
     comment = comment.toString(),
     favoriteCount = favoriteCount,
-    createdBy = createdBy.toString(),
+    createdBy = Creator(
+        userId = createdBy?.get("userId") ?: "",
+        userName = createdBy?.get("userName") ?: ""
+    ),
     createdAt = createdAt?.toDate()?.formatTimestamp() ?: "",
     location = LocationPoint(
         latitude = location?.latitude ?: 0.0,
@@ -52,7 +58,7 @@ internal fun Pick.toFirebasePick(): FirebasePick = FirebasePick(
     artistName = song.artistName,
     artwork = mapOf("url" to song.imageUrl, "bgColor" to song.bgColor.toRgbString()),
     comment = comment,
-    createdBy = createdBy,
+    createdBy = mapOf("userId" to createdBy.userId, "userName" to createdBy.userName),
     externalUrl = song.externalUrl,
     favoriteCount = favoriteCount,
     genreNames = song.genreNames,
@@ -62,6 +68,12 @@ internal fun Pick.toFirebasePick(): FirebasePick = FirebasePick(
     musicVideoUrl = musicVideoUrl,
     songId = song.id,
     songName = song.songName,
+)
+
+internal fun FirebaseUser.toUser(): User = User(
+    userId = "",
+    userName = name ?: "",
+    myPicks = myPicks
 )
 
 private fun Int.toRgbString(): String {

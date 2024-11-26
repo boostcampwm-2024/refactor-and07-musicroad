@@ -1,8 +1,9 @@
 package com.squirtles.data.repository
 
-import com.squirtles.data.exception.FirebaseException
 import com.squirtles.domain.datasource.FirebaseRemoteDataSource
+import com.squirtles.domain.exception.FirebaseException
 import com.squirtles.domain.model.Pick
+import com.squirtles.domain.model.User
 import com.squirtles.domain.repository.FirebaseRepository
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -11,6 +12,18 @@ import javax.inject.Singleton
 class FirebaseRepositoryImpl @Inject constructor(
     private val firebaseRemoteDataSource: FirebaseRemoteDataSource
 ) : FirebaseRepository {
+
+    override suspend fun createUser(): Result<User> {
+        return handleResult(FirebaseException.CreatedUserFailedException()) {
+            firebaseRemoteDataSource.createUser()
+        }
+    }
+
+    override suspend fun fetchUser(userId: String): Result<User> {
+        return handleResult(FirebaseException.UserNotFoundException()) {
+            firebaseRemoteDataSource.fetchUser(userId)
+        }
+    }
 
     override suspend fun fetchPick(pickID: String): Result<Pick> {
         return handleResult(FirebaseException.NoSuchPickException()) {
