@@ -133,14 +133,16 @@ fun DetailPickScreen(
         if (isMusicVideoAvailable && showMusicVideo) {
             val isPlaying = swipeableState.offset.value < contentHeightPx * 0.8f
             val alpha = (1 - (swipeableState.offset.value / contentHeightPx)).coerceIn(0f, 1f)
+            if (swipeableState.offset.value.roundToInt() >= contentHeightPx) showMusicVideo = false
 
             MusicVideoScreen(
-                videoUri = pick.musicVideoUrl,
+                pick = pick,
                 isPlaying = isPlaying,
                 modifier = swipeableModifier
                     .fillMaxSize()
                     .offset { IntOffset(0, swipeableState.offset.value.roundToInt()) }
-                    .graphicsLayer { this.alpha = alpha }
+                    .graphicsLayer { this.alpha = alpha },
+                onBackClick = onBackClick
             )
 
             LaunchedEffect(isPlaying) {
