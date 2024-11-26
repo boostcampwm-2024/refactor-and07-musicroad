@@ -188,7 +188,10 @@ fun MapScreen(
                                             }
                                         }
                                     },
-                                    navigateToPickDetail = { onPickSummaryClick(pick.id) }
+                                    navigateToPickDetail = {
+                                        playerViewModel.pause()
+                                        onPickSummaryClick(pick.id)
+                                    }
                                 )
                             }
                         }

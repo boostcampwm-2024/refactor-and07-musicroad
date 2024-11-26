@@ -83,6 +83,14 @@ fun NaverMap(
 
     DisposableEffect(Unit) {
         clusterer = Clusterer.ComplexBuilder<MarkerKey>()
+            .thresholdStrategy { zoom ->
+                when {
+                    zoom >= 16 -> 10.0
+                    zoom >= 13 -> 20.0
+                    zoom >= 11 -> 40.0
+                    else -> 70.0
+                }
+            }
             .tagMergeStrategy { cluster ->
                 cluster.children.map { it.tag }.joinToString(",")
             }
