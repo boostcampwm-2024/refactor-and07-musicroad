@@ -5,7 +5,10 @@ import android.graphics.SurfaceTexture
 import android.view.Surface
 import android.view.TextureView
 import androidx.annotation.OptIn
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -31,9 +34,12 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -54,6 +60,8 @@ import com.squirtles.musicroad.R
 import com.squirtles.musicroad.ui.theme.Black
 import com.squirtles.musicroad.ui.theme.Gray
 import com.squirtles.musicroad.ui.theme.White
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 @OptIn(UnstableApi::class)
 @Composable
@@ -63,11 +71,14 @@ fun MusicVideoScreen(
     modifier: Modifier,
     onBackClick: () -> Unit
 ) {
+    val context = LocalContext.current
+    val player = remember { ExoPlayer.Builder(context).build() }
+
     Box(
         modifier = modifier
     ) {
-        MusicVideoPlayer(pick.musicVideoUrl, isPlaying)
-        VideoPlayerOverlay(pick, isPlaying, onBackClick)
+        MusicVideoPlayer(pick.musicVideoUrl, player, isPlaying)
+        VideoPlayerOverlay(pick, player, onBackClick)
     }
 }
 
@@ -75,13 +86,33 @@ fun MusicVideoScreen(
 @Composable
 private fun VideoPlayerOverlay(
     pick: Pick,
-    isPlaying: Boolean,
+    player: ExoPlayer,
     onBackClick: () -> Unit
 ) {
+    val alpha = remember { Animatable(0f) }
+    val coroutineScope = rememberCoroutineScope()
+
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(Black.copy(0.5f))
+            .graphicsLayer { this.alpha = alpha.value }
+            .background(Black.copy(alpha = alpha.value.coerceAtMost(0.5f)))
+            .pointerInput(Unit) {
+                detectTapGestures(
+                    onTap = {
+                        coroutineScope.launch {
+                            // Fade In
+                            alpha.animateTo(1.0f, animationSpec = tween(durationMillis = 300))
+
+                            // 대기
+                            delay(3_000L)
+
+                            // Fade Out
+                            alpha.animateTo(0f, animationSpec = tween(durationMillis = 300))
+                        }
+                    }
+                )
+            }
     ) {
         CenterAlignedTopAppBar(
             title = {
@@ -95,7 +126,10 @@ private fun VideoPlayerOverlay(
                 .statusBarsPadding()
                 .align(Alignment.TopCenter),
             navigationIcon = {
-                IconButton(onClick = onBackClick) {
+                IconButton(
+                    onClick = onBackClick,
+                    enabled = alpha.value > 0.5f
+                ) {
                     Icon(
                         imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                         contentDescription = stringResource(id = R.string.pick_app_bar_back_description),
@@ -109,14 +143,15 @@ private fun VideoPlayerOverlay(
         )
 
         IconButton(
-            onClick = { /*TODO*/ },
+            onClick = { if (player.isPlaying) player.pause() else player.play() },
             modifier = Modifier
                 .align(Alignment.Center)
                 .background(Black.copy(0.5f), shape = CircleShape)
                 .padding(8.dp),
+            enabled = alpha.value > 0.5f
         ) {
             Icon(
-                imageVector = if (isPlaying) Icons.Default.Pause else Icons.Default.PlayArrow,
+                imageVector = if (player.isPlaying) Icons.Default.Pause else Icons.Default.PlayArrow,
                 contentDescription = stringResource(id = R.string.player_play_pause_description),
                 modifier = Modifier.size(30.dp),
                 tint = White
@@ -169,10 +204,10 @@ private fun VideoPlayerOverlay(
 @Composable
 private fun MusicVideoPlayer(
     videoUri: String,
+    player: ExoPlayer,
     isPlaying: Boolean
 ) {
     val context = LocalContext.current
-    val player = remember { ExoPlayer.Builder(context).build() }
     val textureView = remember { TextureView(context) }
 
     DisposableEffect(Unit) {
@@ -252,7 +287,7 @@ private fun VideoPlayerOverlayPreview() {
             location = LocationPoint(1.0, 1.0),
             musicVideoUrl = "",
         ),
-        isPlaying = true,
+        player = ExoPlayer.Builder(LocalContext.current).build(),
         onBackClick = {}
     )
 }
