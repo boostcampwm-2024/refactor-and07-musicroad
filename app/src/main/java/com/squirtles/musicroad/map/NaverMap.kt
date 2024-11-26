@@ -5,7 +5,6 @@ import android.app.Activity
 import android.content.Context
 import android.graphics.PointF
 import android.location.Location
-import android.util.Log
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -102,7 +101,6 @@ fun NaverMap(
                 override fun updateClusterMarker(info: ClusterMarkerInfo, marker: Marker) {
                     super.updateClusterMarker(info, marker)
 
-                    Log.d("test", "updateClustererMarker - info: ${info.tag}")
                     // 클릭된 마커가 클러스터 마커 안에 포함되면 클릭된 마커 해제
                     mapViewModel.clickedMarkerState.value.curPickId?.let { curPickId ->
                         if (info.tag.toString().contains(curPickId)) {
@@ -145,9 +143,8 @@ fun NaverMap(
             })
             .leafMarkerUpdater(object : DefaultLeafMarkerUpdater() {
                 override fun updateLeafMarker(info: LeafMarkerInfo, marker: Marker) {
-                    super.updateLeafMarker(info, marker) // 얘 있으니까 단말로 될 때 가끔 초록 마커가 보였다가 커스텀 마커가 보여지는 듯?
+                    super.updateLeafMarker(info, marker)
 
-                    Log.d("test", "updateLeafMarker - info: ${info.key}")
                     val pick = (info.key as MarkerKey).pick
                     val leafMarkerIconView = LeafMarkerIconView(context).apply {
                         setPaintColor(Blue.toArgb())
@@ -166,7 +163,6 @@ fun NaverMap(
                                     pickId = pick.id
                                 )
                             }
-                            Log.d("test", "map: ${marker.map}, marker: ${marker.position}, pick: $pick")
                             true
                         }
                         // 단말 마커를 클릭한 채로 configuration change 시 크기 유지
