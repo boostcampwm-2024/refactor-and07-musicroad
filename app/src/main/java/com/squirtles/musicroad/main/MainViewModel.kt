@@ -22,7 +22,7 @@ sealed class LoadingState {
 
 @HiltViewModel
 class MainViewModel @Inject constructor(
-    private val getUserIdFromLocalStorageUseCase: GetUserIdFromLocalStorageUseCase,
+    getUserIdFromLocalStorageUseCase: GetUserIdFromLocalStorageUseCase,
     private val fetchUserUseCase: FetchUserUseCase,
     private val createUserUseCase: CreateUserUseCase
 ) : ViewModel() {
