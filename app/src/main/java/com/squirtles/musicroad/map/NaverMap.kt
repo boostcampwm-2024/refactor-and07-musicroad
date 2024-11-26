@@ -46,11 +46,15 @@ import com.naver.maps.map.overlay.Overlay
 import com.naver.maps.map.overlay.OverlayImage
 import com.naver.maps.map.util.FusedLocationSource
 import com.squirtles.musicroad.R
-import com.squirtles.musicroad.map.marker.MarkerIconView
+import com.squirtles.musicroad.map.marker.ClusterMarkerIconView
+import com.squirtles.musicroad.map.marker.DensityType
+import com.squirtles.musicroad.map.marker.LeafMarkerIconView
 import com.squirtles.musicroad.map.marker.MarkerKey
+import com.squirtles.musicroad.ui.theme.Black
 import com.squirtles.musicroad.ui.theme.Blue
 import com.squirtles.musicroad.ui.theme.Primary
 import com.squirtles.musicroad.ui.theme.Purple15
+import com.squirtles.musicroad.ui.theme.White
 import kotlinx.coroutines.launch
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
@@ -105,10 +109,18 @@ fun NaverMap(
                             mapViewModel.resetClickedMarkerState(context)
                         }
                     }
-                    val markerIconView = MarkerIconView(context).apply {
-                        setPaintColor(Blue.toArgb())
+                    val densityType = when {
+                        info.size < 10 -> DensityType.LOW
+                        info.size < 100 -> DensityType.MEDIUM
+                        else -> DensityType.HIGH
                     }
-                    marker.icon = OverlayImage.fromView(markerIconView)
+                    val captionColor = when {
+                        densityType == DensityType.LOW -> Black
+                        else -> White
+                    }
+                    val clusterMarkerIconView = ClusterMarkerIconView(context, densityType)
+                    marker.icon = OverlayImage.fromView(clusterMarkerIconView)
+                    marker.captionColor = captionColor.toArgb()
                     marker.onClickListener = Overlay.OnClickListener {
                         marker.map?.let { map ->
                             setCameraToMarker(
@@ -131,11 +143,11 @@ fun NaverMap(
 
                     Log.d("test", "updateLeafMarker - info: ${info.key}")
                     val pick = (info.key as MarkerKey).pick
-                    val markerIconView = MarkerIconView(context).apply {
+                    val leafMarkerIconView = LeafMarkerIconView(context).apply {
                         setPaintColor(Blue.toArgb())
                     }
-                    markerIconView.setLeafMarkerIcon(pick) {
-                        marker.icon = OverlayImage.fromView(markerIconView)
+                    leafMarkerIconView.setLeafMarkerIcon(pick) {
+                        marker.icon = OverlayImage.fromView(leafMarkerIconView)
                         marker.setOnClickListener {
                             marker.map?.let { map ->
                                 setCameraToMarker(

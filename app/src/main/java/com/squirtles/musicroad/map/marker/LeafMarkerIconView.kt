@@ -17,7 +17,7 @@ import coil3.toBitmap
 import coil3.transform.CircleCropTransformation
 import com.squirtles.domain.model.Pick
 
-class MarkerIconView(
+class LeafMarkerIconView(
     context: Context,
     attrs: AttributeSet? = null
 ) : View(context, attrs) {
@@ -99,8 +99,6 @@ class MarkerIconView(
     private fun Int.dpToPx() = (this * resources.displayMetrics.density).toInt()
 
     companion object {
-        private const val TAG_LOG = "MarkerIconView"
-
         private const val STROKE_WIDTH = 8f
         private const val MARKER_WIDTH = 40
         private const val MARKER_HEIGHT = 50
