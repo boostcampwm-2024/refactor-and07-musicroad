@@ -263,15 +263,15 @@ private fun DetailPickScreen(
                     comment = pick.comment,
                     scrollState = scrollState
                 )
-            }
 
-            if (pick.song.previewUrl.isBlank().not()) {
-                Log.d("DetailPickScreen", "Create Android View Player")
-                MusicPlayer(
-                    context = context,
-                    previewUrl = pick.song.previewUrl,
-                    playerViewModel = playerViewModel
-                )
+                if (pick.song.previewUrl.isBlank().not()) {
+                    Log.d("DetailPickScreen", "Create Android View Player")
+                    MusicPlayer(
+                        context = context,
+                        previewUrl = pick.song.previewUrl,
+                        playerViewModel = playerViewModel
+                    )
+                }
             }
 
             if (isMusicVideoAvailable) {
