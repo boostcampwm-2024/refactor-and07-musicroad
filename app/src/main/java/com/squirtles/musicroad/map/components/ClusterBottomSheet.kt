@@ -27,7 +27,11 @@ import androidx.compose.ui.graphics.painter.ColorPainter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import coil3.request.ImageRequest
@@ -55,6 +59,29 @@ fun ClusterBottomSheet(
         containerColor = MaterialTheme.colorScheme.surface
     ) {
         clusterPickList?.let { pickList ->
+            Text(
+                text = buildAnnotatedString {
+                    withStyle(
+                        SpanStyle(
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+                    ) {
+                        append("전체 ")
+                    }
+                    withStyle(
+                        SpanStyle(
+                            color = MaterialTheme.colorScheme.primary,
+                            fontWeight = FontWeight.Bold
+                        )
+                    ) {
+                        append("${pickList.size}")
+                    }
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(start = DEFAULT_PADDING),
+                style = MaterialTheme.typography.titleMedium
+            )
             LazyColumn {
                 items(
                     items = pickList,
@@ -63,8 +90,8 @@ fun ClusterBottomSheet(
                     BottomSheetItem(
                         song = pick.song,
                         pickLocation = pick.location,
-                        // TODO: createdBy
-                        // TODO: comment
+                        createdUserName = pick.createdBy.userName,
+                        comment = pick.comment,
                         calculateDistance = calculateDistance,
                         onClickItem = { onClickItem(pick.id) }
                     )
@@ -79,13 +106,16 @@ fun BottomSheetItem(
     song: Song,
     pickLocation: LocationPoint,
     calculateDistance: (Double, Double) -> String,
+    createdUserName: String,
+    comment: String,
     onClickItem: () -> Unit
 ) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .clickable { onClickItem() }
-            .padding(horizontal = DEFAULT_PADDING, vertical = DEFAULT_PADDING / 2)
+            .padding(horizontal = DEFAULT_PADDING, vertical = DEFAULT_PADDING / 2),
+        verticalAlignment = Alignment.CenterVertically
     ) {
         AsyncImage(
             model = ImageRequest.Builder(LocalContext.current)
@@ -122,11 +152,26 @@ fun BottomSheetItem(
                 )
                 Text(
                     text = calculateDistance(pickLocation.latitude, pickLocation.longitude),
-                    style = MaterialTheme.typography.bodyMedium.copy(Gray)
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    style = MaterialTheme.typography.bodyMedium
                 )
             }
 
-            // TODO: 나머지 정보들: 누가 등록한 픽인지, 한마디
+            Text(
+                text = "${createdUserName}님의 픽",
+                color = MaterialTheme.colorScheme.onSurface,
+                overflow = TextOverflow.Ellipsis,
+                maxLines = 1,
+                style = MaterialTheme.typography.bodyMedium,
+            )
+
+            Text(
+                text = comment,
+                color = MaterialTheme.colorScheme.onSecondary,
+                overflow = TextOverflow.Ellipsis,
+                maxLines = 1,
+                style = MaterialTheme.typography.bodyMedium,
+            )
         }
     }
 }
