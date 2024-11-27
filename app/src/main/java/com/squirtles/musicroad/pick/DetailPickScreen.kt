@@ -77,6 +77,7 @@ import com.squirtles.musicroad.pick.components.SwipeUpIcon
 import com.squirtles.musicroad.pick.components.music.MusicPlayer
 import com.squirtles.musicroad.ui.theme.Black
 import com.squirtles.musicroad.ui.theme.White
+import com.squirtles.musicroad.videoplayer.MusicVideoScreen
 import kotlin.math.roundToInt
 
 @OptIn(ExperimentalWearMaterialApi::class)
