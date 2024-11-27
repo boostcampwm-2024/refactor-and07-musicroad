@@ -5,6 +5,7 @@ import android.app.Activity
 import android.content.Context
 import android.graphics.PointF
 import android.location.Location
+import android.view.View
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -37,7 +38,9 @@ import com.naver.maps.map.clustering.ClusterMarkerInfo
 import com.naver.maps.map.clustering.Clusterer
 import com.naver.maps.map.clustering.DefaultClusterMarkerUpdater
 import com.naver.maps.map.clustering.DefaultLeafMarkerUpdater
+import com.naver.maps.map.clustering.DefaultMarkerManager
 import com.naver.maps.map.clustering.LeafMarkerInfo
+import com.naver.maps.map.overlay.Align
 import com.naver.maps.map.overlay.CircleOverlay
 import com.naver.maps.map.overlay.LocationOverlay
 import com.naver.maps.map.overlay.Marker
@@ -97,10 +100,19 @@ fun NaverMap(
             .tagMergeStrategy { cluster ->
                 cluster.children.map { it.tag }.joinToString(",")
             }
+            .markerManager(object : DefaultMarkerManager() {
+                override fun createMarker(): Marker {
+                    val marker = Marker()
+                    with(marker) {
+                        icon = OverlayImage.fromView(View(context))
+                        setCaptionAligns(Align.Center)
+                        captionHaloColor = android.graphics.Color.TRANSPARENT
+                    }
+                    return marker
+                }
+            })
             .clusterMarkerUpdater(object : DefaultClusterMarkerUpdater() {
                 override fun updateClusterMarker(info: ClusterMarkerInfo, marker: Marker) {
-                    super.updateClusterMarker(info, marker)
-
                     // 클릭된 마커가 클러스터 마커 안에 포함되면 클릭된 마커 해제
                     mapViewModel.clickedMarkerState.value.curPickId?.let { curPickId ->
                         if (info.tag.toString().contains(curPickId)) {
@@ -118,6 +130,8 @@ fun NaverMap(
                     }
                     val clusterMarkerIconView = ClusterMarkerIconView(context, densityType)
                     marker.icon = OverlayImage.fromView(clusterMarkerIconView)
+                    marker.anchor = PointF(0.5F, 0.5F)
+                    marker.captionText = info.size.toString()
                     marker.captionColor = captionColor.toArgb()
                     marker.onClickListener = Overlay.OnClickListener {
                         marker.map?.let { map ->
@@ -143,7 +157,8 @@ fun NaverMap(
             })
             .leafMarkerUpdater(object : DefaultLeafMarkerUpdater() {
                 override fun updateLeafMarker(info: LeafMarkerInfo, marker: Marker) {
-                    super.updateLeafMarker(info, marker)
+                    marker.anchor = Marker.DEFAULT_ANCHOR
+                    marker.captionText = ""
 
                     val pick = (info.key as MarkerKey).pick
                     val leafMarkerIconView = LeafMarkerIconView(context).apply {
