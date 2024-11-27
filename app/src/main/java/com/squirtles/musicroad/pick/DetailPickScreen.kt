@@ -1,7 +1,6 @@
 package com.squirtles.musicroad.pick
 
 import android.app.Activity
-import android.util.Log
 import android.util.Size
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.Orientation
@@ -15,10 +14,11 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -74,6 +74,7 @@ import com.squirtles.musicroad.pick.components.CommentText
 import com.squirtles.musicroad.pick.components.PickInformation
 import com.squirtles.musicroad.pick.components.SongInfo
 import com.squirtles.musicroad.pick.components.SwipeUpIcon
+import com.squirtles.musicroad.pick.components.music.CircleVisualizer
 import com.squirtles.musicroad.pick.components.music.MusicPlayer
 import com.squirtles.musicroad.ui.theme.Black
 import com.squirtles.musicroad.ui.theme.White
@@ -169,6 +170,8 @@ private fun DetailPickScreen(
     val view = LocalView.current
     val context = LocalContext.current
 
+    val audioSessionId by playerViewModel.audioSessionId.collectAsStateWithLifecycle()
+
     if (!view.isInEditMode) {
         SideEffect {
             val window = (view.context as Activity).window
@@ -246,16 +249,26 @@ private fun DetailPickScreen(
                     dynamicOnBackgroundColor = dynamicOnBackgroundColor
                 )
 
-                AsyncImage(
-                    model = pick.song.getImageUrlWithSize(Size(400, 400)),
-                    contentDescription = pick.song.albumName + stringResource(id = R.string.pick_album_description),
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 30.dp)
-                        .aspectRatio(1f)
-                        .clip(RoundedCornerShape(20.dp)),
-                    contentScale = ContentScale.Crop
-                )
+                Box(
+                    Modifier
+                        .size(350.dp, 350.dp)
+                        .align(Alignment.CenterHorizontally)
+                ) {
+                    CircleVisualizer(
+                        audioSessionId = audioSessionId
+                    )
+                    AsyncImage(
+                        model = pick.song.getImageUrlWithSize(Size(400, 400)),
+                        contentDescription = pick.song.albumName + stringResource(id = R.string.pick_album_description),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 30.dp)
+                            .aspectRatio(1f)
+                            .clip(CircleShape),
+                        contentScale = ContentScale.Crop
+                    )
+                }
+
 
                 PickInformation(formattedDate = pick.createdAt, favoriteCount = pick.favoriteCount)
 
@@ -265,7 +278,6 @@ private fun DetailPickScreen(
                 )
 
                 if (pick.song.previewUrl.isBlank().not()) {
-                    Log.d("DetailPickScreen", "Create Android View Player")
                     MusicPlayer(
                         context = context,
                         previewUrl = pick.song.previewUrl,
