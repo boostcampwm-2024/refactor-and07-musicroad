@@ -36,7 +36,6 @@ internal fun CanvasSoundEffect(
     color: Color,
     modifier: Modifier = Modifier
 ) {
-//    Log.d("CanvasSoundEffect", "Received FFT data: ${audioData.joinToString(",")}")
 
     val offsetAngle = Math.toRadians(-90.0)
     val angleStep = 360f / audioData.size
@@ -45,16 +44,18 @@ internal fun CanvasSoundEffect(
     Canvas(modifier = modifier.fillMaxSize()) {
         val width = size.width
         val height = size.height
-        val radius = max(width, height) * 0.4f
+        val radius = max(width, height) * 0.45f
 
         audioData.forEachIndexed { i, magnitude ->
             val angle = Math.toRadians((i * angleStep).toDouble()) + offsetAngle
+            val cosValue = cos(angle)
+            val sinValue = sin(angle)
             val barHeight = magnitude * height / 4
 
-            val startX = (width / 2 + radius * cos(angle)).toFloat()
-            val startY = (height / 2 + radius * sin(angle)).toFloat()
-            val endX = (width / 2 + (radius + barHeight) * cos(angle)).toFloat()
-            val endY = (height / 2 + (radius + barHeight) * sin(angle)).toFloat()
+            val startX = (width / 2 + radius * cosValue).toFloat()
+            val startY = (height / 2 + radius * sinValue).toFloat()
+            val endX = (width / 2 + (radius + barHeight) * cosValue).toFloat()
+            val endY = (height / 2 + (radius + barHeight) * sinValue).toFloat()
 
             points.add(Offset(startX, startY))
             points.add(Offset(endX, endY))
@@ -64,7 +65,7 @@ internal fun CanvasSoundEffect(
             points = points,
             pointMode = PointMode.Lines,
             color = color,
-            strokeWidth = 2f
+            strokeWidth = 12f
         )
     }
 }

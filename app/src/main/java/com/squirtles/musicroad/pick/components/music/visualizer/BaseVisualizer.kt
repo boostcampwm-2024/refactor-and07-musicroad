@@ -11,9 +11,6 @@ class BaseVisualizer(
 ) {
     private var visualizer: Visualizer? = null
 
-    private val _bytesFlow = MutableSharedFlow<ByteArray>(replay = 0, extraBufferCapacity = 1)
-    val bytesFlow: SharedFlow<ByteArray> = _bytesFlow.asSharedFlow()
-
     private val _fftFlow = MutableSharedFlow<List<Float>>(replay = 0, extraBufferCapacity = 1)
     val fftFlow: SharedFlow<List<Float>> = _fftFlow.asSharedFlow()
 
@@ -34,18 +31,26 @@ class BaseVisualizer(
 
                 override fun onFftDataCapture(visualizer: Visualizer, bytes: ByteArray, samplingRate: Int) {
                     // bytes = [실수부,허수부,실수부,허수부 ....]
-                    val magnitudes = mutableListOf<Float>()
-                    for (i in 0 until bytes.size / 2 step 2) {
-                        // 복소수
-                        val real = bytes[i].toInt()
-                        val imaginary = bytes[i + 1].toInt()
+                    val size = bytes.size / 4 // 각 복소수당 2바이트
+                    val magnitudes = FloatArray(size)
 
-                        val magnitude = sqrt((real * real + imaginary * imaginary).toDouble()).toFloat()
-                        magnitudes.add(magnitude)
+                    for (i in 0 until size) {
+                        val real = bytes[2 * i].toInt()
+                        val imaginary = bytes[2 * i + 1].toInt()
+                        magnitudes[i] = sqrt((real * real + imaginary * imaginary).toDouble()).toFloat()
                     }
-                    val filteredMagnitudes = magnitudes.slice(validRange)
+
+                    val filteredMagnitudes = magnitudes.copyOfRange(validRange.first, validRange.last + 1)
+                    _fftFlow.tryEmit(filteredMagnitudes.toList())
+
+
+//                    val filteredMagnitudes = mutableListOf<Float>()
+//                    for (value in magnitudes.copyOfRange(validRange.first, validRange.last + 1)) {
+//                        filteredMagnitudes.add(value)
+//                        filteredMagnitudes.add(value)
+//                    }
 //                    Log.d("BaseVisualizer", "filtered fft data ${filteredMagnitudes.size}: ${filteredMagnitudes.joinToString(",")}")
-                    _fftFlow.tryEmit(filteredMagnitudes)
+//                    _fftFlow.tryEmit(filteredMagnitudes)
                 }
             }, Visualizer.getMaxCaptureRate() / 2, false, true)
             enabled = true
