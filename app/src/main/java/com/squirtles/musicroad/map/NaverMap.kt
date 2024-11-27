@@ -162,7 +162,8 @@ fun NaverMap(
 
                     val pick = (info.key as MarkerKey).pick
                     val leafMarkerIconView = LeafMarkerIconView(context).apply {
-                        setPaintColor(Blue.toArgb())
+                        val color = if (pick.createdBy.userId == mapViewModel.getUserId()) Blue else Primary
+                        setPaintColor(color.toArgb())
                     }
                     leafMarkerIconView.setLeafMarkerIcon(pick) {
                         marker.icon = OverlayImage.fromView(leafMarkerIconView)

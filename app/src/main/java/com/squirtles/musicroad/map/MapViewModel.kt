@@ -12,6 +12,7 @@ import com.naver.maps.map.overlay.Marker
 import com.squirtles.domain.model.Pick
 import com.squirtles.domain.usecase.FetchLastLocationUseCase
 import com.squirtles.domain.usecase.FetchPickInAreaUseCase
+import com.squirtles.domain.usecase.GetCurrentUserUseCase
 import com.squirtles.domain.usecase.SaveLastLocationUseCase
 import com.squirtles.musicroad.map.marker.MarkerKey
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -31,7 +32,8 @@ data class MarkerState(
 class MapViewModel @Inject constructor(
     fetchLastLocationUseCase: FetchLastLocationUseCase,
     private val saveLastLocationUseCase: SaveLastLocationUseCase,
-    private val fetchPickInAreaUseCase: FetchPickInAreaUseCase
+    private val fetchPickInAreaUseCase: FetchPickInAreaUseCase,
+    private val getCurrentUserUseCase: GetCurrentUserUseCase
 ) : ViewModel() {
 
     private var _lastCameraPosition: CameraPosition? = null
@@ -53,6 +55,8 @@ class MapViewModel @Inject constructor(
     // LocalDataSource에 저장되는 위치 정보
     // Firestore 데이터 쿼리 작업 최소화 및 위치데이터 공유 용도
     val lastLocation: StateFlow<Location?> = fetchLastLocationUseCase()
+
+    fun getUserId() = getCurrentUserUseCase().userId
 
     fun setLastCameraPosition(cameraPosition: CameraPosition) {
         _lastCameraPosition = cameraPosition
