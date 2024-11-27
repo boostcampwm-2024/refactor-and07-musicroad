@@ -45,6 +45,13 @@ class PlayerViewModel @Inject constructor() : ViewModel() {
                 override fun onPlayerError(error: PlaybackException) {
                     handleError(error)
                 }
+
+                override fun onPlaybackStateChanged(playbackState: Int) {
+                    if (playbackState == Player.STATE_ENDED) {
+                        it.seekTo(0)
+                        it.pause()
+                    }
+                }
             })
             it.volume = 0.8f
         }
