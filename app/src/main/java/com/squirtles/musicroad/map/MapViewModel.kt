@@ -117,11 +117,7 @@ class MapViewModel @Inject constructor(
 
             prevClickedMarker?.toggleSizeByClick(context, false)
             marker.toggleSizeByClick(context, true)
-            val pickList = clusterTag?.let {
-                val pickIds = it.split(",")
-                pickIds.mapNotNull { id -> picks[id] }
-            }
-            Log.d("test", "pickList: $pickList")
+            val pickList = clusterTag?.split(",")?.mapNotNull { id -> picks[id] }
             _clickedMarkerState.emit(MarkerState(marker, pickList, pickId))
         }
     }
