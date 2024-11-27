@@ -6,6 +6,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.PointMode
 import androidx.compose.ui.graphics.drawscope.Stroke
 import kotlin.math.cos
@@ -39,6 +40,7 @@ internal fun CanvasSoundEffect(
 
     val offsetAngle = Math.toRadians(-90.0)
     val angleStep = 360f / audioData.size
+    val path = Path()
     val points = mutableListOf<Offset>()
 
     Canvas(modifier = modifier.fillMaxSize()) {
@@ -50,7 +52,7 @@ internal fun CanvasSoundEffect(
             val angle = Math.toRadians((i * angleStep).toDouble()) + offsetAngle
             val cosValue = cos(angle)
             val sinValue = sin(angle)
-            val barHeight = magnitude * height / 4
+            val barHeight = magnitude * height / 5
 
             val startX = (width / 2 + radius * cosValue).toFloat()
             val startY = (height / 2 + radius * sinValue).toFloat()
@@ -59,13 +61,26 @@ internal fun CanvasSoundEffect(
 
             points.add(Offset(startX, startY))
             points.add(Offset(endX, endY))
+
+//            if (i == 0) {
+//                path.moveTo(startX, startY)
+//            } else {
+//
+//                path.lineTo(endX, endY)
+//            }
         }
 
         drawPoints(
             points = points,
             pointMode = PointMode.Lines,
             color = color,
-            strokeWidth = 12f
+            strokeWidth = 24f
         )
+
+//        drawPath(
+//            path = path,
+//            color = color,
+//            style = Stroke(width = 4f)
+//        )
     }
 }
