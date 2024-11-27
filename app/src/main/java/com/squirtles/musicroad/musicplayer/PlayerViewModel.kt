@@ -46,7 +46,7 @@ class PlayerViewModel @Inject constructor() : ViewModel() {
                     handleError(error)
                 }
             })
-            it.volume = 0.5f
+            it.volume = 0.8f
         }
         this.player = exoPlayer
     }

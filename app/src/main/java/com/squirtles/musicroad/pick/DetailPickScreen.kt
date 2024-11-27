@@ -74,8 +74,8 @@ import com.squirtles.musicroad.pick.components.CommentText
 import com.squirtles.musicroad.pick.components.PickInformation
 import com.squirtles.musicroad.pick.components.SongInfo
 import com.squirtles.musicroad.pick.components.SwipeUpIcon
-import com.squirtles.musicroad.pick.components.music.CircleVisualizer
 import com.squirtles.musicroad.pick.components.music.MusicPlayer
+import com.squirtles.musicroad.pick.components.music.visualizer.CircleVisualizer
 import com.squirtles.musicroad.ui.theme.Black
 import com.squirtles.musicroad.ui.theme.White
 import kotlin.math.roundToInt
@@ -255,7 +255,8 @@ private fun DetailPickScreen(
                         .align(Alignment.CenterHorizontally)
                 ) {
                     CircleVisualizer(
-                        audioSessionId = audioSessionId
+                        audioSessionId = audioSessionId,
+                        modifier = Modifier.align(Alignment.Center)
                     )
                     AsyncImage(
                         model = pick.song.getImageUrlWithSize(Size(400, 400)),
@@ -264,7 +265,8 @@ private fun DetailPickScreen(
                             .fillMaxWidth()
                             .padding(horizontal = 30.dp)
                             .aspectRatio(1f)
-                            .clip(CircleShape),
+                            .clip(CircleShape)
+                            .align(Alignment.Center),
                         contentScale = ContentScale.Crop
                     )
                 }
