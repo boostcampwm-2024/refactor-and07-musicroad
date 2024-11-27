@@ -10,8 +10,10 @@ import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -21,6 +23,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Pause
@@ -46,6 +49,7 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -78,13 +82,13 @@ fun MusicVideoScreen(
 ) {
     val context = LocalContext.current
     val player = remember { ExoPlayer.Builder(context).build() }
-    val playerPlayState = remember { mutableStateOf(true) }
+    val playerState = remember { mutableStateOf(true) }
 
     Box(
         modifier = modifier
     ) {
-        MusicVideoPlayer(pick.musicVideoUrl, player, swipePlayState, playerPlayState)
-        VideoPlayerOverlay(pick, playerPlayState, onBackClick)
+        MusicVideoPlayer(pick.musicVideoUrl, player, swipePlayState, playerState)
+        VideoPlayerOverlay(pick, playerState, onBackClick)
     }
 }
 
@@ -92,7 +96,7 @@ fun MusicVideoScreen(
 @Composable
 private fun VideoPlayerOverlay(
     pick: Pick,
-    playerPlayState: MutableState<Boolean>,
+    playerState: MutableState<Boolean>,
     onBackClick: () -> Unit
 ) {
     val alpha = remember { Animatable(0f) }
@@ -149,7 +153,7 @@ private fun VideoPlayerOverlay(
         )
 
         IconButton(
-            onClick = { playerPlayState.value = playerPlayState.value.not() },
+            onClick = { playerState.value = playerState.value.not() },
             modifier = Modifier
                 .align(Alignment.Center)
                 .background(Black.copy(0.5f), shape = CircleShape)
@@ -157,7 +161,7 @@ private fun VideoPlayerOverlay(
             enabled = alpha.value > 0.5f
         ) {
             Icon(
-                imageVector = if (playerPlayState.value) Icons.Default.Pause else Icons.Default.PlayArrow,
+                imageVector = if (playerState.value) Icons.Default.Pause else Icons.Default.PlayArrow,
                 contentDescription = stringResource(id = R.string.player_play_pause_description),
                 modifier = Modifier.size(30.dp),
                 tint = White
@@ -193,7 +197,7 @@ private fun VideoPlayerOverlay(
                 style = MaterialTheme.typography.titleLarge
             )
 
-            Spacer(modifier = Modifier.height(28.dp))
+            Spacer(modifier = Modifier.height(24.dp))
 
             Text(
                 text = pick.comment,
@@ -203,6 +207,24 @@ private fun VideoPlayerOverlay(
                 maxLines = 2,
                 style = MaterialTheme.typography.titleLarge
             )
+
+            Spacer(modifier = Modifier.height(24.dp))
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.End
+            ) {
+                Text(
+                    text = stringResource(id = R.string.video_quality_description),
+                    modifier = Modifier
+                        .background(Gray.copy(0.3f), RoundedCornerShape(8.dp))
+                        .padding(vertical = 4.dp, horizontal = 8.dp),
+                    color = White,
+                    fontSize = 16.sp,
+                    textAlign = TextAlign.Right,
+                    style = MaterialTheme.typography.titleSmall
+                )
+            }
         }
     }
 }
@@ -304,7 +326,7 @@ private fun VideoPlayerOverlayPreview() {
             location = LocationPoint(1.0, 1.0),
             musicVideoUrl = "",
         ),
-        playerPlayState = remember { mutableStateOf(false) },
+        playerState = remember { mutableStateOf(false) },
         onBackClick = {}
     )
 }
