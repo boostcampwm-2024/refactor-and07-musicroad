@@ -16,6 +16,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
@@ -26,6 +27,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.painter.ColorPainter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
@@ -42,12 +44,14 @@ import com.squirtles.domain.model.Song
 import com.squirtles.musicroad.R
 import com.squirtles.musicroad.create.HorizontalSpacer
 import com.squirtles.musicroad.ui.theme.Gray
+import com.squirtles.musicroad.ui.theme.Primary
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ClusterBottomSheet(
     onDismissRequest: () -> Unit,
     clusterPickList: List<Pick>?,
+    userId: String,
     calculateDistance: (Double, Double) -> String,
     onClickItem: (String) -> Unit
 ) {
@@ -90,8 +94,9 @@ fun ClusterBottomSheet(
                     BottomSheetItem(
                         song = pick.song,
                         pickLocation = pick.location,
-                        createdUserName = pick.createdBy.userName,
+                        createdUserName = pick.createdBy.userName.takeIf { pick.createdBy.userId != userId },
                         comment = pick.comment,
+                        favoriteCount = pick.favoriteCount,
                         calculateDistance = calculateDistance,
                         onClickItem = { onClickItem(pick.id) }
                     )
@@ -105,9 +110,10 @@ fun ClusterBottomSheet(
 fun BottomSheetItem(
     song: Song,
     pickLocation: LocationPoint,
-    calculateDistance: (Double, Double) -> String,
-    createdUserName: String,
+    createdUserName: String?,
     comment: String,
+    favoriteCount: Int,
+    calculateDistance: (Double, Double) -> String,
     onClickItem: () -> Unit
 ) {
     Row(
@@ -115,6 +121,7 @@ fun BottomSheetItem(
             .fillMaxWidth()
             .clickable { onClickItem() }
             .padding(horizontal = DEFAULT_PADDING, vertical = DEFAULT_PADDING / 2),
+        horizontalArrangement = Arrangement.spacedBy(DEFAULT_PADDING),
         verticalAlignment = Alignment.CenterVertically
     ) {
         AsyncImage(
@@ -130,40 +137,64 @@ fun BottomSheetItem(
             contentScale = ContentScale.Crop,
         )
 
-        HorizontalSpacer(16)
-
         Column(
             modifier = Modifier.weight(1f)
         ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = "${song.songName} - ${song.artistName}",
-                    modifier = Modifier
-                        .weight(1f)
-                        .padding(end = DEFAULT_PADDING),
-                    color = MaterialTheme.colorScheme.onSurface,
-                    overflow = TextOverflow.Ellipsis,
-                    maxLines = 1,
-                    style = MaterialTheme.typography.titleMedium,
-                )
-                Text(
-                    text = calculateDistance(pickLocation.latitude, pickLocation.longitude),
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    style = MaterialTheme.typography.bodyMedium
-                )
-            }
-
             Text(
-                text = "${createdUserName}님의 픽",
+                text = "${song.songName} - ${song.artistName}",
                 color = MaterialTheme.colorScheme.onSurface,
                 overflow = TextOverflow.Ellipsis,
                 maxLines = 1,
-                style = MaterialTheme.typography.bodyMedium,
+                style = MaterialTheme.typography.titleMedium,
             )
+
+            Row(
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                createdUserName?.let { userName ->
+                    Text(
+                        text = userName,
+                        modifier = Modifier.weight(weight = 1f, fill = false),
+                        color = MaterialTheme.colorScheme.onSurface,
+                        overflow = TextOverflow.Ellipsis,
+                        maxLines = 1,
+                        style = MaterialTheme.typography.bodyMedium,
+                    )
+
+                    Text(
+                        text = stringResource(id = R.string.map_info_window_pick_user),
+                        color = MaterialTheme.colorScheme.onSurface,
+                        overflow = TextOverflow.Ellipsis,
+                        maxLines = 1,
+                        style = MaterialTheme.typography.bodyMedium,
+                    )
+                } ?: run {
+                    Text(
+                        text = "내가 등록한 픽",
+                        modifier = Modifier.weight(weight = 1f, fill = false),
+                        color = MaterialTheme.colorScheme.onSurface,
+                        overflow = TextOverflow.Ellipsis,
+                        maxLines = 1,
+                        style = MaterialTheme.typography.bodyMedium,
+                    )
+                }
+
+                HorizontalSpacer(8)
+
+                Icon(
+                    painter = painterResource(id = R.drawable.ic_favorite),
+                    contentDescription = stringResource(R.string.map_info_window_favorite_count_icon_description),
+                    tint = Primary
+                )
+
+                Text(
+                    text = "$favoriteCount",
+                    color = MaterialTheme.colorScheme.onSurface,
+                    overflow = TextOverflow.Ellipsis,
+                    maxLines = 1,
+                    style = MaterialTheme.typography.bodyMedium,
+                )
+            }
 
             Text(
                 text = comment,
@@ -173,6 +204,13 @@ fun BottomSheetItem(
                 style = MaterialTheme.typography.bodyMedium,
             )
         }
+
+        Text(
+            text = calculateDistance(pickLocation.latitude, pickLocation.longitude),
+            modifier = Modifier.align(Alignment.Top),
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            style = MaterialTheme.typography.bodyMedium
+        )
     }
 }
 

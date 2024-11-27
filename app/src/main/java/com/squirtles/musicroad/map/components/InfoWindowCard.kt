@@ -39,7 +39,6 @@ import com.squirtles.domain.model.Creator
 import com.squirtles.domain.model.LocationPoint
 import com.squirtles.domain.model.Pick
 import com.squirtles.domain.model.Song
-import com.squirtles.domain.model.User
 import com.squirtles.musicroad.R
 import com.squirtles.musicroad.ui.theme.Gray
 import com.squirtles.musicroad.ui.theme.MusicRoadTheme
@@ -48,6 +47,7 @@ import com.squirtles.musicroad.ui.theme.Primary
 @Composable
 fun InfoWindow(
     pick: Pick,
+    userId: String,
     navigateToPick: (String) -> Unit,
     calculateDistance: (Double, Double) -> String
 ) {
@@ -91,22 +91,33 @@ fun InfoWindow(
                 Row(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text(
-                        text = pick.createdBy.userName,
-                        modifier = Modifier.weight(weight = 1f, fill = false),
-                        color = MaterialTheme.colorScheme.onSurface,
-                        overflow = TextOverflow.Ellipsis,
-                        maxLines = 1,
-                        style = MaterialTheme.typography.bodyLarge,
-                    )
+                    if (pick.createdBy.userId != userId) {
+                        Text(
+                            text = pick.createdBy.userName,
+                            modifier = Modifier.weight(weight = 1f, fill = false),
+                            color = MaterialTheme.colorScheme.onSurface,
+                            overflow = TextOverflow.Ellipsis,
+                            maxLines = 1,
+                            style = MaterialTheme.typography.bodyLarge,
+                        )
 
-                    Text(
-                        text = stringResource(id = R.string.map_info_window_pick_user),
-                        color = MaterialTheme.colorScheme.onSurface,
-                        overflow = TextOverflow.Ellipsis,
-                        maxLines = 1,
-                        style = MaterialTheme.typography.bodyLarge,
-                    )
+                        Text(
+                            text = stringResource(id = R.string.map_info_window_pick_user),
+                            color = MaterialTheme.colorScheme.onSurface,
+                            overflow = TextOverflow.Ellipsis,
+                            maxLines = 1,
+                            style = MaterialTheme.typography.bodyLarge,
+                        )
+                    } else {
+                        Text(
+                            text = "내가 등록한 픽",
+                            modifier = Modifier.weight(weight = 1f, fill = false),
+                            color = MaterialTheme.colorScheme.onSurface,
+                            overflow = TextOverflow.Ellipsis,
+                            maxLines = 1,
+                            style = MaterialTheme.typography.bodyLarge,
+                        )
+                    }
 
                     Spacer(modifier = Modifier.width(8.dp))
 
@@ -175,6 +186,7 @@ private fun InfoWindowPreview() {
                 location = LocationPoint(1.0, 1.0),
                 musicVideoUrl = "",
             ),
+            userId = "",
             navigateToPick = { },
             calculateDistance = { _, _ ->
                 TODO()

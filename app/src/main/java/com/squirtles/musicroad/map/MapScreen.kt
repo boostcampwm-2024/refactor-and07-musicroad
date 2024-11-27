@@ -90,7 +90,8 @@ fun MapScreen(
                         showBottomSheet = false
                         mapViewModel.picks[clickedMarkerState.curPickId]?.let { pick ->
                             InfoWindow(
-                                pick,
+                                pick = pick,
+                                userId = mapViewModel.getUserId(),
                                 navigateToPick = { pickId ->
                                     playerViewModel.pause()
                                     onPickSummaryClick(pickId)
@@ -139,6 +140,7 @@ fun MapScreen(
                         mapViewModel.resetClickedMarkerState(context)
                     },
                     clusterPickList = clickedMarkerState.clusterPickList,
+                    userId = mapViewModel.getUserId(),
                     calculateDistance = { lat, lng ->
                         mapViewModel.calculateDistance(lat, lng).let { distance ->
                             when {
