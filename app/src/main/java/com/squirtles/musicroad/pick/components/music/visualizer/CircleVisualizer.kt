@@ -66,8 +66,8 @@ fun CircleVisualizer(
             baseVisualizer.release()
         }
     }
-    
-    CanvasSoundEffect(
+
+    CanvasSoundEffectBar(
         audioData = magnitudes.value.map { it.value },
         color = color,
         modifier = modifier
