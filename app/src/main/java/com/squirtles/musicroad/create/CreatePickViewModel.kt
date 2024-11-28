@@ -8,7 +8,6 @@ import com.squirtles.domain.model.Creator
 import com.squirtles.domain.model.LocationPoint
 import com.squirtles.domain.model.Pick
 import com.squirtles.domain.model.Song
-import com.squirtles.domain.model.User
 import com.squirtles.domain.usecase.CreatePickUseCase
 import com.squirtles.domain.usecase.FetchLastLocationUseCase
 import com.squirtles.domain.usecase.GetCurrentUserUseCase
@@ -18,9 +17,12 @@ import com.squirtles.musicroad.UiState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -52,6 +54,10 @@ class CreatePickViewModel @Inject constructor(
     val comment get() = _comment
 
     private var lastLocation: Location? = null
+    private val createPickClick = MutableSharedFlow<Unit>()
+
+    private val _createdPickId = MutableStateFlow<String?>(null)
+    val createdPickId = _createdPickId.asStateFlow()
 
     init {
         // 데이터소스의 위치값을 계속 collect하며 curLocation 변수에 저장
@@ -72,6 +78,14 @@ class CreatePickViewModel @Inject constructor(
                     } else {
                         searchJob = launch { searchSongs(searchKeyword) }
                     }
+                }
+        }
+
+        viewModelScope.launch {
+            createPickClick
+                .throttleFirst(2000)
+                .collect {
+                    createPick()
                 }
         }
     }
@@ -105,9 +119,13 @@ class CreatePickViewModel @Inject constructor(
         _searchText.value = text
     }
 
-    fun createPick(
-        onSuccess: (String) -> Unit
-    ) {
+    fun onCreatePickClick() {
+        viewModelScope.launch {
+            createPickClick.emit(Unit)
+        }
+    }
+
+    private fun createPick() {
         _selectedSong?.let { song ->
             viewModelScope.launch {
                 if (lastLocation == null) {
@@ -135,10 +153,24 @@ class CreatePickViewModel @Inject constructor(
                 )
 
                 createResult.onSuccess { pickId ->
-                    onSuccess(pickId)
+                    _createdPickId.emit(pickId)
                 }.onFailure {
                     /* TODO: Firestore 등록 실패처리 */
                     Log.d("CreatePickViewModel", createResult.exceptionOrNull()?.message.toString())
+                }
+            }
+        }
+    }
+
+    private fun <T> Flow<T>.throttleFirst(periodMillis: Long): Flow<T> {
+        require(periodMillis > 0) { "period should be positive" }
+        return flow {
+            var lastTime = 0L
+            collect { value ->
+                val currentTime = System.currentTimeMillis()
+                if (currentTime - lastTime >= periodMillis) {
+                    lastTime = currentTime
+                    emit(value)
                 }
             }
         }

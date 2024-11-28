@@ -31,7 +31,9 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -64,6 +66,13 @@ fun CreatePickScreen(
 ) {
     val song = createPickViewModel.selectedSong ?: DEFAULT_SONG
     val comment = createPickViewModel.comment.collectAsStateWithLifecycle()
+    val createdPickId by createPickViewModel.createdPickId.collectAsStateWithLifecycle()
+
+    LaunchedEffect(createdPickId) {
+        createdPickId?.let {
+            onCreateClick(it)
+        }
+    }
 
     val dynamicBackgroundColor = Color(song.bgColor)
     val dynamicOnBackgroundColor = if (dynamicBackgroundColor.luminance() >= 0.5f) Black else White
@@ -90,7 +99,7 @@ fun CreatePickScreen(
             onBackClick()
         },
         onCreateClick = {
-            createPickViewModel.createPick(onCreateClick)
+            createPickViewModel.onCreatePickClick()
         },
         onCommentChange = createPickViewModel::onCommentChange
     )
