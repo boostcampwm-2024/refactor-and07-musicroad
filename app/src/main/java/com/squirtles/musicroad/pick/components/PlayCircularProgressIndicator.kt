@@ -1,4 +1,4 @@
-package com.squirtles.musicroad.pick.components.music
+package com.squirtles.musicroad.pick.components
 
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
@@ -12,6 +12,7 @@ import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.squirtles.musicroad.ui.theme.White
 import kotlin.math.atan2
 
 @Composable
@@ -46,18 +47,10 @@ internal fun PlayCircularProgressIndicator(
                 }
             }
     ) {
-//        CircularProgressIndicator(
-//            progress = { bufferPercentage() / 100f },
-//            modifier = Modifier.fillMaxSize(),
-//            color = DarkGray,
-//            strokeWidth = strokeWidth,
-//            trackColor = Color.DarkGray,
-//        )
-
         CircularProgressIndicator(
             modifier = Modifier.fillMaxSize(),
             progress = { currentTime() / duration },
-            color = Color.White,
+            color = White,
             trackColor = Color.Transparent,
             strokeWidth = strokeWidth,
             strokeCap = StrokeCap.Round,

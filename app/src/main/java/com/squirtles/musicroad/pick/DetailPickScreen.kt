@@ -1,14 +1,12 @@
 package com.squirtles.musicroad.pick
 
 import android.app.Activity
-import android.util.Size
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
@@ -18,7 +16,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -39,12 +36,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.luminance
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
@@ -63,20 +58,18 @@ import androidx.wear.compose.material.ExperimentalWearMaterialApi
 import androidx.wear.compose.material.FractionalThreshold
 import androidx.wear.compose.material.rememberSwipeableState
 import androidx.wear.compose.material.swipeable
-import coil3.compose.AsyncImage
 import com.squirtles.domain.model.Creator
 import com.squirtles.domain.model.LocationPoint
 import com.squirtles.domain.model.Pick
 import com.squirtles.domain.model.Song
 import com.squirtles.musicroad.R
 import com.squirtles.musicroad.musicplayer.PlayerViewModel
+import com.squirtles.musicroad.pick.components.CircleAlbumCover
 import com.squirtles.musicroad.pick.components.CommentText
 import com.squirtles.musicroad.pick.components.PickInformation
 import com.squirtles.musicroad.pick.components.SongInfo
 import com.squirtles.musicroad.pick.components.SwipeUpIcon
 import com.squirtles.musicroad.pick.components.music.MusicPlayer
-import com.squirtles.musicroad.pick.components.music.PlayCircularProgressIndicator
-import com.squirtles.musicroad.pick.components.music.visualizer.CircleVisualizer
 import com.squirtles.musicroad.ui.theme.Black
 import com.squirtles.musicroad.ui.theme.White
 import kotlin.math.roundToInt
@@ -260,44 +253,19 @@ private fun DetailPickScreen(
                     dynamicOnBackgroundColor = dynamicOnBackgroundColor
                 )
 
-                Box(
-                    Modifier
-                        .size(300.dp)
-                        .align(Alignment.CenterHorizontally)
-                ) {
-                    CircleVisualizer(
-                        audioSessionId = audioSessionId,
-                        color = audioEffectColor,
-                        sizeRatio = 0.5f,
-                        modifier = Modifier.align(Alignment.Center)
-                    )
-
-                    PlayCircularProgressIndicator(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(10.dp)
-                            .align(Alignment.Center),
-                        currentTime = { playerState.currentPosition.toFloat() },
-                        duration = duration.toFloat(),
-                        strokeWidth = 5.dp,
-                        onSeekChanged = { timeMs ->
-                            playerViewModel.playerSeekTo(timeMs.toLong())
-                        },
-                    )
-
-                    AsyncImage(
-                        model = pick.song.getImageUrlWithSize(Size(400, 400)),
-                        contentDescription = pick.song.albumName + stringResource(id = R.string.pick_album_description),
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 30.dp)
-                            .aspectRatio(1f)
-                            .clip(CircleShape)
-                            .align(Alignment.Center),
-                        contentScale = ContentScale.Crop
-                    )
-                }
-
+                CircleAlbumCover(
+                    modifier = Modifier
+                        .size(320.dp)
+                        .align(Alignment.CenterHorizontally),
+                    song = pick.song,
+                    playerState = playerState,
+                    duration = duration,
+                    audioSessionId = audioSessionId,
+                    audioEffectColor = audioEffectColor,
+                    onSeekChanged = { timeMs ->
+                        playerViewModel.playerSeekTo(timeMs)
+                    },
+                )
 
                 PickInformation(formattedDate = pick.createdAt, favoriteCount = pick.favoriteCount)
 
