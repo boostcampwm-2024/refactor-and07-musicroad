@@ -80,10 +80,10 @@ class CreatePickViewModel @Inject constructor(
                 }
         }
 
-        // 등록 버튼 클릭 후 2초 이내의 클릭은 무시하고 픽 생성하기
+        // 등록 버튼 클릭 후 3초 이내의 클릭은 무시하고 픽 생성하기
         viewModelScope.launch {
             createPickClick
-                .throttleFirst(2000)
+                .throttleFirst(3000)
                 .collect {
                     createPick()
                 }
