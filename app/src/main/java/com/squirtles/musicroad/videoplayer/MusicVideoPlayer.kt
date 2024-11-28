@@ -6,6 +6,7 @@ import android.view.Surface
 import android.view.TextureView
 import androidx.annotation.OptIn
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.viewinterop.AndroidView
@@ -20,6 +21,17 @@ fun MusicVideoPlayer(
     val context = LocalContext.current
     val player = remember { videoPlayerViewModel.player }
     val textureView = remember { TextureView(context) }
+
+    DisposableEffect(Unit) {
+        onDispose {
+            player?.pause()
+            videoPlayerViewModel.setLastPosition(player?.currentPosition ?: 0)
+            player?.release()
+            textureView.surfaceTexture?.release()
+            textureView.surfaceTextureListener = null
+            videoPlayerViewModel.releasePlayer()
+        }
+    }
 
     AndroidView(
         factory = {

@@ -34,10 +34,12 @@ class VideoPlayerViewModel @Inject constructor() : ViewModel() {
     val playerState: SharedFlow<PlayerState> = _playerState
 
     private val _swipeState = MutableStateFlow(0f) // 현재 offset 저장
-    val swipeState: StateFlow<Float> get() = _swipeState
+    val swipeState: StateFlow<Float> = _swipeState
 
     private var _showMusicVideo = false
     val showMusicVideo get() = _showMusicVideo
+
+    private var lastPosition = 0L
 
     fun setShowMusicVideo(isShow: Boolean) {
         _showMusicVideo = isShow
@@ -54,6 +56,7 @@ class VideoPlayerViewModel @Inject constructor() : ViewModel() {
             setMediaItem(mediaItem)
             prepare()
             playWhenReady = false
+            seekTo(lastPosition)
             this
         }
 
@@ -73,6 +76,9 @@ class VideoPlayerViewModel @Inject constructor() : ViewModel() {
         setPlayer()
     }
 
+    fun releasePlayer() {
+        _player = null
+    }
 
     fun setPlayState(playerState: PlayerState) {
         viewModelScope.launch {
@@ -84,6 +90,10 @@ class VideoPlayerViewModel @Inject constructor() : ViewModel() {
         viewModelScope.launch {
             _swipePlayState.emit(isPlaying)
         }
+    }
+
+    fun setLastPosition(time: Long) {
+        lastPosition = time
     }
 
     private fun setPlayer() {
