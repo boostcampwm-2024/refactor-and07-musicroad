@@ -22,6 +22,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.Replay
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -30,10 +31,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -47,6 +46,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.graphics.toColorInt
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.squirtles.domain.model.Creator
 import com.squirtles.domain.model.LocationPoint
 import com.squirtles.domain.model.Pick
@@ -55,18 +56,25 @@ import com.squirtles.musicroad.R
 import com.squirtles.musicroad.ui.theme.Black
 import com.squirtles.musicroad.ui.theme.Gray
 import com.squirtles.musicroad.ui.theme.White
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun VideoPlayerOverlay(
     pick: Pick,
-    playerState: MutableState<Boolean>,
-    onBackClick: () -> Unit
+    onBackClick: () -> Unit,
+    videoPlayerViewModel: VideoPlayerViewModel = hiltViewModel()
 ) {
+    val playerState = videoPlayerViewModel.playerState.collectAsStateWithLifecycle(PlayerState.Playing)
     val alpha = remember { Animatable(0f) }
-    val coroutineScope = rememberCoroutineScope()
+
+    LaunchedEffect(Unit) {
+        videoPlayerViewModel.playerState.collect {
+            when (it) {
+                PlayerState.Playing -> alpha.animateTo(0f, animationSpec = tween(durationMillis = 300))
+                else -> alpha.animateTo(1.0f, animationSpec = tween(durationMillis = 300))
+            }
+        }
+    }
 
     Box(
         modifier = Modifier
@@ -76,16 +84,7 @@ fun VideoPlayerOverlay(
             .pointerInput(Unit) {
                 detectTapGestures(
                     onTap = {
-                        coroutineScope.launch {
-                            // Fade In
-                            alpha.animateTo(1.0f, animationSpec = tween(durationMillis = 300))
-
-                            // 대기
-                            delay(3_000L)
-
-                            // Fade Out
-                            alpha.animateTo(0f, animationSpec = tween(durationMillis = 300))
-                        }
+                        if (alpha.value == 0f) videoPlayerViewModel.setPlayState(PlayerState.Pause)
                     }
                 )
             }
@@ -119,7 +118,13 @@ fun VideoPlayerOverlay(
         )
 
         IconButton(
-            onClick = { playerState.value = playerState.value.not() },
+            onClick = {
+                when (playerState.value) {
+                    PlayerState.Pause -> videoPlayerViewModel.setPlayState(PlayerState.Playing)
+                    PlayerState.Playing -> videoPlayerViewModel.setPlayState(PlayerState.Pause)
+                    PlayerState.Replay -> videoPlayerViewModel.setPlayState(PlayerState.Playing)
+                }
+            },
             modifier = Modifier
                 .align(Alignment.Center)
                 .background(Black.copy(0.5f), shape = CircleShape)
@@ -127,7 +132,11 @@ fun VideoPlayerOverlay(
             enabled = alpha.value > 0.5f
         ) {
             Icon(
-                imageVector = if (playerState.value) Icons.Default.Pause else Icons.Default.PlayArrow,
+                imageVector = when (playerState.value) {
+                    PlayerState.Pause -> Icons.Default.PlayArrow
+                    PlayerState.Playing -> Icons.Default.Pause
+                    PlayerState.Replay -> Icons.Default.Replay
+                },
                 contentDescription = stringResource(id = R.string.player_play_pause_description),
                 modifier = Modifier.size(30.dp),
                 tint = White
@@ -219,7 +228,6 @@ private fun VideoPlayerOverlayPreview() {
             location = LocationPoint(1.0, 1.0),
             musicVideoUrl = "",
         ),
-        playerState = remember { mutableStateOf(false) },
         onBackClick = {}
     )
 }

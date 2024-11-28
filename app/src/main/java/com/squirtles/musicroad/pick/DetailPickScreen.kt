@@ -78,6 +78,7 @@ import com.squirtles.musicroad.pick.components.music.MusicPlayer
 import com.squirtles.musicroad.ui.theme.Black
 import com.squirtles.musicroad.ui.theme.White
 import com.squirtles.musicroad.videoplayer.MusicVideoScreen
+import com.squirtles.musicroad.videoplayer.VideoPlayerViewModel
 import kotlin.math.roundToInt
 
 @OptIn(ExperimentalWearMaterialApi::class)
@@ -86,8 +87,10 @@ fun DetailPickScreen(
     pickId: String,
     onBackClick: () -> Unit,
     pickViewModel: PickViewModel = hiltViewModel(),
-    playerViewModel: PlayerViewModel = hiltViewModel()
+    playerViewModel: PlayerViewModel = hiltViewModel(),
+    videoPlayerViewModel: VideoPlayerViewModel = hiltViewModel()
 ) {
+    val context = LocalContext.current
     val screenHeight = LocalConfiguration.current.screenHeightDp.dp
     val screenHeightPx = with(LocalDensity.current) { screenHeight.toPx() }
     val statusBarHeight = with(LocalDensity.current) { WindowInsets.statusBars.getTop(this) }
@@ -103,6 +106,7 @@ fun DetailPickScreen(
 
     val isFavorite = false
     val pick by pickViewModel.pick.collectAsStateWithLifecycle()
+    val swipePlayState by videoPlayerViewModel.swipePlayState.collectAsStateWithLifecycle(false)
     var isMusicVideoAvailable by remember { mutableStateOf(false) }
     var showMusicVideo by remember { mutableStateOf(false) }
 
@@ -112,6 +116,11 @@ fun DetailPickScreen(
 
     LaunchedEffect(pick) {
         isMusicVideoAvailable = pick.musicVideoUrl.isNotEmpty()
+
+        // 비디오 플레이어 설정
+        if (isMusicVideoAvailable) {
+            videoPlayerViewModel.initializePlayer(context, pick.musicVideoUrl)
+        }
     }
 
     Box(modifier = Modifier.fillMaxSize()) {
@@ -132,13 +141,13 @@ fun DetailPickScreen(
         }
 
         if (isMusicVideoAvailable && showMusicVideo) {
-            val isPlaying = swipeableState.offset.value < contentHeightPx * 0.8f
+            videoPlayerViewModel.setSwipePlayState(swipeableState.offset.value < contentHeightPx * 0.8f)
             val alpha = (1 - (swipeableState.offset.value / contentHeightPx)).coerceIn(0f, 1f)
             if (swipeableState.offset.value.roundToInt() >= contentHeightPx) showMusicVideo = false
 
             MusicVideoScreen(
                 pick = pick,
-                swipePlayState = isPlaying,
+                swipePlayState = swipePlayState,
                 modifier = swipeableModifier
                     .fillMaxSize()
                     .offset { IntOffset(0, swipeableState.offset.value.roundToInt()) }
@@ -146,8 +155,8 @@ fun DetailPickScreen(
                 onBackClick = onBackClick
             )
 
-            LaunchedEffect(isPlaying) {
-                if (isPlaying) playerViewModel.pause()
+            LaunchedEffect(swipePlayState) {
+                if (swipePlayState) playerViewModel.pause()
             }
         }
     }
