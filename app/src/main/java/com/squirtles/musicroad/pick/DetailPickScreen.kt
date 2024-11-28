@@ -20,16 +20,8 @@ import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material3.CenterAlignedTopAppBar
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
@@ -49,13 +41,10 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalView
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
-import androidx.core.graphics.toColorInt
 import androidx.core.view.WindowInsetsControllerCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -64,13 +53,12 @@ import androidx.wear.compose.material.FractionalThreshold
 import androidx.wear.compose.material.rememberSwipeableState
 import androidx.wear.compose.material.swipeable
 import coil3.compose.AsyncImage
-import com.squirtles.domain.model.Creator
-import com.squirtles.domain.model.LocationPoint
 import com.squirtles.domain.model.Pick
-import com.squirtles.domain.model.Song
 import com.squirtles.musicroad.R
 import com.squirtles.musicroad.musicplayer.PlayerViewModel
+import com.squirtles.musicroad.pick.PickViewModel.Companion.DEFAULT_PICK
 import com.squirtles.musicroad.pick.components.CommentText
+import com.squirtles.musicroad.pick.components.DetailPickTopAppBar
 import com.squirtles.musicroad.pick.components.PickInformation
 import com.squirtles.musicroad.pick.components.SongInfo
 import com.squirtles.musicroad.pick.components.SwipeUpIcon
@@ -150,22 +138,23 @@ fun DetailPickScreen(
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun DetailPickScreen(
     userId: String,
     userName: String,
     pick: Pick,
+    isCreatedBySelf: Boolean,
     isFavorite: Boolean,
+    userName: String,
     isMusicVideoAvailable: Boolean,
     swipeableModifier: Modifier,
     playerViewModel: PlayerViewModel,
-    onBackClick: () -> Unit
+    onBackClick: () -> Unit,
+    onActionClick: () -> Unit
 ) {
-    val isMine = userId == pick.createdBy.userId
     val scrollState = rememberScrollState()
     val dynamicBackgroundColor = Color(pick.song.bgColor)
-    val dynamicOnBackgroundColor = if (dynamicBackgroundColor.luminance() >= 0.5f) Black else White
+    val onDynamicBackgroundColor = if (dynamicBackgroundColor.luminance() >= 0.5f) Black else White
     val view = LocalView.current
     val context = LocalContext.current
 
@@ -181,40 +170,14 @@ private fun DetailPickScreen(
 
     Scaffold(
         topBar = {
-            CenterAlignedTopAppBar(
-                title = {
-                    Text(
-                        text = userName + stringResource(id = R.string.pick_app_bar_title_user),
-                        color = dynamicOnBackgroundColor,
-                        style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold)
-                    )
-                },
+            DetailPickTopAppBar(
                 modifier = Modifier.statusBarsPadding(),
-                navigationIcon = {
-                    IconButton(onClick = onBackClick) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = stringResource(id = R.string.pick_app_bar_back_description),
-                            tint = dynamicOnBackgroundColor
-                        )
-                    }
-                },
-                actions = {
-                    IconButton(onClick = { /*TODO*/ }) {
-                        val iconPainter =
-                            if (isMine) R.drawable.ic_delete else if (isFavorite) R.drawable.ic_favorite_true else R.drawable.ic_favorite_false
-                        val iconDescription =
-                            if (isMine) R.string.pick_delete_icon_description else if (isFavorite) R.string.pick_favorite_true_icon_description else R.string.pick_favorite_false_icon_description
-                        Icon(
-                            painter = painterResource(iconPainter),
-                            contentDescription = stringResource(id = iconDescription),
-                            tint = dynamicOnBackgroundColor
-                        )
-                    }
-                },
-                colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
-                    containerColor = Color.Transparent
-                )
+                isCreatedBySelf = isCreatedBySelf,
+                isFavorite = isFavorite,
+                userName = userName,
+                onDynamicBackgroundColor = onDynamicBackgroundColor,
+                onBackClick = onBackClick,
+                onActionClick = { onActionClick() }
             )
         }
     ) { innerPadding ->
@@ -243,7 +206,7 @@ private fun DetailPickScreen(
             ) {
                 SongInfo(
                     song = pick.song,
-                    dynamicOnBackgroundColor = dynamicOnBackgroundColor
+                    dynamicOnBackgroundColor = onDynamicBackgroundColor
                 )
 
                 AsyncImage(
@@ -289,32 +252,14 @@ private fun DetailPickScreen(
 @Composable
 private fun DetailPickScreenPreview() {
     DetailPickScreen(
-        userId = "",
-        userName = "짱구",
-        pick = Pick(
-            id = "",
-            song = Song(
-                id = "",
-                songName = "Super Shy",
-                artistName = "뉴진스",
-                albumName = "NewJeans 'Super Shy' - Single",
-                imageUrl = "https://i.scdn.co/image/ab67616d0000b2733d98a0ae7c78a3a9babaf8af",
-                genreNames = listOf("KPop", "R&B", "Rap"),
-                bgColor = "#8fc1e2".toColorInt(),
-                externalUrl = "",
-                previewUrl = ""
-            ),
-            comment = "강남역 거리는 Super Shy 듣기 좋네요 ^-^!",
-            createdAt = "2024.11.02",
-            createdBy = Creator(userId = "", userName = "짱구"),
-            favoriteCount = 100,
-            location = LocationPoint(1.0, 1.0),
-            musicVideoUrl = "",
-        ),
+        pick = DEFAULT_PICK,
+        isCreatedBySelf = false,
         isFavorite = false,
+        userName = "짱구",
         isMusicVideoAvailable = true,
         swipeableModifier = Modifier,
         playerViewModel = PlayerViewModel(),
         onBackClick = {},
+        onActionClick = {}
     )
 }
