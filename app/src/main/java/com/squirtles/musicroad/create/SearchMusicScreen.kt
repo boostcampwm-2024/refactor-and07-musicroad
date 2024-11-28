@@ -46,9 +46,7 @@ import androidx.compose.ui.focus.FocusManager
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalFocusManager
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
@@ -56,10 +54,9 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import coil3.compose.AsyncImage
 import com.squirtles.domain.model.Song
-import com.squirtles.musicroad.R
 import com.squirtles.musicroad.UiState
+import com.squirtles.musicroad.common.AlbumImage
 import com.squirtles.musicroad.ui.theme.Black
 import com.squirtles.musicroad.ui.theme.Gray
 import com.squirtles.musicroad.ui.theme.Primary
@@ -257,14 +254,13 @@ private fun SongItem(
             .padding(horizontal = DefaultPadding, vertical = ItemSpacing / 2),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        AsyncImage(
-            model = song.getImageUrlWithSize(RequestImageSize),
-            contentDescription = stringResource(R.string.search_music_album_description),
-            contentScale = ContentScale.Crop,
+        AlbumImage(
+            imageUrl = song.getImageUrlWithSize(RequestImageSize),
             modifier = Modifier
                 .size(ImageSize)
-                .clip(RoundedCornerShape(size = 16.dp))
+                .clip(RoundedCornerShape(16.dp))
         )
+
         HorizontalSpacer(16)
         Column {
             TextWithColorAndStyle(

@@ -5,10 +5,13 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBars
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -23,6 +26,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.squirtles.musicroad.map.components.BottomNavigation
+import com.squirtles.musicroad.map.components.ClusterBottomSheet
 import com.squirtles.musicroad.map.components.InfoWindow
 import com.squirtles.musicroad.map.components.PickNotificationBanner
 import com.squirtles.musicroad.musicplayer.PlayerViewModel
@@ -33,18 +37,17 @@ fun MapScreen(
     onFavoriteClick: () -> Unit,
     onCenterClick: () -> Unit,
     onSettingClick: () -> Unit,
-    onInfoWindowClick: (String) -> Unit,
+    onPickSummaryClick: (String) -> Unit,
     playerViewModel: PlayerViewModel = hiltViewModel()
 ) {
     val nearPicks by mapViewModel.nearPicks.collectAsStateWithLifecycle()
-    val pickMarkers by mapViewModel.pickMarkers.collectAsStateWithLifecycle()
-    val selectedPickState by mapViewModel.selectedPickState.collectAsStateWithLifecycle()
     val lastLocation by mapViewModel.lastLocation.collectAsStateWithLifecycle()
 
+    val clickedMarkerState by mapViewModel.clickedMarkerState.collectAsStateWithLifecycle()
     val playerState by playerViewModel.playerState.collectAsStateWithLifecycle()
 
     val context = LocalContext.current
-
+    var showBottomSheet by remember { mutableStateOf(false) }
     var isPlaying: Boolean by remember { mutableStateOf(false) }
 
     LaunchedEffect(nearPicks) {
@@ -67,9 +70,7 @@ fun MapScreen(
         ) {
             NaverMap(
                 mapViewModel = mapViewModel,
-                lastLocation = lastLocation,
-                pickMarkers = pickMarkers,
-                selectedPickState = selectedPickState
+                lastLocation = lastLocation
             )
 
             if (nearPicks.isNotEmpty()) {
@@ -87,25 +88,34 @@ fun MapScreen(
                 verticalArrangement = Arrangement.Bottom,
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                pickMarkers[selectedPickState.current]?.pick?.let { pick ->
-                    InfoWindow(
-                        pick,
-                        navigateToPick = { pickId ->
-                            playerViewModel.pause()
-                            onInfoWindowClick(pickId)
-                        },
-                        calculateDistance = { lat, lng ->
-                            mapViewModel.calculateDistance(lat, lng).let { distance ->
-                                when {
-                                    distance >= 1000.0 -> "%.1fkm".format(distance / 1000.0)
-                                    distance >= 0 -> "%.0fm".format(distance)
-                                    else -> ""
+                clickedMarkerState.prevClickedMarker?.let {
+                    if (clickedMarkerState.curPickId != null) { // 단말 마커 클릭 시
+                        showBottomSheet = false
+                        mapViewModel.picks[clickedMarkerState.curPickId]?.let { pick ->
+                            InfoWindow(
+                                pick = pick,
+                                userId = mapViewModel.getUserId(),
+                                navigateToPick = { pickId ->
+                                    playerViewModel.pause()
+                                    onPickSummaryClick(pickId)
+                                },
+                                calculateDistance = { lat, lng ->
+                                    mapViewModel.calculateDistance(lat, lng).let { distance ->
+                                        when {
+                                            distance >= 1000.0 -> "%.1fkm".format(distance / 1000.0)
+                                            distance >= 0 -> "%.0fm".format(distance)
+                                            else -> ""
+                                        }
+                                    }
                                 }
-                            }
+                            )
                         }
-                    )
-                    Spacer(Modifier.height(16.dp))
+                    } else { // 클러스터 마커 클릭 시
+                        showBottomSheet = true
+                    }
                 }
+
+                Spacer(Modifier.height(16.dp))
 
                 BottomNavigation(
                     modifier = Modifier.padding(bottom = 16.dp),
@@ -122,6 +132,34 @@ fun MapScreen(
                     onSettingClick = {
                         playerViewModel.pause()
                         onSettingClick()
+                    }
+                )
+            }
+
+            if (showBottomSheet) {
+                ClusterBottomSheet(
+                    onDismissRequest = {
+                        showBottomSheet = false
+                        mapViewModel.resetClickedMarkerState(context)
+                    },
+                    modifier = Modifier
+                        .fillMaxHeight()
+                        .padding(WindowInsets.statusBars.asPaddingValues()),
+                    clusterPickList = clickedMarkerState.clusterPickList,
+                    userId = mapViewModel.getUserId(),
+                    calculateDistance = { lat, lng ->
+                        mapViewModel.calculateDistance(lat, lng).let { distance ->
+                            when {
+                                distance >= 1000.0 -> "%.1fkm".format(distance / 1000.0)
+                                distance >= 0 -> "%.0fm".format(distance)
+                                else -> ""
+                            }
+                        }
+
+                    },
+                    onClickItem = { pickId ->
+                        playerViewModel.pause()
+                        onPickSummaryClick(pickId)
                     }
                 )
             }

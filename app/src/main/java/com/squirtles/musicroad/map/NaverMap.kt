@@ -10,9 +10,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
@@ -31,11 +33,14 @@ import com.naver.maps.map.LocationTrackingMode
 import com.naver.maps.map.MapView
 import com.naver.maps.map.NaverMap
 import com.naver.maps.map.UiSettings
+import com.naver.maps.map.clustering.Clusterer
 import com.naver.maps.map.overlay.CircleOverlay
 import com.naver.maps.map.overlay.LocationOverlay
 import com.naver.maps.map.overlay.OverlayImage
 import com.naver.maps.map.util.FusedLocationSource
 import com.squirtles.musicroad.R
+import com.squirtles.musicroad.map.marker.MarkerKey
+import com.squirtles.musicroad.map.marker.buildClusterer
 import com.squirtles.musicroad.ui.theme.Primary
 import com.squirtles.musicroad.ui.theme.Purple15
 import kotlinx.coroutines.launch
@@ -45,9 +50,7 @@ import kotlin.coroutines.suspendCoroutine
 @Composable
 fun NaverMap(
     mapViewModel: MapViewModel,
-    lastLocation: Location?,
-    pickMarkers: Map<String, MusicRoadMarker>,
-    selectedPickState: PickState,
+    lastLocation: Location?
 ) {
     val context = LocalContext.current
     val mapView = remember { MapView(context) }
@@ -58,19 +61,23 @@ fun NaverMap(
         remember { FusedLocationSource(context as Activity, LOCATION_PERMISSION_REQUEST_CODE) }
     val locationOverlay = remember { mutableStateOf<LocationOverlay?>(null) }
     val circleOverlay = remember { CircleOverlay() }
+    var clusterer by remember { mutableStateOf<Clusterer<MarkerKey>?>(null) }
 
     val lifecycleOwner = LocalLifecycleOwner.current
     val coroutineScope = rememberCoroutineScope()
-
-    LaunchedEffect(selectedPickState) {
-        pickMarkers[selectedPickState.current]?.toggleSizeByClick(context, true)
-        pickMarkers[selectedPickState.previous]?.toggleSizeByClick(context, false)
-    }
 
     LaunchedEffect(lastLocation) {
         // 현재 위치와 마지막 위치가 5미터 이상 차이가 날때만 현위치 기준 반경 100m 픽 정보 개수 불러오기
         lastLocation?.let {
             mapViewModel.requestPickNotificationArea(lastLocation, CIRCLE_RADIUS_METER)
+        }
+    }
+
+    DisposableEffect(Unit) {
+        clusterer = buildClusterer(context, mapViewModel)
+
+        onDispose {
+            clusterer?.clear()
         }
     }
 
@@ -118,53 +125,27 @@ fun NaverMap(
                         )
                         initLocationOverlay(locationSource, locationOverlay)
                         setLocationChangeListener(circleOverlay, mapViewModel)
-                        setMapClickListener { mapViewModel.resetSelectedPickState() }
+                        setMapClickListener { mapViewModel.resetClickedMarkerState(context) }
                         setCameraIdleListener { leftTop, rightBottom ->
-                            mapViewModel.fetchPicksInBounds(leftTop, rightBottom)
+                            mapViewModel.fetchPicksInBounds(leftTop, rightBottom, clusterer)
                         }
+                        clusterer?.map = this
                     }
                 }
             }
         },
         modifier = Modifier.fillMaxSize()
-    ) {
-        naverMap.value?.let {
-            pickMarkers.forEach { (pick, marker) ->
-                if (marker.map == null) {
-                    it.createMarker(
-                        context = context,
-                        marker = marker,
-                        setSelectedPickState = mapViewModel::setSelectedPickState
-                    )
-                }
-            }
-        }
-    }
+    )
 }
 
-private fun NaverMap.createMarker(
-    context: Context,
-    marker: MusicRoadMarker,
-    setSelectedPickState: (String) -> Unit
-) {
-    marker.loadMarkerImage(context = context, map = this) {
-        onMarkerClick(
-            clickedMarker = marker,
-            setSelectedPickState = setSelectedPickState
-        )
-    }
-}
-
-private fun NaverMap.onMarkerClick(
-    clickedMarker: MusicRoadMarker,
-    setSelectedPickState: (String) -> Unit
+internal fun setCameraToMarker(
+    map: NaverMap,
+    clickedMarkerPosition: LatLng
 ) {
     val cameraUpdate = CameraUpdate
-        .scrollTo(clickedMarker.position)
+        .scrollTo(clickedMarkerPosition)
         .animate(CameraAnimation.Easing)
-    this.moveCamera(cameraUpdate)
-
-    setSelectedPickState(clickedMarker.pick.id)
+    map.moveCamera(cameraUpdate)
 }
 
 private fun NaverMap.initLocationOverlay(

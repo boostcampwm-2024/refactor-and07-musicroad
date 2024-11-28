@@ -1,4 +1,4 @@
-package com.squirtles.musicroad.map.components
+package com.squirtles.musicroad.map.marker
 
 import android.content.Context
 import android.graphics.Bitmap
@@ -6,6 +6,7 @@ import android.graphics.Canvas
 import android.graphics.Paint
 import android.graphics.Rect
 import android.util.AttributeSet
+import android.util.Size
 import android.view.View
 import androidx.annotation.ColorInt
 import coil3.SingletonImageLoader
@@ -14,8 +15,9 @@ import coil3.request.allowHardware
 import coil3.request.transformations
 import coil3.toBitmap
 import coil3.transform.CircleCropTransformation
+import com.squirtles.domain.model.Pick
 
-class MarkerIconView(
+class LeafMarkerIconView(
     context: Context,
     attrs: AttributeSet? = null
 ) : View(context, attrs) {
@@ -68,7 +70,14 @@ class MarkerIconView(
         strokePaint.color = color
     }
 
-    fun loadImage(url: String?, onImageLoaded: () -> Unit) {
+    fun setLeafMarkerIcon(pick: Pick, onImageLoaded: () -> Unit) {
+        val song = pick.song
+        loadImage(song.getImageUrlWithSize(REQUEST_IMAGE_SIZE)) {
+            onImageLoaded()
+        }
+    }
+
+    private fun loadImage(url: String?, onImageLoaded: () -> Unit) {
         val request = ImageRequest.Builder(context)
             .data(url)
             .allowHardware(false)
@@ -90,10 +99,9 @@ class MarkerIconView(
     private fun Int.dpToPx() = (this * resources.displayMetrics.density).toInt()
 
     companion object {
-        private const val TAG_LOG = "MarkerIconView"
-
         private const val STROKE_WIDTH = 8f
         private const val MARKER_WIDTH = 40
         private const val MARKER_HEIGHT = 50
+        private val REQUEST_IMAGE_SIZE = Size(300, 300)
     }
 }
