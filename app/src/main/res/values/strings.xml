@@ -38,4 +38,10 @@
     <!-- Search Music -->
     <string name="search_music_album_description">노래 앨범 이미지</string>
     <string name="search_music_search_button_description">노래 검색 버튼</string>
+
+    <!-- Delete Pick Dialog -->
+    <string name="delete_pick_dialog_title">삭제하시겠습니까?</string>
+    <string name="delete_pick_dialog_body">등록하신 픽이 삭제됩니다.</string>
+    <string name="delete_pick_dialog_cancel">취소</string>
+    <string name="delete_pick_dialog_delete">삭제하기</string>
 </resources>
