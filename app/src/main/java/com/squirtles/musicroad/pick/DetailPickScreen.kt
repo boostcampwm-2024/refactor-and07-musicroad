@@ -177,8 +177,10 @@ private fun DetailPickScreen(
         blue = (dynamicBackgroundColor.blue + 0.2f).coerceAtMost(1.0f),
     )
 
+    // PlayerViewModel Collect
     val audioSessionId by playerViewModel.audioSessionId.collectAsStateWithLifecycle()
     val playerState by playerViewModel.playerState.collectAsStateWithLifecycle()
+    val bufferPercentage by playerViewModel.bufferPercentage.collectAsStateWithLifecycle()
     val duration by playerViewModel.duration.collectAsStateWithLifecycle()
 
     if (!view.isInEditMode) {
@@ -306,9 +308,22 @@ private fun DetailPickScreen(
 
                 if (pick.song.previewUrl.isBlank().not()) {
                     MusicPlayer(
-                        context = context,
                         previewUrl = pick.song.previewUrl,
-                        playerViewModel = playerViewModel
+                        playerState = playerState,
+                        duration = duration,
+                        bufferPercentage = bufferPercentage,
+                        readyPlayer = { sourceUrl ->
+                            playerViewModel.readyPlayer(context, sourceUrl)
+                        },
+                        onSeekChanged = { timeMs ->
+                            playerViewModel.playerSeekTo(timeMs)
+                        },
+                        onReplayForwardClick = { replaySec ->
+                            playerViewModel.replayForward(replaySec)
+                        },
+                        onPauseToggle = {
+                            playerViewModel.togglePlayPause()
+                        },
                     )
                 }
             }
