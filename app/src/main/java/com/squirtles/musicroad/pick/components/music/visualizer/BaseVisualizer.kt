@@ -42,15 +42,6 @@ class BaseVisualizer(
 
                     val filteredMagnitudes = magnitudes.copyOfRange(validRange.first, validRange.last + 1)
                     _fftFlow.tryEmit(filteredMagnitudes.toList())
-
-
-//                    val filteredMagnitudes = mutableListOf<Float>()
-//                    for (value in magnitudes.copyOfRange(validRange.first, validRange.last + 1)) {
-//                        filteredMagnitudes.add(value)
-//                        filteredMagnitudes.add(value)
-//                    }
-//                    Log.d("BaseVisualizer", "filtered fft data ${filteredMagnitudes.size}: ${filteredMagnitudes.joinToString(",")}")
-//                    _fftFlow.tryEmit(filteredMagnitudes)
                 }
             }, Visualizer.getMaxCaptureRate() / 2, false, true)
             enabled = true
