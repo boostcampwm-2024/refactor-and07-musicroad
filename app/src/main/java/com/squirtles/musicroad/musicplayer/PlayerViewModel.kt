@@ -2,12 +2,14 @@ package com.squirtles.musicroad.musicplayer
 
 import android.content.Context
 import android.util.Log
+import androidx.annotation.OptIn
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.media3.common.C.TIME_UNSET
 import androidx.media3.common.MediaItem
 import androidx.media3.common.PlaybackException
 import androidx.media3.common.Player
+import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
 import com.squirtles.musicroad.musicplayer.PlayerState.Companion.PLAYER_STATE_INITIAL
 import com.squirtles.musicroad.musicplayer.PlayerState.Companion.PLAYER_STATE_STOP
@@ -23,6 +25,9 @@ class PlayerViewModel @Inject constructor() : ViewModel() {
 
     private var player: ExoPlayer? = null
 
+    private val _audioSessionId = MutableStateFlow(0)
+    val audioSessionId: StateFlow<Int> = _audioSessionId
+
     private val _playerState = MutableStateFlow(PLAYER_STATE_INITIAL)
     val playerState: StateFlow<PlayerState> = _playerState
 
@@ -32,20 +37,26 @@ class PlayerViewModel @Inject constructor() : ViewModel() {
     private val _duration = MutableStateFlow(30_000L)
     val duration: StateFlow<Long> = _duration
 
-    private var playList: List<String> = emptyList()
-
     private fun initializePlayer(context: Context) {
         val exoPlayer = ExoPlayer.Builder(context).build().also {
             it.addListener(object : Player.Listener {
                 override fun onPlayerError(error: PlaybackException) {
                     handleError(error)
                 }
-            })
-        }
 
+                override fun onPlaybackStateChanged(playbackState: Int) {
+                    if (playbackState == Player.STATE_ENDED) {
+                        it.seekTo(0)
+                        it.pause()
+                    }
+                }
+            })
+            it.volume = 0.8f
+        }
         this.player = exoPlayer
     }
 
+    @OptIn(UnstableApi::class)
     fun readyPlayer(context: Context, sourceUrl: String) {
         if (player != null) return
 
@@ -64,6 +75,8 @@ class PlayerViewModel @Inject constructor() : ViewModel() {
             _duration.value =
                 if (it.duration == TIME_UNSET) 30_000L else it.duration
 
+            _audioSessionId.value = it.audioSessionId
+
             updatePlayerStatePeriodically(it)
         }
     }
@@ -80,7 +93,6 @@ class PlayerViewModel @Inject constructor() : ViewModel() {
             it.prepare()
             it.playWhenReady = false
             it.repeatMode = Player.REPEAT_MODE_ALL
-            playList = sourceUrls
         }
     }
 

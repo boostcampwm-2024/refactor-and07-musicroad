@@ -85,17 +85,20 @@ class MainActivity : AppCompatActivity() {
                                 }
 
                                 is LoadingState.NetworkError -> {
-                                    Toast.makeText(this@MainActivity, getString(R.string.main_network_error_message), Toast.LENGTH_LONG).show()
+                                    Toast.makeText(this@MainActivity, getString(R.string.main_network_error_message), Toast.LENGTH_LONG)
+                                        .show()
                                     finish()
                                 }
 
                                 is LoadingState.UserNotFoundError -> {
-                                    Toast.makeText(this@MainActivity, getString(R.string.main_user_not_found_message), Toast.LENGTH_LONG).show()
+                                    Toast.makeText(this@MainActivity, getString(R.string.main_user_not_found_message), Toast.LENGTH_LONG)
+                                        .show()
                                     finish()
                                 }
 
                                 is LoadingState.CreatedUserError -> {
-                                    Toast.makeText(this@MainActivity, getString(R.string.main_create_user_fail_message), Toast.LENGTH_LONG).show()
+                                    Toast.makeText(this@MainActivity, getString(R.string.main_create_user_fail_message), Toast.LENGTH_LONG)
+                                        .show()
                                     finish()
                                 }
                             }
@@ -110,16 +113,16 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun checkSelfPermission(): Boolean {
-        return PermissionChecker.checkSelfPermission(this, PERMISSIONS[0]) ==
-                PermissionChecker.PERMISSION_GRANTED &&
-                PermissionChecker.checkSelfPermission(this, PERMISSIONS[1]) ==
-                PermissionChecker.PERMISSION_GRANTED
+        return PERMISSIONS.all { permission ->
+            PermissionChecker.checkSelfPermission(this, permission) == PermissionChecker.PERMISSION_GRANTED
+        }
     }
 
     companion object {
         private val PERMISSIONS = arrayOf(
             Manifest.permission.ACCESS_FINE_LOCATION,
-            Manifest.permission.ACCESS_COARSE_LOCATION
+            Manifest.permission.ACCESS_COARSE_LOCATION,
+            Manifest.permission.RECORD_AUDIO
         )
     }
 }

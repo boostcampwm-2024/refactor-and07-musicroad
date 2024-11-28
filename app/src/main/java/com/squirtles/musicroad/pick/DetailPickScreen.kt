@@ -2,8 +2,6 @@ package com.squirtles.musicroad.pick
 
 import android.app.Activity
 import android.content.Context
-import android.util.Log
-import android.util.Size
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.Orientation
@@ -11,16 +9,15 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Scaffold
@@ -48,6 +45,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
+import androidx.core.graphics.toColorInt
 import androidx.core.view.WindowInsetsControllerCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -56,9 +54,12 @@ import androidx.wear.compose.material.FractionalThreshold
 import androidx.wear.compose.material.rememberSwipeableState
 import androidx.wear.compose.material.swipeable
 import coil3.compose.AsyncImage
+import com.squirtles.domain.model.Creator
+import com.squirtles.domain.model.LocationPoint
 import com.squirtles.domain.model.Pick
 import com.squirtles.musicroad.R
 import com.squirtles.musicroad.musicplayer.PlayerViewModel
+import com.squirtles.musicroad.pick.components.CircleAlbumCover
 import com.squirtles.musicroad.pick.PickViewModel.Companion.DEFAULT_PICK
 import com.squirtles.musicroad.pick.components.CommentText
 import com.squirtles.musicroad.pick.components.DeletePickDialog
@@ -225,6 +226,18 @@ private fun DetailPick(
     val view = LocalView.current
     val context = LocalContext.current
 
+    val audioEffectColor = dynamicBackgroundColor.copy(
+        red = (dynamicBackgroundColor.red + 0.2f).coerceAtMost(1.0f),
+        green = (dynamicBackgroundColor.green + 0.2f).coerceAtMost(1.0f),
+        blue = (dynamicBackgroundColor.blue + 0.2f).coerceAtMost(1.0f),
+    )
+
+    // PlayerViewModel Collect
+    val audioSessionId by playerViewModel.audioSessionId.collectAsStateWithLifecycle()
+    val playerState by playerViewModel.playerState.collectAsStateWithLifecycle()
+    val bufferPercentage by playerViewModel.bufferPercentage.collectAsStateWithLifecycle()
+    val duration by playerViewModel.duration.collectAsStateWithLifecycle()
+
     if (!view.isInEditMode) {
         SideEffect {
             val window = (view.context as Activity).window
@@ -276,15 +289,18 @@ private fun DetailPick(
                     dynamicOnBackgroundColor = onDynamicBackgroundColor
                 )
 
-                AsyncImage(
-                    model = pick.song.getImageUrlWithSize(Size(400, 400)),
-                    contentDescription = pick.song.albumName + stringResource(id = R.string.pick_album_description),
+                CircleAlbumCover(
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 30.dp)
-                        .aspectRatio(1f)
-                        .clip(RoundedCornerShape(20.dp)),
-                    contentScale = ContentScale.Crop
+                        .size(320.dp)
+                        .align(Alignment.CenterHorizontally),
+                    song = pick.song,
+                    playerState = playerState,
+                    duration = duration,
+                    audioSessionId = audioSessionId,
+                    audioEffectColor = audioEffectColor,
+                    onSeekChanged = { timeMs ->
+                        playerViewModel.playerSeekTo(timeMs)
+                    },
                 )
 
                 PickInformation(formattedDate = pick.createdAt, favoriteCount = pick.favoriteCount)
@@ -295,11 +311,23 @@ private fun DetailPick(
                 )
 
                 if (pick.song.previewUrl.isBlank().not()) {
-                    Log.d("DetailPickScreen", "Create Android View Player")
                     MusicPlayer(
-                        context = context,
                         previewUrl = pick.song.previewUrl,
-                        playerViewModel = playerViewModel
+                        playerState = playerState,
+                        duration = duration,
+                        bufferPercentage = bufferPercentage,
+                        readyPlayer = { sourceUrl ->
+                            playerViewModel.readyPlayer(context, sourceUrl)
+                        },
+                        onSeekChanged = { timeMs ->
+                            playerViewModel.playerSeekTo(timeMs)
+                        },
+                        onReplayForwardClick = { replaySec ->
+                            playerViewModel.replayForward(replaySec)
+                        },
+                        onPauseToggle = {
+                            playerViewModel.togglePlayPause()
+                        },
                     )
                 }
             }

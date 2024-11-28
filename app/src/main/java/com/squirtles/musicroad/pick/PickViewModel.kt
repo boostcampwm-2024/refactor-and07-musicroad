@@ -30,7 +30,6 @@ class PickViewModel @Inject constructor(
 
     fun fetchPick(pickId: String) {
         viewModelScope.launch {
-            _detailPickUiState.emit(DetailPickUiState.Loading)
             fetchPickUseCase(pickId)
                 .onSuccess {
                     _detailPickUiState.emit(DetailPickUiState.Success(it))
