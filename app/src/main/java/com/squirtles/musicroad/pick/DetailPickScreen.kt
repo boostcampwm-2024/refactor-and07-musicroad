@@ -1,48 +1,61 @@
 package com.squirtles.musicroad.pick
 
 import android.app.Activity
-import android.content.Context
-import android.widget.Toast
+import android.util.Log
+import android.util.Size
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.luminance
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalView
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
+import androidx.core.graphics.toColorInt
 import androidx.core.view.WindowInsetsControllerCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -50,22 +63,20 @@ import androidx.wear.compose.material.ExperimentalWearMaterialApi
 import androidx.wear.compose.material.FractionalThreshold
 import androidx.wear.compose.material.rememberSwipeableState
 import androidx.wear.compose.material.swipeable
+import coil3.compose.AsyncImage
+import com.squirtles.domain.model.Creator
+import com.squirtles.domain.model.LocationPoint
 import com.squirtles.domain.model.Pick
+import com.squirtles.domain.model.Song
 import com.squirtles.musicroad.R
 import com.squirtles.musicroad.musicplayer.PlayerViewModel
-import com.squirtles.musicroad.pick.PickViewModel.Companion.DEFAULT_PICK
-import com.squirtles.musicroad.pick.components.CircleAlbumCover
 import com.squirtles.musicroad.pick.components.CommentText
-import com.squirtles.musicroad.pick.components.DeletePickDialog
-import com.squirtles.musicroad.pick.components.DetailPickTopAppBar
 import com.squirtles.musicroad.pick.components.PickInformation
 import com.squirtles.musicroad.pick.components.SongInfo
 import com.squirtles.musicroad.pick.components.SwipeUpIcon
 import com.squirtles.musicroad.pick.components.music.MusicPlayer
 import com.squirtles.musicroad.ui.theme.Black
 import com.squirtles.musicroad.ui.theme.White
-import com.squirtles.musicroad.videoplayer.MusicVideoScreen
-import com.squirtles.musicroad.videoplayer.VideoPlayerViewModel
 import kotlin.math.roundToInt
 
 @OptIn(ExperimentalWearMaterialApi::class)
@@ -98,20 +109,49 @@ fun DetailPickScreen(
     val uiState by pickViewModel.detailPickUiState.collectAsStateWithLifecycle()
     var showDeletePickDialog by rememberSaveable { mutableStateOf(false) }
     val swipePlayState by videoPlayerViewModel.swipePlayState.collectAsStateWithLifecycle(false)
+    val uiState by pickViewModel.detailPickUiState.collectAsStateWithLifecycle()
     var isMusicVideoAvailable by remember { mutableStateOf(false) }
+    var showMusicVideo by remember { mutableStateOf(false) }
+    var showDeletePickDialog by rememberSaveable { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
         pickViewModel.fetchPick(pickId)
     }
 
-//    LaunchedEffect(pick) {
-//        isMusicVideoAvailable = pick.musicVideoUrl.isNotEmpty()
-//
-//        // 비디오 플레이어 설정
-//        if (isMusicVideoAvailable) {
-//            videoPlayerViewModel.initializePlayer(context, pick.musicVideoUrl)
-//        }
-//    }
+    when (uiState) {
+        DetailPickUiState.Loading -> {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(Black),
+                contentAlignment = Alignment.Center
+            ) {
+                CircularProgressIndicator()
+            }
+        }
+
+        is DetailPickUiState.Success -> {
+            val pick = (uiState as DetailPickUiState.Success).pick
+            isMusicVideoAvailable = pick.musicVideoUrl.isNotEmpty()
+
+            val isCreatedBySelf = pickViewModel.getUserId() == pick.createdBy.userId
+            val onActionClick: () -> Unit = {
+                when {
+                    isCreatedBySelf -> {
+                        playerViewModel.pause()
+                        showDeletePickDialog = true
+                    }
+
+                    isFavorite -> {
+                        // TODO: 픽 담기 해제
+                    }
+
+                    else -> {
+                        // TODO: 픽 담기
+                    }
+                }
+            }
+
 
     LaunchedEffect(swipeableState) {
         snapshotFlow { swipeableState.offset.value }
@@ -180,7 +220,7 @@ fun DetailPickScreen(
                     videoPlayerViewModel.setShowMusicVideo(true)
                 }
 
-                if (isMusicVideoAvailable && videoPlayerViewModel.showMusicVideo) {
+                    if (isMusicVideoAvailable && videoPlayerViewModel.showMusicVideo) {
                     videoPlayerViewModel.setSwipePlayState(swipeableState.offset.value < contentHeightPx * 0.9f)
                     val alpha = (1 - (swipeableState.offset.value / contentHeightPx)).coerceIn(0f, 1f)
 
