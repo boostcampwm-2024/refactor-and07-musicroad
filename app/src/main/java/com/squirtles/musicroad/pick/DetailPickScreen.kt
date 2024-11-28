@@ -30,6 +30,7 @@ import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -60,6 +61,7 @@ import com.squirtles.musicroad.R
 import com.squirtles.musicroad.musicplayer.PlayerViewModel
 import com.squirtles.musicroad.pick.PickViewModel.Companion.DEFAULT_PICK
 import com.squirtles.musicroad.pick.components.CommentText
+import com.squirtles.musicroad.pick.components.DeletePickDialog
 import com.squirtles.musicroad.pick.components.DetailPickTopAppBar
 import com.squirtles.musicroad.pick.components.PickInformation
 import com.squirtles.musicroad.pick.components.SongInfo
@@ -96,6 +98,7 @@ fun DetailPickScreen(
     val uiState by pickViewModel.detailPickUiState.collectAsStateWithLifecycle()
     var isMusicVideoAvailable by remember { mutableStateOf(false) }
     var showMusicVideo by remember { mutableStateOf(false) }
+    var showDeletePickDialog by rememberSaveable { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
         pickViewModel.fetchPick(pickId)
@@ -127,7 +130,10 @@ fun DetailPickScreen(
                     swipeableModifier = swipeableModifier,
                     playerViewModel = playerViewModel,
                     onBackClick = onBackClick,
-                    onActionClick = { pickViewModel.deletePick(pickId) }
+                    onActionClick = {
+                        playerViewModel.pause()
+                        showDeletePickDialog = true
+                    }
                 )
 
                 // 최초 Swipe 동작 전에 MusicVideoScreen이 생성되지 않도록 함
@@ -171,7 +177,18 @@ fun DetailPickScreen(
         DetailPickUiState.Error -> {
             // TODO: pick 로딩 실패
         }
+    }
 
+    if (showDeletePickDialog) {
+        DeletePickDialog(
+            onDismissRequest = {
+                showDeletePickDialog = false
+            },
+            onDeletion = {
+                showDeletePickDialog = false
+                pickViewModel.deletePick(pickId)
+            }
+        )
     }
 }
 
