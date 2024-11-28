@@ -188,8 +188,21 @@ class FirebaseDataSourceImpl @Inject constructor(
                 }
         }
 
-    override suspend fun deletePick(pick: Pick): Boolean {
-        TODO("Not yet implemented")
+    override suspend fun deletePick(pickId: String): Boolean {
+        return suspendCancellableCoroutine { continuation ->
+            db.collection("picks").document(pickId)
+                .delete()
+                .addOnSuccessListener {
+                    Log.d("FirebaseDataSourceImpl", "삭제 성공")
+                    continuation.resume(true)
+                }
+                .addOnFailureListener { exception ->
+                    Log.e("FirebaseDataSourceImpl", "픽 삭제 실패 $exception")
+                    continuation.resumeWithException(exception)
+                }
+        }
+        // TODO: 유저가 등록한 리스트에서 이 픽 id를 삭제
+        // TODO: favorite에서 이 픽 id 삭제
     }
 
     private fun updateCurrentUserPick(userId: String, pickId: String): Task<Void> {
