@@ -11,13 +11,14 @@ import com.squirtles.domain.model.Pick
 @Composable
 fun MusicVideoScreen(
     pick: Pick,
+    swipePlayState: Boolean,
     modifier: Modifier,
     onBackClick: () -> Unit
 ) {
-    Box(
-        modifier = modifier
-    ) {
-        MusicVideoPlayer()
-        VideoPlayerOverlay(pick, onBackClick)
+    if (swipePlayState) {
+        Box(modifier = modifier) {
+            MusicVideoPlayer()
+            VideoPlayerOverlay(pick, onBackClick)
+        }
     }
 }

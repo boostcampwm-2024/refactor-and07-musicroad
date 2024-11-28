@@ -149,11 +149,12 @@ fun DetailPickScreen(
         }
 
         if (isMusicVideoAvailable && videoPlayerViewModel.showMusicVideo) {
-            videoPlayerViewModel.setSwipePlayState(swipeableState.offset.value < contentHeightPx * 0.8f)
+            videoPlayerViewModel.setSwipePlayState(swipeableState.offset.value < contentHeightPx * 0.9f)
             val alpha = (1 - (swipeableState.offset.value / contentHeightPx)).coerceIn(0f, 1f)
 
             MusicVideoScreen(
                 pick = pick,
+                swipePlayState = swipePlayState,
                 modifier = swipeableModifier
                     .fillMaxSize()
                     .offset { IntOffset(0, swipeableState.offset.value.roundToInt()) }
@@ -163,7 +164,12 @@ fun DetailPickScreen(
 
             LaunchedEffect(swipePlayState) {
                 if (swipePlayState) playerViewModel.pause()
-                else videoPlayerViewModel.setShowMusicVideo(false)
+                else {
+                    videoPlayerViewModel.setShowMusicVideo(false)
+
+                    // 비디오 플레이어 초기화
+                    videoPlayerViewModel.initializePlayer(context, pick.musicVideoUrl)
+                }
             }
         }
     }

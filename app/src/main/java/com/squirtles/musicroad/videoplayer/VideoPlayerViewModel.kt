@@ -27,10 +27,10 @@ class VideoPlayerViewModel @Inject constructor() : ViewModel() {
     private var _player: ExoPlayer? = null
     val player get() = _player
 
-    private var _swipePlayState = MutableStateFlow(false)
+    private var _swipePlayState = MutableStateFlow(false) // swipe 상태에 따른 play 여부
     val swipePlayState: StateFlow<Boolean> = _swipePlayState
 
-    private var _playerState = MutableStateFlow(PlayerState.Playing)
+    private var _playerState = MutableStateFlow(PlayerState.Playing) // 현재 플레이어의 상태
     val playerState: SharedFlow<PlayerState> = _playerState
 
     private val _swipeState = MutableStateFlow(0f) // 현재 offset 저장
