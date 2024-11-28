@@ -31,7 +31,7 @@ class VideoPlayerViewModel @Inject constructor() : ViewModel() {
     val swipePlayState: StateFlow<Boolean> = _swipePlayState
 
     private var _playerState = MutableStateFlow(PlayerState.Playing) // 현재 플레이어의 상태
-    val playerState: SharedFlow<PlayerState> = _playerState
+    val playerState: StateFlow<PlayerState> = _playerState
 
     private val _swipeState = MutableStateFlow(0f) // 현재 offset 저장
     val swipeState: StateFlow<Float> = _swipeState

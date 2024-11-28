@@ -96,9 +96,10 @@ fun DetailPickScreen(
     val screenHeightPx = with(LocalDensity.current) { screenHeight.toPx() }
     val statusBarHeight = with(LocalDensity.current) { WindowInsets.statusBars.getTop(this) }
     val contentHeightPx = screenHeightPx + statusBarHeight
-    val anchors = mapOf(contentHeightPx to 0f, 0f to 1f)
-    val initialOffset = videoPlayerViewModel.swipeState.collectAsStateWithLifecycle().value
+
+    val initialOffset by videoPlayerViewModel.swipeState.collectAsStateWithLifecycle()
     val swipeableState = rememberSwipeableState(initialValue = initialOffset)
+    val anchors = mapOf(contentHeightPx to 0f, 0f to 1f)
     val swipeableModifier = Modifier.swipeable(
         state = swipeableState,
         anchors = anchors,
