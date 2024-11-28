@@ -133,8 +133,9 @@ fun CreatePickScreen(
                 .background(Black.copy(alpha = 0.5F))
                 .clickable( // 클릭 효과 제거 및 클릭 이벤트 무시
                     interactionSource = remember { MutableInteractionSource() },
-                    indication = null
-                ) { },
+                    indication = null,
+                    onClick = {}
+                ),
             contentAlignment = Alignment.Center
         ) {
             CircularProgressIndicator()
