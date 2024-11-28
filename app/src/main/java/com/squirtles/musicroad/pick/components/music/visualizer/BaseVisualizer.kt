@@ -11,7 +11,7 @@ class BaseVisualizer(
 ) {
     private val visualizer = Visualizer(audioSessionId)
 
-    private val _fftFlow = MutableSharedFlow<List<Float>>(replay = 0, extraBufferCapacity = 1)
+    private val _fftFlow = MutableSharedFlow<List<Float>>(replay = 1)
     val fftFlow: SharedFlow<List<Float>> = _fftFlow.asSharedFlow()
 
     private val validRange = getSignificantFftIndexRange()
