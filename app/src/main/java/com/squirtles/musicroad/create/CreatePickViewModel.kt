@@ -13,7 +13,6 @@ import com.squirtles.domain.usecase.FetchLastLocationUseCase
 import com.squirtles.domain.usecase.GetCurrentUserUseCase
 import com.squirtles.domain.usecase.GetMusicVideoUrlUseCase
 import com.squirtles.domain.usecase.SearchSongsUseCase
-import com.squirtles.musicroad.UiState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.Job
@@ -37,7 +36,7 @@ class CreatePickViewModel @Inject constructor(
 ) : ViewModel() {
 
     // SearchMusicScreen
-    private val _searchUiState = MutableStateFlow<UiState<List<Song>>>(UiState.Init)
+    private val _searchUiState = MutableStateFlow<SearchUiState<List<Song>>>(SearchUiState.Init)
     val searchUiState = _searchUiState.asStateFlow()
 
     private var _selectedSong: Song? = null
@@ -50,14 +49,14 @@ class CreatePickViewModel @Inject constructor(
     private var searchJob: Job? = null
 
     // CreatePickScreen
+    private val _createPickUiState = MutableStateFlow<CreateUiState<String>>(CreateUiState.Default)
+    val createPickUiState = _createPickUiState.asStateFlow()
+
     private val _comment = MutableStateFlow("")
     val comment get() = _comment
 
     private var lastLocation: Location? = null
     private val createPickClick = MutableSharedFlow<Unit>()
-
-    private val _createdPickId = MutableStateFlow<String?>(null)
-    val createdPickId = _createdPickId.asStateFlow()
 
     init {
         // 데이터소스의 위치값을 계속 collect하며 curLocation 변수에 저장
@@ -74,13 +73,14 @@ class CreatePickViewModel @Inject constructor(
                     searchJob?.cancel()
                     if (searchKeyword.isBlank()) {
                         searchResult = null
-                        _searchUiState.value = UiState.Init
+                        _searchUiState.value = SearchUiState.Init
                     } else {
                         searchJob = launch { searchSongs(searchKeyword) }
                     }
                 }
         }
 
+        // 등록 버튼 클릭 후 2초 이내의 클릭은 무시하고 픽 생성하기
         viewModelScope.launch {
             createPickClick
                 .throttleFirst(2000)
@@ -91,15 +91,15 @@ class CreatePickViewModel @Inject constructor(
     }
 
     private suspend fun searchSongs(searchKeyword: String) {
-        _searchUiState.value = UiState.Loading(searchResult)
+        _searchUiState.value = SearchUiState.Loading(searchResult)
         val result = searchSongsUseCase(searchKeyword)
 
         result.onSuccess {
             searchResult = it
-            _searchUiState.value = UiState.Success(it)
+            _searchUiState.value = SearchUiState.Success(it)
         }.onFailure {
             searchResult = null
-            _searchUiState.value = UiState.Error // NotFoundException(message=No such resource)
+            _searchUiState.value = SearchUiState.Error // NotFoundException(message=No such resource)
         }
     }
 
@@ -153,9 +153,10 @@ class CreatePickViewModel @Inject constructor(
                 )
 
                 createResult.onSuccess { pickId ->
-                    _createdPickId.emit(pickId)
+                    _createPickUiState.emit(CreateUiState.Success(pickId))
                 }.onFailure {
                     /* TODO: Firestore 등록 실패처리 */
+                    _createPickUiState.emit(CreateUiState.Error)
                     Log.d("CreatePickViewModel", createResult.exceptionOrNull()?.message.toString())
                 }
             }

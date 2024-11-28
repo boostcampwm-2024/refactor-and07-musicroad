@@ -55,7 +55,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.squirtles.domain.model.Song
-import com.squirtles.musicroad.UiState
 import com.squirtles.musicroad.common.AlbumImage
 import com.squirtles.musicroad.ui.theme.Black
 import com.squirtles.musicroad.ui.theme.Gray
@@ -100,18 +99,18 @@ fun SearchMusicScreen(
                 .addFocusCleaner(focusManager)
         ) {
             when (uiState) {
-                UiState.Init -> {
+                SearchUiState.Init -> {
                     // TODO: HOT 리스트
                 }
 
-                is UiState.Loading -> {
+                is SearchUiState.Loading -> {
                     LinearProgressIndicator(
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(top = 10.dp),
                         trackColor = Gray
                     )
-                    (uiState as UiState.Loading).prevData?.let {
+                    (uiState as SearchUiState.Loading).prevData?.let {
                         SearchResult(
                             searchResult = it,
                             onItemClick = { song ->
@@ -122,9 +121,9 @@ fun SearchMusicScreen(
                     }
                 }
 
-                is UiState.Success -> {
+                is SearchUiState.Success -> {
                     SearchResult(
-                        searchResult = (uiState as UiState.Success).data,
+                        searchResult = (uiState as SearchUiState.Success).data,
                         onItemClick = { song ->
                             createPickViewModel.onSongItemClick(song)
                             onItemClick()
@@ -132,7 +131,7 @@ fun SearchMusicScreen(
                     )
                 }
 
-                UiState.Error -> {
+                SearchUiState.Error -> {
                     // TODO: 검색 결과가 없는 경우. 일단은 텍스트로만 처리해뒀습니다.
                     Text("검색 결과가 없습니다.", color = White)
                 }
