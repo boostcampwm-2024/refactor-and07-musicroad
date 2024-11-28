@@ -3,7 +3,10 @@ package com.squirtles.musicroad.create
 import android.app.Activity
 import android.util.Log
 import android.util.Size
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -21,6 +24,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -32,6 +36,11 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.SideEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -64,6 +73,8 @@ fun CreatePickScreen(
 ) {
     val song = createPickViewModel.selectedSong ?: DEFAULT_SONG
     val comment = createPickViewModel.comment.collectAsStateWithLifecycle()
+    val uiState by createPickViewModel.createPickUiState.collectAsStateWithLifecycle()
+    var showCreateIndicator by rememberSaveable { mutableStateOf(false) }
 
     val dynamicBackgroundColor = Color(song.bgColor)
     val dynamicOnBackgroundColor = if (dynamicBackgroundColor.luminance() >= 0.5f) Black else White
@@ -80,20 +91,56 @@ fun CreatePickScreen(
 
     Log.d("CreatePickScreen", song.toString())
 
-    CreatePickDisplay(
-        song = song,
-        comment = comment.value,
-        dynamicBackgroundColor = dynamicBackgroundColor,
-        dynamicOnBackgroundColor = dynamicOnBackgroundColor,
-        onBackClick = {
-            createPickViewModel.resetComment()
-            onBackClick()
-        },
-        onCreateClick = {
-            createPickViewModel.createPick(onCreateClick)
-        },
-        onCommentChange = createPickViewModel::onCommentChange
-    )
+    // 생성 중 인디케이터가 표시되고 있을 때는 시스템의 뒤로 가기 버튼 클릭을 무시
+    BackHandler(enabled = showCreateIndicator) { }
+
+    when (uiState) {
+        CreateUiState.Default -> {
+            CreatePickDisplay(
+                song = song,
+                comment = comment.value,
+                dynamicBackgroundColor = dynamicBackgroundColor,
+                dynamicOnBackgroundColor = dynamicOnBackgroundColor,
+                onBackClick = {
+                    createPickViewModel.resetComment()
+                    onBackClick()
+                },
+                onCreateClick = {
+                    createPickViewModel.onCreatePickClick()
+                    showCreateIndicator = true
+                },
+                onCommentChange = createPickViewModel::onCommentChange
+            )
+        }
+
+        is CreateUiState.Success -> {
+            showCreateIndicator = false
+            val pickId = (uiState as CreateUiState.Success<String>).data
+            onCreateClick(pickId)
+        }
+
+        CreateUiState.Error -> {
+            // TODO()
+            showCreateIndicator = false
+            Text("생성 오류")
+        }
+    }
+
+    if (showCreateIndicator) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Black.copy(alpha = 0.5F))
+                .clickable( // 클릭 효과 제거 및 클릭 이벤트 무시
+                    interactionSource = remember { MutableInteractionSource() },
+                    indication = null,
+                    onClick = {}
+                ),
+            contentAlignment = Alignment.Center
+        ) {
+            CircularProgressIndicator()
+        }
+    }
 }
 
 @Composable

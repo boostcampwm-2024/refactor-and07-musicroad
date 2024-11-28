@@ -95,6 +95,7 @@ fun MainNavGraph(
             DetailPickScreen(
                 pickId = pickId,
                 onBackClick = { navController.navigateUp() },
+                onDeleted = { mapViewModel.resetClickedMarkerState(it) },
             )
         }
     }

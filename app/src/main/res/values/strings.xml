@@ -16,7 +16,7 @@
     <string name="map_album_image_description">앨범 이미지</string>
     <string name="map_info_window_pick_user">님의 픽</string>
     <string name="map_info_window_favorite_count_icon_description">픽을 담은 개수</string>
-    <string name="map_pick_created_by_self">내가 등록한 픽</string>
+    <string name="pick_created_by_self">내가 등록한 픽</string>
 
     <!-- Pick -->
     <string name="pick_app_bar_title">픽 등록</string>
@@ -33,8 +33,15 @@
     <string name="player_forward_description">5초 앞으로</string>
     <string name="player_replay_description">5초 뒤로</string>
     <string name="player_play_pause_description">재생/일시정지</string>
+    <string name="success_delete_pick">삭제되었습니다</string>
 
     <!-- Search Music -->
     <string name="search_music_album_description">노래 앨범 이미지</string>
     <string name="search_music_search_button_description">노래 검색 버튼</string>
+
+    <!-- Delete Pick Dialog -->
+    <string name="delete_pick_dialog_title">삭제하시겠습니까?</string>
+    <string name="delete_pick_dialog_body">등록하신 픽이 삭제됩니다.</string>
+    <string name="delete_pick_dialog_cancel">취소</string>
+    <string name="delete_pick_dialog_delete">삭제하기</string>
 </resources>

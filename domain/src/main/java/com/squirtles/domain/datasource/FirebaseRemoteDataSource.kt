@@ -10,6 +10,6 @@ interface FirebaseRemoteDataSource {
     suspend fun fetchPick(pickID: String): Pick?
     suspend fun fetchPicksInArea(lat: Double, lng: Double, radiusInM: Double): List<Pick>
     suspend fun createPick(pick: Pick): String
-    suspend fun deletePick(pick: Pick): Boolean
+    suspend fun deletePick(pickId: String): Boolean
 //    suspend fun updatePick(pick: Pick)
 }
