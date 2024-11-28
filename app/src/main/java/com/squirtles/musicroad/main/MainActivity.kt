@@ -71,7 +71,7 @@ class MainActivity : AppCompatActivity() {
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 try {
-                    withTimeout(10_000L) {
+                    withTimeout(30_000L) {
                         mainViewModel.loadingState.collect { state ->
                             when (state) {
                                 is LoadingState.Loading -> {
