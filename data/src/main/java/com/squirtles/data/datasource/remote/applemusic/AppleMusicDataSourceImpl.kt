@@ -37,7 +37,7 @@ class AppleMusicDataSourceImpl @Inject constructor(
 
     private suspend fun requestSearchApi(searchText: String, types: String): SearchResponse {
         val queryMap = mapOf(
-            "term" to searchText.replace(" ", "+"),
+            "term" to searchText,
             "limit" to "10",
             "offset" to "0"
         )

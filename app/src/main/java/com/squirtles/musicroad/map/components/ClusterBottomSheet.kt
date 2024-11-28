@@ -31,6 +31,8 @@ import com.squirtles.domain.model.LocationPoint
 import com.squirtles.domain.model.Pick
 import com.squirtles.domain.model.Song
 import com.squirtles.musicroad.common.AlbumImage
+import com.squirtles.musicroad.common.CreatedByOtherUserText
+import com.squirtles.musicroad.common.CreatedBySelfText
 import com.squirtles.musicroad.create.HorizontalSpacer
 import kotlinx.coroutines.launch
 
