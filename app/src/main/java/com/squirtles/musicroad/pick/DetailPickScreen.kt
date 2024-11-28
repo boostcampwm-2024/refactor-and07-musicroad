@@ -1,8 +1,10 @@
 package com.squirtles.musicroad.pick
 
 import android.app.Activity
+import android.content.Context
 import android.util.Log
 import android.util.Size
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.layout.Arrangement
@@ -72,9 +74,11 @@ import kotlin.math.roundToInt
 fun DetailPickScreen(
     pickId: String,
     onBackClick: () -> Unit,
+    onDeleted: (Context) -> Unit,
     pickViewModel: PickViewModel = hiltViewModel(),
     playerViewModel: PlayerViewModel = hiltViewModel()
 ) {
+    val context = LocalContext.current
     val screenHeight = LocalConfiguration.current.screenHeightDp.dp
     val screenHeightPx = with(LocalDensity.current) { screenHeight.toPx() }
     val statusBarHeight = with(LocalDensity.current) { WindowInsets.statusBars.getTop(this) }
@@ -89,7 +93,7 @@ fun DetailPickScreen(
     )
 
     val isFavorite = false
-    val pick by pickViewModel.pick.collectAsStateWithLifecycle()
+    val uiState by pickViewModel.detailPickUiState.collectAsStateWithLifecycle()
     var isMusicVideoAvailable by remember { mutableStateOf(false) }
     var showMusicVideo by remember { mutableStateOf(false) }
 
@@ -97,51 +101,82 @@ fun DetailPickScreen(
         pickViewModel.fetchPick(pickId)
     }
 
-    LaunchedEffect(pick) {
-        isMusicVideoAvailable = pick.musicVideoUrl.isNotEmpty()
-    }
-
-    Box(modifier = Modifier.fillMaxSize()) {
-        DetailPickScreen(
-            userId = pick.createdBy.userId,
-            userName = pick.createdBy.userName,
-            pick = pick,
-            isFavorite = isFavorite,
-            isMusicVideoAvailable = isMusicVideoAvailable,
-            swipeableModifier = swipeableModifier,
-            playerViewModel = playerViewModel,
-            onBackClick = onBackClick
-        )
-
-        // 최초 Swipe 동작 전에 MusicVideoScreen이 생성되지 않도록 함
-        if (swipeableState.offset.value != 0.0f && contentHeightPx != swipeableState.offset.value) {
-            showMusicVideo = true
-        }
-
-        if (isMusicVideoAvailable && showMusicVideo) {
-            val isPlaying = swipeableState.offset.value < contentHeightPx * 0.8f
-            val alpha = (1 - (swipeableState.offset.value / contentHeightPx)).coerceIn(0f, 1f)
-
-            MusicVideoScreen(
-                videoUri = pick.musicVideoUrl,
-                isPlaying = isPlaying,
-                modifier = swipeableModifier
+    when (uiState) {
+        DetailPickUiState.Loading -> {
+            Box(
+                modifier = Modifier
                     .fillMaxSize()
-                    .offset { IntOffset(0, swipeableState.offset.value.roundToInt()) }
-                    .graphicsLayer { this.alpha = alpha }
-            )
-
-            LaunchedEffect(isPlaying) {
-                if (isPlaying) playerViewModel.pause()
+                    .background(Black),
+                contentAlignment = Alignment.Center
+            ) {
+                CircularProgressIndicator()
             }
         }
+
+        is DetailPickUiState.Success -> {
+            val pick = (uiState as DetailPickUiState.Success).pick
+            isMusicVideoAvailable = pick.musicVideoUrl.isNotEmpty()
+
+            Box(modifier = Modifier.fillMaxSize()) {
+                DetailPick(
+                    pick = pick,
+                    isCreatedBySelf = pickViewModel.getUserId() == pick.createdBy.userId,
+                    isFavorite = isFavorite, // TODO
+                    userName = pick.createdBy.userName,
+                    isMusicVideoAvailable = isMusicVideoAvailable,
+                    swipeableModifier = swipeableModifier,
+                    playerViewModel = playerViewModel,
+                    onBackClick = onBackClick,
+                    onActionClick = { pickViewModel.deletePick(pickId) }
+                )
+
+                // 최초 Swipe 동작 전에 MusicVideoScreen이 생성되지 않도록 함
+                if (swipeableState.offset.value != 0.0f && contentHeightPx != swipeableState.offset.value) {
+                    showMusicVideo = true
+                }
+
+                if (isMusicVideoAvailable && showMusicVideo) {
+                    val isPlaying = swipeableState.offset.value < contentHeightPx * 0.8f
+                    val alpha =
+                        (1 - (swipeableState.offset.value / contentHeightPx)).coerceIn(0f, 1f)
+
+                    MusicVideoScreen(
+                        videoUri = pick.musicVideoUrl,
+                        isPlaying = isPlaying,
+                        modifier = swipeableModifier
+                            .fillMaxSize()
+                            .offset { IntOffset(0, swipeableState.offset.value.roundToInt()) }
+                            .graphicsLayer { this.alpha = alpha }
+                    )
+
+                    LaunchedEffect(isPlaying) {
+                        if (isPlaying) playerViewModel.pause()
+                    }
+                }
+            }
+        }
+
+        DetailPickUiState.Deleted -> {
+            LaunchedEffect(Unit) {
+                onBackClick()
+                onDeleted(context)
+                Toast.makeText(
+                    context,
+                    context.getString(R.string.success_delete_pick),
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
+        }
+
+        DetailPickUiState.Error -> {
+            // TODO: pick 로딩 실패
+        }
+
     }
 }
 
 @Composable
-private fun DetailPickScreen(
-    userId: String,
-    userName: String,
+private fun DetailPick(
     pick: Pick,
     isCreatedBySelf: Boolean,
     isFavorite: Boolean,
@@ -250,8 +285,8 @@ private fun DetailPickScreen(
 
 @Preview
 @Composable
-private fun DetailPickScreenPreview() {
-    DetailPickScreen(
+private fun DetailPickPreview() {
+    DetailPick(
         pick = DEFAULT_PICK,
         isCreatedBySelf = false,
         isFavorite = false,
