@@ -75,6 +75,7 @@ import com.squirtles.musicroad.pick.components.PickInformation
 import com.squirtles.musicroad.pick.components.SongInfo
 import com.squirtles.musicroad.pick.components.SwipeUpIcon
 import com.squirtles.musicroad.pick.components.music.MusicPlayer
+import com.squirtles.musicroad.pick.components.music.PlayCircularProgressIndicator
 import com.squirtles.musicroad.pick.components.music.visualizer.CircleVisualizer
 import com.squirtles.musicroad.ui.theme.Black
 import com.squirtles.musicroad.ui.theme.White
@@ -170,7 +171,15 @@ private fun DetailPickScreen(
     val view = LocalView.current
     val context = LocalContext.current
 
+    val audioEffectColor = dynamicBackgroundColor.copy(
+        red = (dynamicBackgroundColor.red + 0.2f).coerceAtMost(1.0f),
+        green = (dynamicBackgroundColor.green + 0.2f).coerceAtMost(1.0f),
+        blue = (dynamicBackgroundColor.blue + 0.2f).coerceAtMost(1.0f),
+    )
+
     val audioSessionId by playerViewModel.audioSessionId.collectAsStateWithLifecycle()
+    val playerState by playerViewModel.playerState.collectAsStateWithLifecycle()
+    val duration by playerViewModel.duration.collectAsStateWithLifecycle()
 
     if (!view.isInEditMode) {
         SideEffect {
@@ -251,13 +260,29 @@ private fun DetailPickScreen(
 
                 Box(
                     Modifier
-                        .size(350.dp, 350.dp)
+                        .size(300.dp)
                         .align(Alignment.CenterHorizontally)
                 ) {
                     CircleVisualizer(
                         audioSessionId = audioSessionId,
+                        color = audioEffectColor,
+                        sizeRatio = 0.5f,
                         modifier = Modifier.align(Alignment.Center)
                     )
+
+                    PlayCircularProgressIndicator(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(10.dp)
+                            .align(Alignment.Center),
+                        currentTime = { playerState.currentPosition.toFloat() },
+                        duration = duration.toFloat(),
+                        strokeWidth = 5.dp,
+                        onSeekChanged = { timeMs ->
+                            playerViewModel.playerSeekTo(timeMs.toLong())
+                        },
+                    )
+
                     AsyncImage(
                         model = pick.song.getImageUrlWithSize(Size(400, 400)),
                         contentDescription = pick.song.albumName + stringResource(id = R.string.pick_album_description),

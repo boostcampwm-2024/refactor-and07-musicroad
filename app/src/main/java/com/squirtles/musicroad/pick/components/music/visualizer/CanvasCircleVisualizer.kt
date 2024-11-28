@@ -36,6 +36,7 @@ internal fun CanvasCircle(
 internal fun CanvasSoundEffectBar(
     audioData: List<Float>,
     color: Color,
+    sizeRatio: Float,
     modifier: Modifier = Modifier
 ) {
 
@@ -46,14 +47,16 @@ internal fun CanvasSoundEffectBar(
     Canvas(modifier = modifier.fillMaxSize()) {
         val width = size.width
         val height = size.height
-        val radius = max(width, height) * 0.45f
+        val radius = max(width, height) * sizeRatio
 
         audioData.forEachIndexed { i, magnitude ->
+            // 현재 오디오데이터가 그려질 각도
             val angle = Math.toRadians((i * angleStep).toDouble()) + offsetAngle
             val cosValue = cos(angle)
             val sinValue = sin(angle)
             val barHeight = magnitude * height / 5
 
+            // 현재 오디오데이터가 그려질 xy 좌표
             val startX = (width / 2 + radius * cosValue).toFloat()
             val startY = (height / 2 + radius * sinValue).toFloat()
             val endX = (width / 2 + (radius + barHeight) * cosValue).toFloat()

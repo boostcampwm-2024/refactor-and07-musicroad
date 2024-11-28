@@ -9,7 +9,7 @@ import kotlin.math.sqrt
 class BaseVisualizer(
     audioSessionId: Int
 ) {
-    private var visualizer: Visualizer? = null
+    private val visualizer = Visualizer(audioSessionId)
 
     private val _fftFlow = MutableSharedFlow<List<Float>>(replay = 0, extraBufferCapacity = 1)
     val fftFlow: SharedFlow<List<Float>> = _fftFlow.asSharedFlow()
@@ -17,11 +17,11 @@ class BaseVisualizer(
     private val validRange = getSignificantFftIndexRange()
 
     init {
-        setPlayer(audioSessionId)
+        setPlayer()
     }
 
-    private fun setPlayer(audioSessionId: Int) {
-        visualizer = Visualizer(audioSessionId).apply {
+    private fun setPlayer() {
+        with(visualizer) {
             enabled = false
             captureSize = CAPTURE_SIZE
             setDataCaptureListener(object : Visualizer.OnDataCaptureListener {
@@ -58,8 +58,7 @@ class BaseVisualizer(
     }
 
     fun release() {
-        visualizer?.release()
-        visualizer = null
+        visualizer.release()
     }
 
     // 20 ~ 4000 Hz 사이만 필터링

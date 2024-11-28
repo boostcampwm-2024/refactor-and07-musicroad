@@ -17,32 +17,16 @@ import kotlinx.coroutines.launch
 fun CircleVisualizer(
     audioSessionId: Int,
     color: Color = Color.White,
+    sizeRatio: Float,
     modifier: Modifier = Modifier
 ) {
     val baseVisualizer = remember { BaseVisualizer(audioSessionId) }
-//    val magnitudes = remember { mutableStateOf<List<Float>>(emptyList()) }
-//    LaunchedEffect(Unit) {
-//        baseVisualizer.fftFlow.collect { fftMagnitudes ->
-//            val newMagnitudes = if (magnitudes.value.isEmpty()) {
-//                fftMagnitudes
-//            } else {
-//                magnitudes.value.mapIndexed { i, oldMagnitude ->
-//                    lerp(
-//                        start = oldMagnitude,
-//                        stop = fftMagnitudes[i],
-//                        fraction = 0.4f
-//                    )
-//                }
-//            }
-//
-//            magnitudes.value = processAudioData(newMagnitudes)
-////            Log.d("CircleVisualizer", "Received FFT data: ${magnitudes.value.joinToString(",")}")
-//        }
-//    }
     val magnitudes = remember { mutableStateOf<List<Animatable<Float, AnimationVector1D>>>(emptyList()) }
-    LaunchedEffect(Unit) {
+
+    LaunchedEffect(baseVisualizer) {
         baseVisualizer.fftFlow.collect { fftArray ->
             val normalizedData = processAudioData(fftArray)
+
             if (magnitudes.value.isEmpty()) {
                 magnitudes.value = normalizedData.map { Animatable(it) }
             } else {
@@ -51,7 +35,7 @@ fun CircleVisualizer(
                         magnitudes.value[i].animateTo(
                             targetValue = magnitude,
                             animationSpec = tween(
-                                durationMillis = 150,
+                                durationMillis = 180,
                                 easing = FastOutSlowInEasing
                             )
                         )
@@ -70,6 +54,7 @@ fun CircleVisualizer(
     CanvasSoundEffectBar(
         audioData = magnitudes.value.map { it.value },
         color = color,
+        sizeRatio = sizeRatio,
         modifier = modifier
     )
 }
@@ -85,9 +70,9 @@ private fun scaleAudioData(audioData: List<Float>): List<Float> {
     return audioData.mapIndexed { index, value ->
         val scaleFactor = if (index < size / 8) 0.5f
         else if (index < size / 4) 1.0f // 저주파 대역
-        else if (index < size / 2) 1.2f // 중간 대역
-//        else if (index < size / 1.5) 1.5f // 고주파 대역
-        else 1.5f // 고주파 대역
+        else if (index < size / 2) 1.5f // 중간 대역
+        else if (index < size / 1.5) 2.0f // 고주파 대역
+        else 3.0f // 고주파 대역
         value * scaleFactor
     }
 }
