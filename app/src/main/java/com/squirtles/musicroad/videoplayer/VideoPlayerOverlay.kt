@@ -64,13 +64,13 @@ fun VideoPlayerOverlay(
     onBackClick: () -> Unit,
     videoPlayerViewModel: VideoPlayerViewModel = hiltViewModel()
 ) {
-    val playerState = videoPlayerViewModel.playerState.collectAsStateWithLifecycle(PlayerState.Playing)
+    val playerState = videoPlayerViewModel.playerState.collectAsStateWithLifecycle(VideoPlayerState.Playing)
     val alpha = remember { Animatable(0f) }
 
     LaunchedEffect(Unit) {
         videoPlayerViewModel.playerState.collect {
             when (it) {
-                PlayerState.Playing -> alpha.animateTo(0f, animationSpec = tween(durationMillis = 300))
+                VideoPlayerState.Playing -> alpha.animateTo(0f, animationSpec = tween(durationMillis = 300))
                 else -> alpha.animateTo(1.0f, animationSpec = tween(durationMillis = 300))
             }
         }
@@ -84,7 +84,7 @@ fun VideoPlayerOverlay(
             .pointerInput(Unit) {
                 detectTapGestures(
                     onTap = {
-                        if (alpha.value == 0f) videoPlayerViewModel.setPlayState(PlayerState.Pause)
+                        if (alpha.value == 0f) videoPlayerViewModel.setPlayState(VideoPlayerState.Pause)
                     }
                 )
             }
@@ -120,9 +120,9 @@ fun VideoPlayerOverlay(
         IconButton(
             onClick = {
                 when (playerState.value) {
-                    PlayerState.Pause -> videoPlayerViewModel.setPlayState(PlayerState.Playing)
-                    PlayerState.Playing -> videoPlayerViewModel.setPlayState(PlayerState.Pause)
-                    PlayerState.Replay -> videoPlayerViewModel.setPlayState(PlayerState.Playing)
+                    VideoPlayerState.Pause -> videoPlayerViewModel.setPlayState(VideoPlayerState.Playing)
+                    VideoPlayerState.Playing -> videoPlayerViewModel.setPlayState(VideoPlayerState.Pause)
+                    VideoPlayerState.Replay -> videoPlayerViewModel.setPlayState(VideoPlayerState.Playing)
                 }
             },
             modifier = Modifier
@@ -133,9 +133,9 @@ fun VideoPlayerOverlay(
         ) {
             Icon(
                 imageVector = when (playerState.value) {
-                    PlayerState.Pause -> Icons.Default.PlayArrow
-                    PlayerState.Playing -> Icons.Default.Pause
-                    PlayerState.Replay -> Icons.Default.Replay
+                    VideoPlayerState.Pause -> Icons.Default.PlayArrow
+                    VideoPlayerState.Playing -> Icons.Default.Pause
+                    VideoPlayerState.Replay -> Icons.Default.Replay
                 },
                 contentDescription = stringResource(id = R.string.player_play_pause_description),
                 modifier = Modifier.size(30.dp),

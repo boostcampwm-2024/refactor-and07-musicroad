@@ -11,15 +11,10 @@ import androidx.media3.exoplayer.ExoPlayer
 import com.squirtles.musicroad.R
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
 import javax.inject.Inject
-
-enum class PlayerState {
-    Playing, Pause, Replay
-}
 
 @HiltViewModel
 class VideoPlayerViewModel @Inject constructor() : ViewModel() {
@@ -30,8 +25,8 @@ class VideoPlayerViewModel @Inject constructor() : ViewModel() {
     private var _swipePlayState = MutableStateFlow(false) // swipe 상태에 따른 play 여부
     val swipePlayState: StateFlow<Boolean> = _swipePlayState
 
-    private var _playerState = MutableStateFlow(PlayerState.Playing) // 현재 플레이어의 상태
-    val playerState: StateFlow<PlayerState> = _playerState
+    private var _playerState = MutableStateFlow(VideoPlayerState.Playing) // 현재 플레이어의 상태
+    val playerState: StateFlow<VideoPlayerState> = _playerState
 
     private val _swipeState = MutableStateFlow(0f) // 현재 offset 저장
     val swipeState: StateFlow<Float> = _swipeState
@@ -65,7 +60,7 @@ class VideoPlayerViewModel @Inject constructor() : ViewModel() {
                 if (state == Player.STATE_ENDED) {
                     viewModelScope.launch {
                         Toast.makeText(context, getString(context, R.string.video_player_ended_message), Toast.LENGTH_SHORT).show()
-                        _playerState.emit(PlayerState.Replay)
+                        _playerState.emit(VideoPlayerState.Replay)
                         exoPlayer.seekTo(0)
                     }
                 }
@@ -80,7 +75,7 @@ class VideoPlayerViewModel @Inject constructor() : ViewModel() {
         _player = null
     }
 
-    fun setPlayState(playerState: PlayerState) {
+    fun setPlayState(playerState: VideoPlayerState) {
         viewModelScope.launch {
             _playerState.emit(playerState)
         }
@@ -99,7 +94,7 @@ class VideoPlayerViewModel @Inject constructor() : ViewModel() {
     private fun setPlayer() {
         viewModelScope.launch {
             combine(swipePlayState, playerState) { swipeState, playState ->
-                swipeState && (playState == PlayerState.Playing)
+                swipeState && (playState == VideoPlayerState.Playing)
             }.collect { shouldPlay ->
                 if (shouldPlay) {
                     player?.play()
