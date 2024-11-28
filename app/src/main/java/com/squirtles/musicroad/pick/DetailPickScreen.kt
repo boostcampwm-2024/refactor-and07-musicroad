@@ -120,20 +120,35 @@ fun DetailPickScreen(
             val pick = (uiState as DetailPickUiState.Success).pick
             isMusicVideoAvailable = pick.musicVideoUrl.isNotEmpty()
 
+            val isCreatedBySelf = pickViewModel.getUserId() == pick.createdBy.userId
+            val onActionClick: () -> Unit = {
+                when {
+                    isCreatedBySelf -> {
+                        playerViewModel.pause()
+                        showDeletePickDialog = true
+                    }
+
+                    isFavorite -> {
+                        // TODO: 픽 담기 해제
+                    }
+
+                    else -> {
+                        // TODO: 픽 담기
+                    }
+                }
+            }
+
             Box(modifier = Modifier.fillMaxSize()) {
                 DetailPick(
                     pick = pick,
-                    isCreatedBySelf = pickViewModel.getUserId() == pick.createdBy.userId,
+                    isCreatedBySelf = isCreatedBySelf,
                     isFavorite = isFavorite, // TODO
                     userName = pick.createdBy.userName,
                     isMusicVideoAvailable = isMusicVideoAvailable,
                     swipeableModifier = swipeableModifier,
                     playerViewModel = playerViewModel,
                     onBackClick = onBackClick,
-                    onActionClick = {
-                        playerViewModel.pause()
-                        showDeletePickDialog = true
-                    }
+                    onActionClick = onActionClick
                 )
 
                 // 최초 Swipe 동작 전에 MusicVideoScreen이 생성되지 않도록 함
