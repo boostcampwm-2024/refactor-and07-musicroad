@@ -41,9 +41,9 @@ fun MainNavGraph(
                 onSettingClick = {
                     // FIXME: 임시로 화면 전환 막아놓음
                 },
-                onInfoWindowClick = { pickId ->
+                onPickSummaryClick = { pickId ->
                     navigationActions.navigateToPickDetail(pickId)
-                }
+                },
             )
         }
 
@@ -95,6 +95,7 @@ fun MainNavGraph(
             DetailPickScreen(
                 pickId = pickId,
                 onBackClick = { navController.navigateUp() },
+                onDeleted = { mapViewModel.resetClickedMarkerState(it) },
             )
         }
     }

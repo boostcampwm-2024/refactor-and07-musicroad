@@ -3,6 +3,9 @@ package com.squirtles.musicroad.ui.theme
 import androidx.compose.ui.graphics.Color
 
 val Primary = Color(0xFFFF5F61)
+val Primary80 = Color(0xFFFFB3B0)
+val Primary50 = Color(0xFFAD625F)
+val Primary20 = Color(0xFF571D1E)
 val Blue = Color(0xFF6B84FF)
 
 val Purple = Color(0xFFBB8280)

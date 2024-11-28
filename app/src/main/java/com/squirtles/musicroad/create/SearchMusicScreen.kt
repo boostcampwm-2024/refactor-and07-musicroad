@@ -46,9 +46,7 @@ import androidx.compose.ui.focus.FocusManager
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalFocusManager
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
@@ -56,10 +54,8 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import coil3.compose.AsyncImage
 import com.squirtles.domain.model.Song
-import com.squirtles.musicroad.R
-import com.squirtles.musicroad.UiState
+import com.squirtles.musicroad.common.AlbumImage
 import com.squirtles.musicroad.ui.theme.Black
 import com.squirtles.musicroad.ui.theme.Gray
 import com.squirtles.musicroad.ui.theme.Primary
@@ -103,18 +99,18 @@ fun SearchMusicScreen(
                 .addFocusCleaner(focusManager)
         ) {
             when (uiState) {
-                UiState.Init -> {
+                SearchUiState.Init -> {
                     // TODO: HOT 리스트
                 }
 
-                is UiState.Loading -> {
+                is SearchUiState.Loading -> {
                     LinearProgressIndicator(
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(top = 10.dp),
                         trackColor = Gray
                     )
-                    (uiState as UiState.Loading).prevData?.let {
+                    (uiState as SearchUiState.Loading).prevData?.let {
                         SearchResult(
                             searchResult = it,
                             onItemClick = { song ->
@@ -125,9 +121,9 @@ fun SearchMusicScreen(
                     }
                 }
 
-                is UiState.Success -> {
+                is SearchUiState.Success -> {
                     SearchResult(
-                        searchResult = (uiState as UiState.Success).data,
+                        searchResult = (uiState as SearchUiState.Success).data,
                         onItemClick = { song ->
                             createPickViewModel.onSongItemClick(song)
                             onItemClick()
@@ -135,7 +131,7 @@ fun SearchMusicScreen(
                     )
                 }
 
-                UiState.Error -> {
+                SearchUiState.Error -> {
                     // TODO: 검색 결과가 없는 경우. 일단은 텍스트로만 처리해뒀습니다.
                     Text("검색 결과가 없습니다.", color = White)
                 }
@@ -257,14 +253,13 @@ private fun SongItem(
             .padding(horizontal = DefaultPadding, vertical = ItemSpacing / 2),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        AsyncImage(
-            model = song.getImageUrlWithSize(RequestImageSize),
-            contentDescription = stringResource(R.string.search_music_album_description),
-            contentScale = ContentScale.Crop,
+        AlbumImage(
+            imageUrl = song.getImageUrlWithSize(RequestImageSize),
             modifier = Modifier
                 .size(ImageSize)
-                .clip(RoundedCornerShape(size = 16.dp))
+                .clip(RoundedCornerShape(16.dp))
         )
+
         HorizontalSpacer(16)
         Column {
             TextWithColorAndStyle(

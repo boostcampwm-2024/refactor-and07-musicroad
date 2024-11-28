@@ -48,8 +48,10 @@ class FirebaseRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun deletePick(pick: Pick): Result<Boolean> {
-        TODO("Not yet implemented")
+    override suspend fun deletePick(pickId: String): Result<Boolean> {
+        return handleResult {
+            firebaseRemoteDataSource.deletePick(pickId)
+        }
     }
 
     private suspend fun <T> handleResult(
