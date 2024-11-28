@@ -2,6 +2,7 @@ package com.squirtles.musicroad.videoplayer
 
 import android.graphics.Matrix
 import android.graphics.SurfaceTexture
+import android.util.Log
 import android.view.Surface
 import android.view.TextureView
 import androidx.annotation.OptIn
@@ -32,7 +33,7 @@ fun MusicVideoPlayer(
                     }
 
                     override fun onSurfaceTextureSizeChanged(surfaceTexture: SurfaceTexture, width: Int, height: Int) {
-                        // TODO
+                        setVideoSize(width, height, textureView)
                     }
 
                     override fun onSurfaceTextureDestroyed(surfaceTexture: SurfaceTexture): Boolean {

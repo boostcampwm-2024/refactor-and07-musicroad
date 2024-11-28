@@ -33,6 +33,20 @@ class VideoPlayerViewModel @Inject constructor() : ViewModel() {
     private var _playerState = MutableStateFlow(PlayerState.Playing)
     val playerState: SharedFlow<PlayerState> = _playerState
 
+    private val _swipeState = MutableStateFlow(0f) // 현재 offset 저장
+    val swipeState: StateFlow<Float> get() = _swipeState
+
+    private var _showMusicVideo = false
+    val showMusicVideo get() = _showMusicVideo
+
+    fun setShowMusicVideo(isShow: Boolean) {
+        _showMusicVideo = isShow
+    }
+
+    fun updateSwipeState(newOffset: Float) {
+        _swipeState.value = newOffset
+    }
+
     fun initializePlayer(context: Context, videoUri: String) {
         if (player != null) return
         val exoPlayer = ExoPlayer.Builder(context).build().run {
