@@ -37,8 +37,6 @@ class PlayerViewModel @Inject constructor() : ViewModel() {
     private val _duration = MutableStateFlow(30_000L)
     val duration: StateFlow<Long> = _duration
 
-    private var playList: List<String> = emptyList()
-
     private fun initializePlayer(context: Context) {
         val exoPlayer = ExoPlayer.Builder(context).build().also {
             it.addListener(object : Player.Listener {
@@ -95,7 +93,6 @@ class PlayerViewModel @Inject constructor() : ViewModel() {
             it.prepare()
             it.playWhenReady = false
             it.repeatMode = Player.REPEAT_MODE_ALL
-            playList = sourceUrls
         }
     }
 
