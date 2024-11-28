@@ -2,7 +2,6 @@ package com.squirtles.musicroad.videoplayer
 
 import android.graphics.Matrix
 import android.graphics.SurfaceTexture
-import android.util.Log
 import android.view.Surface
 import android.view.TextureView
 import androidx.annotation.OptIn
@@ -51,13 +50,15 @@ fun MusicVideoPlayer(
 }
 
 private fun setVideoSize(width: Int, height: Int, textureView: TextureView) {
-    // 영상을 화면 크기에 맞게 확대
-    val matrix = Matrix()
-    val scaleFactor = height.toFloat() / width.toFloat()
-    matrix.setScale(scaleFactor, 1f)
+    // 세로가 더 긴 경우 영상을 화면 크기에 맞게 확대
+    if (height > width) {
+        val matrix = Matrix()
+        val scaleFactor = height.toFloat() / width.toFloat()
+        matrix.setScale(scaleFactor, 1f)
 
-    // 영상 중앙 정렬
-    val translateX = (width - width * scaleFactor) / 2f
-    matrix.postTranslate(translateX, 0f)
-    textureView.setTransform(matrix)
+        // 영상 중앙 정렬
+        val translateX = (width - width * scaleFactor) / 2f
+        matrix.postTranslate(translateX, 0f)
+        textureView.setTransform(matrix)
+    }
 }
