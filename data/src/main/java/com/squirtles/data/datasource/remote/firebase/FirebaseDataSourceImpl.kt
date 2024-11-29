@@ -208,6 +208,22 @@ class FirebaseDataSourceImpl @Inject constructor(
         // TODO: favorite에서 이 픽 id 삭제
     }
 
+    override suspend fun fetchIsFavorite(pickId: String, userId: String): Boolean {
+        return suspendCancellableCoroutine { continuation ->
+            db.collection(COLLECTION_FAVORITES)
+                .whereEqualTo("pickId", pickId)
+                .whereEqualTo("userId", userId)
+                .get()
+                .addOnSuccessListener { result ->
+                    if (result.isEmpty) continuation.resume(false) else continuation.resume(true)
+                }
+                .addOnFailureListener { exception ->
+                    Log.w("FirebaseDataSourceImpl", "Error at fetching is favorite", exception)
+                    continuation.resumeWithException(exception)
+                }
+        }
+    }
+
     override suspend fun createFavorite(pickId: String, userId: String): Boolean {
         return suspendCancellableCoroutine { continuation ->
             val firebaseFavorite = FirebaseFavorite(

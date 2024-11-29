@@ -9,9 +9,11 @@ import com.squirtles.domain.model.Pick
 import com.squirtles.domain.model.Song
 import com.squirtles.domain.usecase.CreateFavoriteUseCase
 import com.squirtles.domain.usecase.DeletePickUseCase
+import com.squirtles.domain.usecase.FetchIsFavoriteUseCase
 import com.squirtles.domain.usecase.FetchPickUseCase
 import com.squirtles.domain.usecase.GetCurrentUserUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
@@ -22,6 +24,7 @@ class PickViewModel @Inject constructor(
     private val fetchPickUseCase: FetchPickUseCase,
     private val getCurrentUserUseCase: GetCurrentUserUseCase,
     private val deletePickUseCase: DeletePickUseCase,
+    private val fetchIsFavoriteUseCase: FetchIsFavoriteUseCase,
     private val createFavoriteUseCase: CreateFavoriteUseCase,
 ) : ViewModel() {
 
@@ -32,13 +35,30 @@ class PickViewModel @Inject constructor(
 
     fun fetchPick(pickId: String) {
         viewModelScope.launch {
-            fetchPickUseCase(pickId)
-                .onSuccess {
-                    _detailPickUiState.emit(DetailPickUiState.Success(it))
+            val fetchPick = async {
+                fetchPickUseCase(pickId)
+            }
+            val fetchIsFavorite = async {
+                fetchIsFavoriteUseCase(pickId, getUserId())
+            }
+
+            val fetchPickResult = fetchPick.await()
+            val fetchIsFavoriteResult = fetchIsFavorite.await()
+
+            when {
+                fetchPickResult.isSuccess && fetchIsFavoriteResult.isSuccess -> {
+                    _detailPickUiState.emit(
+                        DetailPickUiState.Success(
+                            pick = fetchPickResult.getOrDefault(DEFAULT_PICK),
+                            isFavorite = fetchIsFavoriteResult.getOrDefault(false)
+                        )
+                    )
                 }
-                .onFailure {
+
+                else -> {
                     _detailPickUiState.emit(DetailPickUiState.Error)
                 }
+            }
         }
     }
 
@@ -60,6 +80,10 @@ class PickViewModel @Inject constructor(
             createFavoriteUseCase(pickId, getUserId())
                 .onSuccess {
                     onAddToFavoriteSuccess()
+                    val currentUiState = _detailPickUiState.value as? DetailPickUiState.Success
+                    currentUiState?.let { successState ->
+                        _detailPickUiState.emit(successState.copy(isFavorite = true))
+                    }
                 }
                 .onFailure {
                     _detailPickUiState.emit(DetailPickUiState.Error)

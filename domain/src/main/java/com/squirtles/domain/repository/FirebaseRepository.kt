@@ -12,5 +12,6 @@ interface FirebaseRepository {
     suspend fun createPick(pick: Pick): Result<String>
     suspend fun deletePick(pickId: String): Result<Boolean>
 
+    suspend fun fetchIsFavorite(pickId: String, userId: String): Result<Boolean>
     suspend fun createFavorite(pickId: String, userId: String): Result<Boolean>
 }

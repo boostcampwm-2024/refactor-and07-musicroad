@@ -12,6 +12,7 @@ interface FirebaseRemoteDataSource {
     suspend fun createPick(pick: Pick): String
     suspend fun deletePick(pickId: String): Boolean
 
+    suspend fun fetchIsFavorite(pickId: String, userId: String): Boolean
     suspend fun createFavorite(pickId: String, userId: String): Boolean
 //    suspend fun updatePick(pick: Pick)
 }

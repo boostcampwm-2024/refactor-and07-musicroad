@@ -91,7 +91,6 @@ fun DetailPickScreen(
         orientation = Orientation.Vertical
     )
 
-    val isFavorite = false
     val uiState by pickViewModel.detailPickUiState.collectAsStateWithLifecycle()
     var isMusicVideoAvailable by remember { mutableStateOf(false) }
     var showMusicVideo by remember { mutableStateOf(false) }
@@ -118,6 +117,7 @@ fun DetailPickScreen(
 
         is DetailPickUiState.Success -> {
             val pick = (uiState as DetailPickUiState.Success).pick
+            val isFavorite = (uiState as DetailPickUiState.Success).isFavorite
             isMusicVideoAvailable = pick.musicVideoUrl.isNotEmpty()
 
             val isCreatedBySelf = pickViewModel.getUserId() == pick.createdBy.userId
