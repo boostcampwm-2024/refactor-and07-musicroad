@@ -3,8 +3,11 @@ package com.squirtles.musicroad.pick
 import android.app.Activity
 import android.content.Context
 import android.widget.Toast
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.Orientation
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -31,21 +34,17 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.luminance
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalView
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
-import androidx.core.graphics.toColorInt
 import androidx.core.view.WindowInsetsControllerCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -53,14 +52,11 @@ import androidx.wear.compose.material.ExperimentalWearMaterialApi
 import androidx.wear.compose.material.FractionalThreshold
 import androidx.wear.compose.material.rememberSwipeableState
 import androidx.wear.compose.material.swipeable
-import coil3.compose.AsyncImage
-import com.squirtles.domain.model.Creator
-import com.squirtles.domain.model.LocationPoint
 import com.squirtles.domain.model.Pick
 import com.squirtles.musicroad.R
 import com.squirtles.musicroad.musicplayer.PlayerViewModel
-import com.squirtles.musicroad.pick.components.CircleAlbumCover
 import com.squirtles.musicroad.pick.PickViewModel.Companion.DEFAULT_PICK
+import com.squirtles.musicroad.pick.components.CircleAlbumCover
 import com.squirtles.musicroad.pick.components.CommentText
 import com.squirtles.musicroad.pick.components.DeletePickDialog
 import com.squirtles.musicroad.pick.components.DetailPickTopAppBar
@@ -100,10 +96,13 @@ fun DetailPickScreen(
     var isMusicVideoAvailable by remember { mutableStateOf(false) }
     var showMusicVideo by remember { mutableStateOf(false) }
     var showDeletePickDialog by rememberSaveable { mutableStateOf(false) }
+    var showProcessIndicator by rememberSaveable { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
         pickViewModel.fetchPick(pickId)
     }
+
+    BackHandler(enabled = showProcessIndicator) { }
 
     when (uiState) {
         DetailPickUiState.Loading -> {
@@ -134,7 +133,11 @@ fun DetailPickScreen(
                     }
 
                     else -> {
-                        // TODO: 픽 담기
+                        showProcessIndicator = true
+                        pickViewModel.addToFavorite(pickId) {
+                            showProcessIndicator = false
+                            context.showShortToast(context.getString(R.string.success_add_to_favorite))
+                        }
                     }
                 }
             }
@@ -191,7 +194,7 @@ fun DetailPickScreen(
         }
 
         DetailPickUiState.Error -> {
-            // TODO: pick 로딩 실패
+            // TODO: pick 로딩 실패 or 담기 실패, 두 상태를 나눠야할지 고민
         }
     }
 
@@ -205,6 +208,22 @@ fun DetailPickScreen(
                 pickViewModel.deletePick(pickId)
             }
         )
+    }
+
+    if (showProcessIndicator) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Black.copy(alpha = 0.5F))
+                .clickable( // 클릭 효과 제거 및 클릭 이벤트 무시
+                    interactionSource = remember { MutableInteractionSource() },
+                    indication = null,
+                    onClick = {}
+                ),
+            contentAlignment = Alignment.Center
+        ) {
+            CircularProgressIndicator()
+        }
     }
 }
 
@@ -341,6 +360,10 @@ private fun DetailPick(
             }
         }
     }
+}
+
+fun Context.showShortToast(message: String) {
+    Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
 }
 
 @Preview

@@ -7,6 +7,7 @@ import com.squirtles.domain.model.Creator
 import com.squirtles.domain.model.LocationPoint
 import com.squirtles.domain.model.Pick
 import com.squirtles.domain.model.Song
+import com.squirtles.domain.usecase.CreateFavoriteUseCase
 import com.squirtles.domain.usecase.DeletePickUseCase
 import com.squirtles.domain.usecase.FetchPickUseCase
 import com.squirtles.domain.usecase.GetCurrentUserUseCase
@@ -20,7 +21,8 @@ import javax.inject.Inject
 class PickViewModel @Inject constructor(
     private val fetchPickUseCase: FetchPickUseCase,
     private val getCurrentUserUseCase: GetCurrentUserUseCase,
-    private val deletePickUseCase: DeletePickUseCase
+    private val deletePickUseCase: DeletePickUseCase,
+    private val createFavoriteUseCase: CreateFavoriteUseCase,
 ) : ViewModel() {
 
     private val _detailPickUiState = MutableStateFlow<DetailPickUiState>(DetailPickUiState.Loading)
@@ -46,6 +48,18 @@ class PickViewModel @Inject constructor(
             deletePickUseCase(pickId)
                 .onSuccess {
                     _detailPickUiState.emit(DetailPickUiState.Deleted)
+                }
+                .onFailure {
+                    _detailPickUiState.emit(DetailPickUiState.Error)
+                }
+        }
+    }
+
+    fun addToFavorite(pickId: String, onAddToFavoriteSuccess: () -> Unit) {
+        viewModelScope.launch {
+            createFavoriteUseCase(pickId, getUserId())
+                .onSuccess {
+                    onAddToFavoriteSuccess()
                 }
                 .onFailure {
                     _detailPickUiState.emit(DetailPickUiState.Error)

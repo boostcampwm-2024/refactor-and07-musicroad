@@ -34,6 +34,7 @@
     <string name="player_replay_description">5초 뒤로</string>
     <string name="player_play_pause_description">재생/일시정지</string>
     <string name="success_delete_pick">삭제되었습니다</string>
+    <string name="success_add_to_favorite">픽 보관함에 추가되었습니다.</string>
 
     <!-- Search Music -->
     <string name="search_music_album_description">노래 앨범 이미지</string>

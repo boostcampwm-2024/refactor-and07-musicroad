@@ -11,6 +11,7 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
 import com.google.firebase.firestore.QuerySnapshot
 import com.google.firebase.firestore.toObject
+import com.squirtles.data.datasource.remote.firebase.model.FirebaseFavorite
 import com.squirtles.data.datasource.remote.firebase.model.FirebasePick
 import com.squirtles.data.datasource.remote.firebase.model.FirebaseUser
 import com.squirtles.data.mapper.toFirebasePick
@@ -207,8 +208,31 @@ class FirebaseDataSourceImpl @Inject constructor(
         // TODO: favorite에서 이 픽 id 삭제
     }
 
+    override suspend fun createFavorite(pickId: String, userId: String): Boolean {
+        return suspendCancellableCoroutine { continuation ->
+            val firebaseFavorite = FirebaseFavorite(
+                pickId = pickId,
+                userId = userId
+            )
+
+            db.collection(COLLECTION_FAVORITES)
+                .add(firebaseFavorite)
+                .addOnSuccessListener {
+                    continuation.resume(true)
+                }
+                .addOnFailureListener { exception ->
+                    Log.e("FirebaseDataSourceImpl", "Failed to create a pick $exception")
+                    continuation.resumeWithException(exception)
+                }
+        }
+    }
+
     private fun updateCurrentUserPick(userId: String, pickId: String): Task<Void> {
         val userDoc = db.collection("users").document(userId)
         return userDoc.update("myPicks", FieldValue.arrayUnion(pickId))
+    }
+
+    companion object {
+        private const val COLLECTION_FAVORITES = "favorites"
     }
 }
