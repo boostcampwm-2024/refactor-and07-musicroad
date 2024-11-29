@@ -208,7 +208,7 @@ class FirebaseDataSourceImpl @Inject constructor(
     }
 
     override suspend fun fetchIsFavorite(pickId: String, userId: String): Boolean {
-        val favoriteDocument = fetchFavoriteDocument(pickId, userId)
+        val favoriteDocument = fetchFavoriteByPickIdAndUserId(pickId, userId)
         return favoriteDocument.isEmpty.not()
     }
 
@@ -231,8 +231,36 @@ class FirebaseDataSourceImpl @Inject constructor(
         }
     }
 
+    override suspend fun getFavorites(userId: String): List<Pick> {
+        val favoriteDocuments = fetchFavoritesByUserId(userId)
+
+        val tasks = mutableListOf<Task<DocumentSnapshot>>()
+        val favorites = mutableListOf<Pick>()
+
+        try {
+            favoriteDocuments.forEach { doc ->
+                tasks.add(
+                    db.collection(COLLECTION_PICKS)
+                        .document(doc.data[FIELD_PICK_ID].toString())
+                        .get()
+                )
+            }
+            Tasks.whenAllComplete(tasks).await()
+        } catch (exception: Exception) {
+            Log.e("FirebaseDataSourceImpl", "Failed to get favorite picks", exception)
+            throw exception
+        }
+        tasks.forEach { task ->
+            task.result.toObject<FirebasePick>()?.run {
+                favorites.add(this.toPick().copy(id = task.result.id))
+            }
+        }
+
+        return favorites
+    }
+
     override suspend fun deleteFavorite(pickId: String, userId: String): Boolean {
-        val favoriteDocument = fetchFavoriteDocument(pickId, userId)
+        val favoriteDocument = fetchFavoriteByPickIdAndUserId(pickId, userId)
         return suspendCancellableCoroutine { continuation ->
             favoriteDocument.forEach { document ->
                 db.collection(COLLECTION_FAVORITES).document(document.id)
@@ -241,7 +269,11 @@ class FirebaseDataSourceImpl @Inject constructor(
                         continuation.resume(true)
                     }
                     .addOnFailureListener { exception ->
-                        Log.w("FirebaseDataSourceImpl", "Error deleting favorite document", exception)
+                        Log.w(
+                            "FirebaseDataSourceImpl",
+                            "Error deleting favorite document",
+                            exception
+                        )
                         continuation.resumeWithException(exception)
                     }
             }
@@ -253,7 +285,10 @@ class FirebaseDataSourceImpl @Inject constructor(
         return userDoc.update("myPicks", FieldValue.arrayUnion(pickId))
     }
 
-    private suspend fun fetchFavoriteDocument(pickId: String, userId: String): QuerySnapshot {
+    private suspend fun fetchFavoriteByPickIdAndUserId(
+        pickId: String,
+        userId: String
+    ): QuerySnapshot {
         return suspendCancellableCoroutine { continuation ->
             db.collection(COLLECTION_FAVORITES)
                 .whereEqualTo(FIELD_PICK_ID, pickId)
@@ -263,7 +298,30 @@ class FirebaseDataSourceImpl @Inject constructor(
                     continuation.resume(result)
                 }
                 .addOnFailureListener { exception ->
-                    Log.w("FirebaseDataSourceImpl", "Error at fetching favorite document", exception)
+                    Log.w(
+                        "FirebaseDataSourceImpl",
+                        "Error at fetching favorite document",
+                        exception
+                    )
+                    continuation.resumeWithException(exception)
+                }
+        }
+    }
+
+    private suspend fun fetchFavoritesByUserId(userId: String): QuerySnapshot {
+        return suspendCancellableCoroutine { continuation ->
+            db.collection(COLLECTION_FAVORITES)
+                .whereEqualTo(FIELD_USER_ID, userId)
+                .get()
+                .addOnSuccessListener { result ->
+                    continuation.resume(result)
+                }
+                .addOnFailureListener { exception ->
+                    Log.w(
+                        "FirebaseDataSourceImpl",
+                        "Error at fetching favorite documents",
+                        exception
+                    )
                     continuation.resumeWithException(exception)
                 }
         }
@@ -271,6 +329,7 @@ class FirebaseDataSourceImpl @Inject constructor(
 
     companion object {
         private const val COLLECTION_FAVORITES = "favorites"
+        private const val COLLECTION_PICKS = "picks"
 
         private const val FIELD_PICK_ID = "pickId"
         private const val FIELD_USER_ID = "userId"

@@ -66,6 +66,12 @@ class FirebaseRepositoryImpl @Inject constructor(
         }
     }
 
+    override suspend fun getFavorites(userId: String): Result<List<Pick>> {
+        return handleResult {
+            firebaseRemoteDataSource.getFavorites(userId)
+        }
+    }
+
     override suspend fun deleteFavorite(pickId: String, userId: String): Result<Boolean> {
         return handleResult {
             firebaseRemoteDataSource.deleteFavorite(pickId, userId)
