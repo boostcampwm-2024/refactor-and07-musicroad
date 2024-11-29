@@ -215,7 +215,7 @@ class FirebaseDataSourceImpl @Inject constructor(
                 .whereEqualTo("userId", userId)
                 .get()
                 .addOnSuccessListener { result ->
-                    if (result.isEmpty) continuation.resume(false) else continuation.resume(true)
+                    continuation.resume(result.isEmpty.not())
                 }
                 .addOnFailureListener { exception ->
                     Log.w("FirebaseDataSourceImpl", "Error at fetching is favorite", exception)
