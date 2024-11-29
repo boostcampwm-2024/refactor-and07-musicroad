@@ -47,7 +47,10 @@ fun MainNavGraph(
 
         composable(MainDestinations.FAVORITE_ROUTE) {
             FavoriteScreen(
-                onBackClick = { navController.navigateUp() }
+                onBackClick = { navController.navigateUp() },
+                onItemClick = { pickId ->
+                    navigationActions.navigateToPickDetail(pickId)
+                }
             )
         }
 

@@ -12,10 +12,15 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
 import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -23,8 +28,13 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.wear.compose.material.CircularProgressIndicator
+import com.squirtles.domain.model.Pick
 import com.squirtles.domain.model.Song
 import com.squirtles.musicroad.R
+import com.squirtles.musicroad.UiState
 import com.squirtles.musicroad.common.AlbumImage
 import com.squirtles.musicroad.common.CommentText
 import com.squirtles.musicroad.common.Constants.DEFAULT_PADDING
@@ -42,7 +52,15 @@ import com.squirtles.musicroad.ui.theme.White
 @Composable
 fun FavoriteScreen(
     onBackClick: () -> Unit,
+    onItemClick: (String) -> Unit,
+    favoriteViewModel: FavoriteViewModel = hiltViewModel()
 ) {
+    val uiState by favoriteViewModel.favoriteUiState.collectAsStateWithLifecycle()
+
+    LaunchedEffect(Unit) {
+        favoriteViewModel.getFavoriteList()
+    }
+
     Scaffold(
         topBar = {
             DefaultTopAppBar(
@@ -57,8 +75,44 @@ fun FavoriteScreen(
                 .background(Brush.verticalGradient(colorStops = colorStops))
                 .padding(innerPadding)
         ) {
-            LazyColumn {
+            when (uiState) {
+                UiState.Loading -> {
+                    CircularProgressIndicator(
+                        modifier = Modifier
+                            .size(36.dp)
+                            .align(Alignment.Center),
+                        indicatorColor = Primary
+                    )
+                }
 
+                is UiState.Success -> {
+                    val favorites = (uiState as UiState.Success<List<Pick>>).data
+
+                    LazyColumn {
+                        items(
+                            items = favorites,
+                            key = { it.id }
+                        ) { pick ->
+                            PickItem(
+                                song = pick.song,
+                                createUserName = pick.createdBy.userName,
+                                favoriteCount = pick.favoriteCount,
+                                comment = pick.comment,
+                                onItemClick = { onItemClick(pick.id) }
+                            )
+                        }
+                    }
+                }
+
+                UiState.Error -> {
+                    Text(
+                        text = "일시적인 오류가 발생했습니다.",
+                        modifier = Modifier.align(Alignment.Center),
+                        color = White,
+                        style = MaterialTheme.typography.bodyLarge
+                    )
+                    // TODO: 다시하기 버튼 같은 거 만들어서 요청 다시 하게 할 수 있도록 만드는 것도 고려해보기
+                }
             }
         }
     }
@@ -70,7 +124,7 @@ fun PickItem(
     createUserName: String,
     favoriteCount: Int,
     comment: String,
-    onClickItem: () -> Unit,
+    onItemClick: () -> Unit,
 ) {
     Row(
         modifier = Modifier
@@ -78,7 +132,7 @@ fun PickItem(
             .clickable(
                 interactionSource = remember { MutableInteractionSource() },
                 indication = ripple(color = White),
-            ) { onClickItem() }
+            ) { onItemClick() }
             .padding(horizontal = DEFAULT_PADDING, vertical = DEFAULT_PADDING / 2),
         horizontalArrangement = Arrangement.spacedBy(DEFAULT_PADDING),
         verticalAlignment = Alignment.CenterVertically
