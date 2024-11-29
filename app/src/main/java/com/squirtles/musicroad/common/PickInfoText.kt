@@ -4,11 +4,16 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.text.withStyle
 import com.squirtles.musicroad.R
 import com.squirtles.musicroad.ui.theme.Primary
 
@@ -60,5 +65,36 @@ fun CommentText(
         overflow = overflow,
         maxLines = maxLines,
         style = style,
+    )
+}
+
+@Composable
+fun TotalCountText(
+    modifier: Modifier,
+    totalCount: Int,
+    defaultColor: Color = MaterialTheme.colorScheme.onSurface,
+    pointColor: Color = MaterialTheme.colorScheme.primary,
+    style: TextStyle = MaterialTheme.typography.titleMedium
+) {
+    Text(
+        text = buildAnnotatedString {
+            withStyle(
+                SpanStyle(
+                    color = defaultColor
+                )
+            ) {
+                append("전체 ")
+            }
+            withStyle(
+                SpanStyle(
+                    color = pointColor,
+                    fontWeight = FontWeight.Bold
+                )
+            ) {
+                append("$totalCount")
+            }
+        },
+        modifier = modifier,
+        style = style
     )
 }

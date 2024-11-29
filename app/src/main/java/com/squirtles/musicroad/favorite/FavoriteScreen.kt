@@ -43,6 +43,7 @@ import com.squirtles.musicroad.common.CreatedByOtherUserText
 import com.squirtles.musicroad.common.DefaultTopAppBar
 import com.squirtles.musicroad.common.FavoriteCountText
 import com.squirtles.musicroad.common.SongInfoText
+import com.squirtles.musicroad.common.TotalCountText
 import com.squirtles.musicroad.create.HorizontalSpacer
 import com.squirtles.musicroad.ui.theme.Black
 import com.squirtles.musicroad.ui.theme.Gray
@@ -88,18 +89,32 @@ fun FavoriteScreen(
                 is UiState.Success -> {
                     val favorites = (uiState as UiState.Success<List<Pick>>).data
 
-                    LazyColumn {
-                        items(
-                            items = favorites,
-                            key = { it.id }
-                        ) { pick ->
-                            PickItem(
-                                song = pick.song,
-                                createUserName = pick.createdBy.userName,
-                                favoriteCount = pick.favoriteCount,
-                                comment = pick.comment,
-                                onItemClick = { onItemClick(pick.id) }
-                            )
+                    Column(
+                        modifier = Modifier.fillMaxSize()
+                    ) {
+                        TotalCountText(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = DEFAULT_PADDING),
+                            totalCount = favorites.size,
+                            defaultColor = White,
+                        )
+
+                        LazyColumn(
+                            modifier = Modifier.weight(1f)
+                        ) {
+                            items(
+                                items = favorites,
+                                key = { it.id }
+                            ) { pick ->
+                                PickItem(
+                                    song = pick.song,
+                                    createUserName = pick.createdBy.userName,
+                                    favoriteCount = pick.favoriteCount,
+                                    comment = pick.comment,
+                                    onItemClick = { onItemClick(pick.id) }
+                                )
+                            }
                         }
                     }
                 }

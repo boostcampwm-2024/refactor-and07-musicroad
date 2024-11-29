@@ -20,10 +20,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.text.SpanStyle
-import androidx.compose.ui.text.buildAnnotatedString
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import com.squirtles.domain.model.LocationPoint
 import com.squirtles.domain.model.Pick
@@ -36,6 +32,7 @@ import com.squirtles.musicroad.common.CreatedByOtherUserText
 import com.squirtles.musicroad.common.CreatedBySelfText
 import com.squirtles.musicroad.common.FavoriteCountText
 import com.squirtles.musicroad.common.SongInfoText
+import com.squirtles.musicroad.common.TotalCountText
 import com.squirtles.musicroad.create.HorizontalSpacer
 import kotlinx.coroutines.launch
 
@@ -59,29 +56,13 @@ fun ClusterBottomSheet(
         containerColor = MaterialTheme.colorScheme.surface
     ) {
         clusterPickList?.let { pickList ->
-            Text(
-                text = buildAnnotatedString {
-                    withStyle(
-                        SpanStyle(
-                            color = MaterialTheme.colorScheme.onSurface
-                        )
-                    ) {
-                        append("전체 ")
-                    }
-                    withStyle(
-                        SpanStyle(
-                            color = MaterialTheme.colorScheme.primary,
-                            fontWeight = FontWeight.Bold
-                        )
-                    ) {
-                        append("${pickList.size}")
-                    }
-                },
+            TotalCountText(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(start = DEFAULT_PADDING),
-                style = MaterialTheme.typography.titleMedium
+                totalCount = pickList.size
             )
+
             LazyColumn {
                 items(
                     items = pickList,
