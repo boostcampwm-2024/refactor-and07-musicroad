@@ -129,7 +129,11 @@ fun DetailPickScreen(
                     }
 
                     isFavorite -> {
-                        // TODO: 픽 담기 해제
+                        showProcessIndicator = true
+                        pickViewModel.deleteAtFavorite(pickId) {
+                            showProcessIndicator = false
+                            context.showShortToast(context.getString(R.string.success_delete_at_favorite))
+                        }
                     }
 
                     else -> {

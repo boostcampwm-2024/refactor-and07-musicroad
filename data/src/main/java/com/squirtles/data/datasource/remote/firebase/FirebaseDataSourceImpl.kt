@@ -211,8 +211,8 @@ class FirebaseDataSourceImpl @Inject constructor(
     override suspend fun fetchIsFavorite(pickId: String, userId: String): Boolean {
         return suspendCancellableCoroutine { continuation ->
             db.collection(COLLECTION_FAVORITES)
-                .whereEqualTo("pickId", pickId)
-                .whereEqualTo("userId", userId)
+                .whereEqualTo(FIELD_PICK_ID, pickId)
+                .whereEqualTo(FIELD_USER_ID, userId)
                 .get()
                 .addOnSuccessListener { result ->
                     continuation.resume(result.isEmpty.not())
@@ -243,6 +243,32 @@ class FirebaseDataSourceImpl @Inject constructor(
         }
     }
 
+    override suspend fun deleteFavorite(pickId: String, userId: String): Boolean {
+        return suspendCancellableCoroutine { continuation ->
+            db.collection(COLLECTION_FAVORITES)
+                .whereEqualTo(FIELD_PICK_ID, pickId)
+                .whereEqualTo(FIELD_USER_ID, userId)
+                .get()
+                .addOnSuccessListener { result ->
+                    for (document in result) {
+                        db.collection(COLLECTION_FAVORITES).document(document.id)
+                            .delete()
+                            .addOnSuccessListener {
+                                continuation.resume(true)
+                            }
+                            .addOnFailureListener { exception ->
+                                Log.w("FirebaseDataSourceImpl", "Error deleting favorite document", exception)
+                                continuation.resumeWithException(exception)
+                            }
+                    }
+                }
+                .addOnFailureListener { exception ->
+                    Log.w("FirebaseDataSourceImpl", "Error at fetching is favorite", exception)
+                    continuation.resumeWithException(exception)
+                }
+        }
+    }
+
     private fun updateCurrentUserPick(userId: String, pickId: String): Task<Void> {
         val userDoc = db.collection("users").document(userId)
         return userDoc.update("myPicks", FieldValue.arrayUnion(pickId))
@@ -250,5 +276,8 @@ class FirebaseDataSourceImpl @Inject constructor(
 
     companion object {
         private const val COLLECTION_FAVORITES = "favorites"
+
+        private const val FIELD_PICK_ID = "pickId"
+        private const val FIELD_USER_ID = "userId"
     }
 }

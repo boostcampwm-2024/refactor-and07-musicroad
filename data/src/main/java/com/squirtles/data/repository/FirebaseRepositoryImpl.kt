@@ -66,6 +66,12 @@ class FirebaseRepositoryImpl @Inject constructor(
         }
     }
 
+    override suspend fun deleteFavorite(pickId: String, userId: String): Result<Boolean> {
+        return handleResult {
+            firebaseRemoteDataSource.deleteFavorite(pickId, userId)
+        }
+    }
+
     private suspend fun <T> handleResult(
         firebaseRepositoryException: FirebaseException,
         call: suspend () -> T?
