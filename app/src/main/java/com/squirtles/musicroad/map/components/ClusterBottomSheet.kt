@@ -1,6 +1,5 @@
 package com.squirtles.musicroad.map.components
 
-import android.util.Size
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -24,15 +23,19 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import com.squirtles.domain.model.LocationPoint
 import com.squirtles.domain.model.Pick
 import com.squirtles.domain.model.Song
 import com.squirtles.musicroad.common.AlbumImage
+import com.squirtles.musicroad.common.CommentText
+import com.squirtles.musicroad.common.Constants.DEFAULT_PADDING
+import com.squirtles.musicroad.common.Constants.REQUEST_IMAGE_SIZE_DEFAULT
 import com.squirtles.musicroad.common.CreatedByOtherUserText
 import com.squirtles.musicroad.common.CreatedBySelfText
+import com.squirtles.musicroad.common.FavoriteCountText
+import com.squirtles.musicroad.common.SongInfoText
 import com.squirtles.musicroad.create.HorizontalSpacer
 import kotlinx.coroutines.launch
 
@@ -122,7 +125,7 @@ fun BottomSheetItem(
         verticalAlignment = Alignment.CenterVertically
     ) {
         AlbumImage(
-            imageUrl = song.getImageUrlWithSize(REQUEST_IMAGE_SIZE),
+            imageUrl = song.getImageUrlWithSize(REQUEST_IMAGE_SIZE_DEFAULT),
             modifier = Modifier
                 .size(45.dp)
                 .clip(RoundedCornerShape(4.dp))
@@ -156,12 +159,8 @@ fun BottomSheetItem(
                 )
             }
 
-            Text(
-                text = comment,
-                color = MaterialTheme.colorScheme.onSecondary,
-                overflow = TextOverflow.Ellipsis,
-                maxLines = 1,
-                style = MaterialTheme.typography.bodyMedium,
+            CommentText(
+                comment = comment
             )
         }
 
@@ -173,6 +172,3 @@ fun BottomSheetItem(
         )
     }
 }
-
-private val DEFAULT_PADDING = 16.dp
-private val REQUEST_IMAGE_SIZE = Size(300, 300)

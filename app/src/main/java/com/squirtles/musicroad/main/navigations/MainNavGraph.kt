@@ -34,9 +34,7 @@ fun MainNavGraph(
         composable(MainDestinations.MAIN_ROUTE) {
             MapScreen(
                 mapViewModel = mapViewModel,
-                onFavoriteClick = {
-                    // FIXME: 임시로 화면 전환 막아놓음
-                },
+                onFavoriteClick = navigationActions.navigateToFavorite,
                 onCenterClick = navigationActions.navigateToSearch,
                 onSettingClick = {
                     // FIXME: 임시로 화면 전환 막아놓음
@@ -48,7 +46,9 @@ fun MainNavGraph(
         }
 
         composable(MainDestinations.FAVORITE_ROUTE) {
-            FavoriteScreen()
+            FavoriteScreen(
+                onBackClick = { navController.navigateUp() }
+            )
         }
 
         composable(MainDestinations.SETTING_ROUTE) {

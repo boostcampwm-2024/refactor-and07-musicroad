@@ -21,7 +21,6 @@
     <!-- Pick -->
     <string name="pick_app_bar_title">픽 등록</string>
     <string name="pick_app_bar_title_user">님의 픽</string>
-    <string name="pick_app_bar_back_description">뒤로가기</string>
     <string name="pick_app_bar_upload_description">등록하기</string>
     <string name="pick_album_description">앨범 이미지</string>
     <string name="pick_comment_placeholder">거리에 남길 한마디를 입력하세요.</string>
@@ -46,4 +45,8 @@
     <string name="delete_pick_dialog_body">등록하신 픽이 삭제됩니다.</string>
     <string name="delete_pick_dialog_cancel">취소</string>
     <string name="delete_pick_dialog_delete">삭제하기</string>
+
+    <!-- Top App Bar -->
+    <string name="top_app_bar_back_description">상단 바 뒤로 가기 버튼</string>
+    <string name="favorite_top_app_bar_title">픽 보관함</string>
 </resources>

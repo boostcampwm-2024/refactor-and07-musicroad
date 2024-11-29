@@ -58,7 +58,7 @@ fun DetailPickTopAppBar(
             ) {
                 Icon(
                     imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                    contentDescription = stringResource(id = R.string.pick_app_bar_back_description),
+                    contentDescription = stringResource(id = R.string.top_app_bar_back_description),
                     tint = onDynamicBackgroundColor
                 )
             }
