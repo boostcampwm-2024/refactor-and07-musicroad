@@ -54,9 +54,21 @@ fun MainNavGraph(
             )
         }
 
+        composable(MainDestinations.MY_PICKS_ROUTE) {
+            PickListScreen(
+                isFavoritePicks = false,
+                onBackClick = { navController.navigateUp() },
+                onItemClick = { pickId ->
+                    navigationActions.navigateToPickDetail(pickId)
+                }
+            )
+        }
+
         composable(MainDestinations.USER_INFO_ROUTE) {
             UserInfoScreen(
                 onBackClick = { navController.navigateUp() },
+                onFavoritePicksClick = navigationActions.navigateToFavoritePicks,
+                onMyPicksClick = navigationActions.navigateToMyPicks,
             )
         }
 

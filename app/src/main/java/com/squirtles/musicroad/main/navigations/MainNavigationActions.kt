@@ -20,6 +20,12 @@ class MainNavigationActions(navController: NavHostController) {
         }
     }
 
+    val navigateToMyPicks: () -> Unit = {
+        navController.navigate(MainDestinations.MY_PICKS_ROUTE) {
+            launchSingleTop = true
+        }
+    }
+
     val navigateToUserInfo: () -> Unit = {
         navController.navigate(MainDestinations.USER_INFO_ROUTE) {
             launchSingleTop = true

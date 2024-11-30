@@ -31,6 +31,8 @@ import com.squirtles.musicroad.common.VerticalSpacer
 @Composable
 fun UserInfoScreen(
     onBackClick: () -> Unit,
+    onFavoritePicksClick: () -> Unit,
+    onMyPicksClick: () -> Unit,
 ) {
     Scaffold(
         topBar = {
@@ -69,13 +71,13 @@ fun UserInfoScreen(
                             imageVector = Icons.Outlined.Archive,
                             contentDescription = stringResource(R.string.user_info_favorite_menu_icon_description),
                             menuTitle = stringResource(R.string.user_info_favorite_menu_title),
-                            onMenuClick = {}
+                            onMenuClick = onFavoritePicksClick
                         ),
                         MenuItem(
                             imageVector = Icons.Default.MusicNote,
                             contentDescription = stringResource(R.string.user_info_created_by_self_menu_icon_description),
                             menuTitle = stringResource(R.string.user_info_created_by_self_menu_title),
-                            onMenuClick = {}
+                            onMenuClick = onMyPicksClick
                         )
                     )
                 )
