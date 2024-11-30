@@ -20,6 +20,9 @@ import com.squirtles.data.mapper.toUser
 import com.squirtles.domain.datasource.FirebaseRemoteDataSource
 import com.squirtles.domain.model.Pick
 import com.squirtles.domain.model.User
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
@@ -31,6 +34,8 @@ import kotlin.coroutines.resumeWithException
 class FirebaseDataSourceImpl @Inject constructor(
     private val db: FirebaseFirestore
 ) : FirebaseRemoteDataSource {
+
+    private val cloudFunctionHelper = CloudFunctionHelper()
 
     override suspend fun createUser(): User? {
         return suspendCancellableCoroutine { continuation ->
@@ -79,7 +84,7 @@ class FirebaseDataSourceImpl @Inject constructor(
         db.collection("picks").document(pickID).get()
             .addOnSuccessListener { document ->
                 val firestorePick = document.toObject<FirebasePick>()?.copy(id = pickID)
-                Log.d("FirebaseDataSourceImpl", firestorePick.toString())
+
                 resultPick = firestorePick?.toPick()
             }
             .addOnFailureListener { exception ->
@@ -222,6 +227,7 @@ class FirebaseDataSourceImpl @Inject constructor(
             db.collection(COLLECTION_FAVORITES)
                 .add(firebaseFavorite)
                 .addOnSuccessListener {
+                    updateFavoriteCount(pickId) // 클라우드 함수 호출
                     continuation.resume(true)
                 }
                 .addOnFailureListener { exception ->
@@ -266,6 +272,7 @@ class FirebaseDataSourceImpl @Inject constructor(
                 db.collection(COLLECTION_FAVORITES).document(document.id)
                     .delete()
                     .addOnSuccessListener {
+                        updateFavoriteCount(pickId) // 클라우드 함수 호출
                         continuation.resume(true)
                     }
                     .addOnFailureListener { exception ->
@@ -324,6 +331,22 @@ class FirebaseDataSourceImpl @Inject constructor(
                     )
                     continuation.resumeWithException(exception)
                 }
+        }
+    }
+
+    private fun updateFavoriteCount(pickId: String) {
+        CoroutineScope(Dispatchers.IO).launch {
+            try {
+                val result = cloudFunctionHelper.updateFavoriteCount(pickId)
+                result.onSuccess {
+                    Log.d("FirebaseDataSourceImpl", "Success to update favorite count")
+                }
+                .onFailure { exception ->
+                    Log.e("FirebaseDataSourceImpl", "Failed to update favorite count", exception)
+                }
+            } catch (e: Exception) {
+                Log.e("FirebaseDataSourceImpl", "Exception occurred while updating favorite count", e)
+            }
         }
     }
 

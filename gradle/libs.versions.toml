@@ -4,6 +4,7 @@ agp = "8.5.1"
 appcompat = "1.7.0"
 coil = "3.0.0"
 composeBom = "2024.10.01"
+composeMaterial = "1.4.0"
 constraintlayout = "2.2.0"
 coreKtx = "1.13.1"
 datastorePreferences = "1.1.1"
@@ -11,6 +12,7 @@ espressoCore = "3.6.1"
 firebaseBom = "33.5.1"
 firebaseDynamicModuleSupportVersion = "16.0.0-beta03"
 firebaseFirestoreKtx = "25.1.1"
+firebaseFunctionsKtx = "21.1.0"
 geofireAndroidCommon = "3.2.0"
 googleServices = "4.4.2"
 hilt = "2.51.1"
@@ -19,6 +21,7 @@ inject = "1"
 junit = "4.13.2"
 junitVersion = "1.2.1"
 kotlin = "1.9.0"
+kotlinxCoroutinesPlayServices = "1.9.0"
 kotlinxSerializationJson = "1.6.0"
 ksp = "1.9.0-1.0.12"
 lifecycleRuntimeKtx = "2.8.7"
@@ -31,7 +34,6 @@ playServicesLocation = "21.3.0"
 retrofit = "2.11.0"
 splashscreen = "1.0.1"
 uiViewbinding = "1.7.5"
-composeMaterial = "1.4.0"
 
 [libraries]
 # AndroidX
@@ -63,6 +65,8 @@ androidx-compose-material = { group = "androidx.wear.compose", name = "compose-m
 firebase-analytics = { module = "com.google.firebase:firebase-analytics" }
 firebase-bom = { module = "com.google.firebase:firebase-bom", version.ref = "firebaseBom" }
 firebase-firestore-ktx = { group = "com.google.firebase", name = "firebase-firestore-ktx", version.ref = "firebaseFirestoreKtx" }
+firebase-functions-ktx = { group = "com.google.firebase", name = "firebase-functions-ktx", version.ref = "firebaseFunctionsKtx" }
+kotlinx-coroutines-play-services = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-play-services", version.ref = "kotlinxCoroutinesPlayServices" }
 
 # Test
 geofire-android-common = { module = "com.firebase:geofire-android-common", version.ref = "geofireAndroidCommon" }

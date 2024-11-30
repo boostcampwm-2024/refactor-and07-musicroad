@@ -283,7 +283,6 @@ private fun DetailPick(
     )
 
     // PlayerViewModel Collect
-    val audioSessionId by playerViewModel.audioSessionId.collectAsStateWithLifecycle()
     val playerState by playerViewModel.playerState.collectAsStateWithLifecycle()
     val bufferPercentage by playerViewModel.bufferPercentage.collectAsStateWithLifecycle()
     val duration by playerViewModel.duration.collectAsStateWithLifecycle()
@@ -339,19 +338,21 @@ private fun DetailPick(
                     dynamicOnBackgroundColor = onDynamicBackgroundColor
                 )
 
-                CircleAlbumCover(
-                    modifier = Modifier
-                        .size(320.dp)
-                        .align(Alignment.CenterHorizontally),
-                    song = pick.song,
-                    playerState = playerState,
-                    duration = duration,
-                    audioSessionId = audioSessionId,
-                    audioEffectColor = audioEffectColor,
-                    onSeekChanged = { timeMs ->
-                        playerViewModel.playerSeekTo(timeMs)
-                    },
-                )
+                if(playerState.isReady){
+                    CircleAlbumCover(
+                        modifier = Modifier
+                            .size(320.dp)
+                            .align(Alignment.CenterHorizontally),
+                        song = pick.song,
+                        playerState = playerState,
+                        duration = duration,
+                        audioEffectColor = audioEffectColor,
+                        audioSessionId = { playerViewModel.audioSessionId },
+                        onSeekChanged = { timeMs ->
+                            playerViewModel.playerSeekTo(timeMs)
+                        },
+                    )
+                }
 
                 PickInformation(formattedDate = pick.createdAt, favoriteCount = pick.favoriteCount)
 
