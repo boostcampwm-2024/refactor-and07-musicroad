@@ -1,4 +1,4 @@
-package com.squirtles.domain.usecase
+package com.squirtles.domain.usecase.local
 
 import android.location.Location
 import com.squirtles.domain.repository.LocalRepository

@@ -1,4 +1,4 @@
-package com.squirtles.domain.usecase
+package com.squirtles.domain.usecase.user
 
 import com.squirtles.domain.model.User
 import com.squirtles.domain.repository.FirebaseRepository

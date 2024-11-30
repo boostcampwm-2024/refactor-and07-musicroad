@@ -3,9 +3,9 @@ package com.squirtles.musicroad.main
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.squirtles.domain.exception.FirebaseException
-import com.squirtles.domain.usecase.CreateUserUseCase
-import com.squirtles.domain.usecase.FetchUserUseCase
-import com.squirtles.domain.usecase.GetUserIdFromLocalStorageUseCase
+import com.squirtles.domain.usecase.user.CreateUserUseCase
+import com.squirtles.domain.usecase.user.FetchUserUseCase
+import com.squirtles.domain.usecase.local.GetUserIdFromLocalStorageUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow

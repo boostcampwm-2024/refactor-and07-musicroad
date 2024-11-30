@@ -1,4 +1,4 @@
-package com.squirtles.domain.usecase
+package com.squirtles.domain.usecase.mypick
 
 import com.squirtles.domain.model.Pick
 import com.squirtles.domain.repository.FirebaseRepository
