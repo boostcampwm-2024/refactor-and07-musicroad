@@ -42,7 +42,7 @@ fun PickListScreen(
 
     LaunchedEffect(Unit) {
         if (isFavoritePicks) {
-            pickListViewModel.getFavoritePicks()
+            pickListViewModel.fetchFavoritePicks()
         } else {
             pickListViewModel.fetchMyPicks()
         }

@@ -242,32 +242,7 @@ class FirebaseDataSourceImpl @Inject constructor(
         return myPicks
     }
 
-    override suspend fun fetchIsFavorite(pickId: String, userId: String): Boolean {
-        val favoriteDocument = fetchFavoriteByPickIdAndUserId(pickId, userId)
-        return favoriteDocument.isEmpty.not()
-    }
-
-    override suspend fun createFavorite(pickId: String, userId: String): Boolean {
-        return suspendCancellableCoroutine { continuation ->
-            val firebaseFavorite = FirebaseFavorite(
-                pickId = pickId,
-                userId = userId
-            )
-
-            db.collection(COLLECTION_FAVORITES)
-                .add(firebaseFavorite)
-                .addOnSuccessListener {
-                    updateFavoriteCount(pickId) // 클라우드 함수 호출
-                    continuation.resume(true)
-                }
-                .addOnFailureListener { exception ->
-                    Log.e("FirebaseDataSourceImpl", "Failed to create favorite", exception)
-                    continuation.resumeWithException(exception)
-                }
-        }
-    }
-
-    override suspend fun getFavoritePicks(userId: String): List<Pick> {
+    override suspend fun fetchFavoritePicks(userId: String): List<Pick> {
         val favoriteDocuments = fetchFavoritesByUserId(userId)
 
         val tasks = mutableListOf<Task<DocumentSnapshot>>()
@@ -293,6 +268,31 @@ class FirebaseDataSourceImpl @Inject constructor(
         }
 
         return favorites
+    }
+
+    override suspend fun fetchIsFavorite(pickId: String, userId: String): Boolean {
+        val favoriteDocument = fetchFavoriteByPickIdAndUserId(pickId, userId)
+        return favoriteDocument.isEmpty.not()
+    }
+
+    override suspend fun createFavorite(pickId: String, userId: String): Boolean {
+        return suspendCancellableCoroutine { continuation ->
+            val firebaseFavorite = FirebaseFavorite(
+                pickId = pickId,
+                userId = userId
+            )
+
+            db.collection(COLLECTION_FAVORITES)
+                .add(firebaseFavorite)
+                .addOnSuccessListener {
+                    updateFavoriteCount(pickId) // 클라우드 함수 호출
+                    continuation.resume(true)
+                }
+                .addOnFailureListener { exception ->
+                    Log.e("FirebaseDataSourceImpl", "Failed to create favorite", exception)
+                    continuation.resumeWithException(exception)
+                }
+        }
     }
 
     override suspend fun deleteFavorite(pickId: String, userId: String): Boolean {

@@ -3,8 +3,8 @@ package com.squirtles.domain.usecase
 import com.squirtles.domain.repository.FirebaseRepository
 import javax.inject.Inject
 
-class GetFavoritePicksUseCase @Inject constructor(
+class FetchFavoritePicksUseCase @Inject constructor(
     private val firebaseRepository: FirebaseRepository
 ) {
-    suspend operator fun invoke(userId: String) = firebaseRepository.getFavoritePicks(userId)
+    suspend operator fun invoke(userId: String) = firebaseRepository.fetchFavoritePicks(userId)
 }
