@@ -2,7 +2,7 @@ package com.squirtles.musicroad.main.navigations
 
 object MainDestinations {
     const val MAIN_ROUTE = "main"
-    const val FAVORITE_ROUTE = "favorite"
+    const val FAVORITE_PICKS_ROUTE = "favorite_picks"
     const val SETTING_ROUTE = "setting"
     const val CREATE_ROUTE = "create"
     const val USER_INFO_ROUTE = "userinfo"

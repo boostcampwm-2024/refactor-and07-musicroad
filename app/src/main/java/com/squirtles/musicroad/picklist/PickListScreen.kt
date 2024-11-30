@@ -1,4 +1,4 @@
-package com.squirtles.musicroad.favorite
+package com.squirtles.musicroad.picklist
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -31,10 +31,8 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.wear.compose.material.CircularProgressIndicator
-import com.squirtles.domain.model.Pick
 import com.squirtles.domain.model.Song
 import com.squirtles.musicroad.R
-import com.squirtles.musicroad.UiState
 import com.squirtles.musicroad.common.AlbumImage
 import com.squirtles.musicroad.common.CommentText
 import com.squirtles.musicroad.common.Constants.COLOR_STOPS
@@ -43,29 +41,36 @@ import com.squirtles.musicroad.common.Constants.REQUEST_IMAGE_SIZE_DEFAULT
 import com.squirtles.musicroad.common.CreatedByOtherUserText
 import com.squirtles.musicroad.common.DefaultTopAppBar
 import com.squirtles.musicroad.common.FavoriteCountText
+import com.squirtles.musicroad.common.HorizontalSpacer
 import com.squirtles.musicroad.common.SongInfoText
 import com.squirtles.musicroad.common.TotalCountText
-import com.squirtles.musicroad.common.HorizontalSpacer
 import com.squirtles.musicroad.ui.theme.Gray
 import com.squirtles.musicroad.ui.theme.Primary
 import com.squirtles.musicroad.ui.theme.White
 
 @Composable
-fun FavoriteScreen(
+fun PickListScreen(
+    isFavoritePicks: Boolean,
     onBackClick: () -> Unit,
     onItemClick: (String) -> Unit,
-    favoriteViewModel: FavoriteViewModel = hiltViewModel()
+    pickListViewModel: PickListViewModel = hiltViewModel()
 ) {
-    val uiState by favoriteViewModel.favoriteUiState.collectAsStateWithLifecycle()
+    val uiState by pickListViewModel.pickListUiState.collectAsStateWithLifecycle()
 
     LaunchedEffect(Unit) {
-        favoriteViewModel.getFavoritePicks()
+        if (isFavoritePicks) {
+            pickListViewModel.getFavoritePicks()
+        } else {
+            // TODO: 내가 등록한 픽 불러오기
+        }
     }
 
     Scaffold(
         topBar = {
             DefaultTopAppBar(
-                title = stringResource(R.string.favorite_top_app_bar_title),
+                title = stringResource(
+                    if (isFavoritePicks) R.string.favorite_picks_top_app_bar_title else R.string.my_picks_top_app_bar_title
+                ),
                 onBackClick = onBackClick
             )
         },
@@ -77,7 +82,7 @@ fun FavoriteScreen(
                 .padding(innerPadding)
         ) {
             when (uiState) {
-                UiState.Loading -> {
+                PickListUiState.Loading -> {
                     CircularProgressIndicator(
                         modifier = Modifier
                             .size(36.dp)
@@ -86,8 +91,8 @@ fun FavoriteScreen(
                     )
                 }
 
-                is UiState.Success -> {
-                    val favoritePicks = (uiState as UiState.Success<List<Pick>>).data
+                is PickListUiState.Success -> {
+                    val pickList = (uiState as PickListUiState.Success).pickList
 
                     Column(
                         modifier = Modifier.fillMaxSize()
@@ -96,7 +101,7 @@ fun FavoriteScreen(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(horizontal = DEFAULT_PADDING),
-                            totalCount = favoritePicks.size,
+                            totalCount = pickList.size,
                             defaultColor = White,
                         )
 
@@ -104,7 +109,7 @@ fun FavoriteScreen(
                             modifier = Modifier.weight(1f)
                         ) {
                             items(
-                                items = favoritePicks,
+                                items = pickList,
                                 key = { it.id }
                             ) { pick ->
                                 PickItem(
@@ -119,7 +124,7 @@ fun FavoriteScreen(
                     }
                 }
 
-                UiState.Error -> {
+                PickListUiState.Error -> {
                     Text(
                         text = "일시적인 오류가 발생했습니다.",
                         modifier = Modifier.align(Alignment.Center),

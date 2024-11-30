@@ -13,10 +13,10 @@ import androidx.navigation.navArgument
 import com.squirtles.musicroad.create.CreatePickScreen
 import com.squirtles.musicroad.create.CreatePickViewModel
 import com.squirtles.musicroad.create.SearchMusicScreen
-import com.squirtles.musicroad.favorite.FavoriteScreen
 import com.squirtles.musicroad.map.MapScreen
 import com.squirtles.musicroad.map.MapViewModel
 import com.squirtles.musicroad.pick.DetailPickScreen
+import com.squirtles.musicroad.picklist.PickListScreen
 import com.squirtles.musicroad.setting.SettingScreen
 import com.squirtles.musicroad.userinfo.UserInfoScreen
 
@@ -35,7 +35,7 @@ fun MainNavGraph(
         composable(MainDestinations.MAIN_ROUTE) {
             MapScreen(
                 mapViewModel = mapViewModel,
-                onFavoriteClick = navigationActions.navigateToFavorite,
+                onFavoriteClick = navigationActions.navigateToFavoritePicks,
                 onCenterClick = navigationActions.navigateToSearch,
                 onUserInfoClick = navigationActions.navigateToUserInfo,
                 onPickSummaryClick = { pickId ->
@@ -44,8 +44,9 @@ fun MainNavGraph(
             )
         }
 
-        composable(MainDestinations.FAVORITE_ROUTE) {
-            FavoriteScreen(
+        composable(MainDestinations.FAVORITE_PICKS_ROUTE) {
+            PickListScreen(
+                isFavoritePicks = true,
                 onBackClick = { navController.navigateUp() },
                 onItemClick = { pickId ->
                     navigationActions.navigateToPickDetail(pickId)

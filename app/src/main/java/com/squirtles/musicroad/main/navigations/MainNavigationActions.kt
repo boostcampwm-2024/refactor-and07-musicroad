@@ -14,13 +14,9 @@ class MainNavigationActions(navController: NavHostController) {
         }
     }
 
-    val navigateToFavorite: () -> Unit = {
-        navController.navigate(MainDestinations.FAVORITE_ROUTE) {
-            popUpTo(navController.graph.findStartDestination().id) {
-                saveState = true
-            }
+    val navigateToFavoritePicks: () -> Unit = {
+        navController.navigate(MainDestinations.FAVORITE_PICKS_ROUTE) {
             launchSingleTop = true
-            restoreState = true
         }
     }
 

@@ -1,11 +1,9 @@
-package com.squirtles.musicroad.favorite
+package com.squirtles.musicroad.picklist
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.squirtles.domain.model.Pick
 import com.squirtles.domain.usecase.GetCurrentUserUseCase
 import com.squirtles.domain.usecase.GetFavoritePicksUseCase
-import com.squirtles.musicroad.UiState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -13,22 +11,22 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class FavoriteViewModel @Inject constructor(
+class PickListViewModel @Inject constructor(
     private val getCurrentUserUseCase: GetCurrentUserUseCase,
     private val getFavoritePicksUseCase: GetFavoritePicksUseCase,
 ) : ViewModel() {
 
-    private val _favoriteUiState = MutableStateFlow<UiState<List<Pick>>>(UiState.Loading)
-    val favoriteUiState = _favoriteUiState.asStateFlow()
+    private val _pickListUiState = MutableStateFlow<PickListUiState>(PickListUiState.Loading)
+    val pickListUiState = _pickListUiState.asStateFlow()
 
     fun getFavoritePicks() {
         viewModelScope.launch {
             getFavoritePicksUseCase(getCurrentUserUseCase().userId)
                 .onSuccess { favoritePicks ->
-                    _favoriteUiState.emit(UiState.Success(favoritePicks))
+                    _pickListUiState.emit(PickListUiState.Success(favoritePicks))
                 }
                 .onFailure {
-                    _favoriteUiState.emit(UiState.Error)
+                    _pickListUiState.emit(PickListUiState.Error)
                 }
         }
     }

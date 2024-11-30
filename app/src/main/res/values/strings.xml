@@ -51,7 +51,8 @@
 
     <!-- Top App Bar -->
     <string name="top_app_bar_back_description">상단 바 뒤로 가기 버튼</string>
-    <string name="favorite_top_app_bar_title">픽 보관함</string>
+    <string name="favorite_picks_top_app_bar_title">픽 보관함</string>
+    <string name="my_picks_top_app_bar_title">등록한 픽</string>
 
     <!-- User Info -->
     <string name="user_info_navigate_to_menu">메뉴로 이동하기 아이콘</string>
