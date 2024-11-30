@@ -1,6 +1,5 @@
 package com.squirtles.musicroad.userinfo
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
@@ -11,6 +10,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForwardIos
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -28,17 +28,14 @@ import com.squirtles.musicroad.R
 import com.squirtles.musicroad.common.Constants.DEFAULT_PADDING
 import com.squirtles.musicroad.common.VerticalSpacer
 import com.squirtles.musicroad.ui.theme.Gray
-import com.squirtles.musicroad.ui.theme.Primary
 import com.squirtles.musicroad.ui.theme.White
 
 @Composable
 internal fun TitleAndMenus(
     title: String,
-    titleColor: Color = Primary,
     titleTextColor: Color = White,
     titleTextStyle: TextStyle = MaterialTheme.typography.titleMedium,
     menus: List<MenuItem>,
-    menuColor: Color = Color.Transparent,
     menuTextColor: Color = White,
     menuTextStyle: TextStyle = MaterialTheme.typography.bodyLarge
 ) {
@@ -47,7 +44,6 @@ internal fun TitleAndMenus(
             text = title,
             modifier = Modifier
                 .fillMaxWidth()
-                .background(titleColor)
                 .padding(
                     horizontal = MENU_PADDING_HORIZONTAL,
                     vertical = MENU_PADDING_VERTICAL
@@ -57,13 +53,19 @@ internal fun TitleAndMenus(
             style = titleTextStyle
         )
 
+        HorizontalDivider(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = MENU_PADDING_HORIZONTAL),
+            color = Gray
+        )
+
         VerticalSpacer(8)
 
         for (menu in menus) {
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .background(menuColor)
                     .clickable(
                         interactionSource = remember { MutableInteractionSource() },
                         indication = ripple(color = White),
