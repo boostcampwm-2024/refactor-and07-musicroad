@@ -88,21 +88,36 @@ fun PickListScreen(
                             defaultColor = White,
                         )
 
-                        LazyColumn(
-                            modifier = Modifier.weight(1f)
-                        ) {
-                            items(
-                                items = pickList,
-                                key = { it.id }
-                            ) { pick ->
-                                PickItem(
-                                    song = pick.song,
-                                    createdByOthers = isFavoritePicks,
-                                    createUserName = pick.createdBy.userName,
-                                    favoriteCount = pick.favoriteCount,
-                                    comment = pick.comment,
-                                    onItemClick = { onItemClick(pick.id) }
+                        if (pickList.isEmpty()) {
+                            Box(
+                                modifier = Modifier.fillMaxSize(),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Text(
+                                    text = stringResource(
+                                        if (isFavoritePicks) R.string.favorite_picks_empty else R.string.my_picks_empty
+                                    ),
+                                    color = White,
+                                    style = MaterialTheme.typography.titleMedium
                                 )
+                            }
+                        } else {
+                            LazyColumn(
+                                modifier = Modifier.weight(1f)
+                            ) {
+                                items(
+                                    items = pickList,
+                                    key = { it.id }
+                                ) { pick ->
+                                    PickItem(
+                                        song = pick.song,
+                                        createdByOthers = isFavoritePicks,
+                                        createUserName = pick.createdBy.userName,
+                                        favoriteCount = pick.favoriteCount,
+                                        comment = pick.comment,
+                                        onItemClick = { onItemClick(pick.id) }
+                                    )
+                                }
                             }
                         }
                     }
