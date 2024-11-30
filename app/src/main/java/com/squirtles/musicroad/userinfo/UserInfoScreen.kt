@@ -11,7 +11,8 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.MusicNote
 import androidx.compose.material.icons.outlined.Archive
-import androidx.compose.material.icons.outlined.Settings
+import androidx.compose.material.icons.outlined.Notifications
+import androidx.compose.material.icons.outlined.SwitchAccount
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -85,9 +86,15 @@ fun UserInfoScreen(
                     title = stringResource(R.string.user_info_setting_category_title),
                     menus = listOf(
                         MenuItem(
-                            imageVector = Icons.Outlined.Settings,
-                            contentDescription = stringResource(R.string.user_info_setting_menu_icon_description),
-                            menuTitle = stringResource(R.string.user_info_setting_menu_title),
+                            imageVector = Icons.Outlined.SwitchAccount,
+                            contentDescription = stringResource(R.string.user_info_setting_profile_menu_icon_description),
+                            menuTitle = stringResource(R.string.user_info_setting_profile_menu_title),
+                            onMenuClick = {}
+                        ),
+                        MenuItem(
+                            imageVector = Icons.Outlined.Notifications,
+                            contentDescription = stringResource(R.string.user_info_setting_notification_menu_icon_description),
+                            menuTitle = stringResource(R.string.user_info_setting_notification_menu_title),
                             onMenuClick = {}
                         )
                     )
