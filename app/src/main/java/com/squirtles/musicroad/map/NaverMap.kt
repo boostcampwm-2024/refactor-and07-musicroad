@@ -5,6 +5,7 @@ import android.app.Activity
 import android.content.Context
 import android.graphics.PointF
 import android.location.Location
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -116,6 +117,7 @@ fun NaverMap(
                     }
 
                     naverMap.value?.run {
+                        mapType = NaverMap.MapType.Navi
                         initMapSettings()
                         initDeviceLocation(
                             context,
@@ -136,6 +138,10 @@ fun NaverMap(
         },
         modifier = Modifier.fillMaxSize()
     )
+
+    if(isSystemInDarkTheme()) {
+        naverMap.value?.isNightModeEnabled = true
+    }
 }
 
 internal fun setCameraToMarker(
