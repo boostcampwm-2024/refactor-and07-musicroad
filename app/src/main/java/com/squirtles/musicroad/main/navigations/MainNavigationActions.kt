@@ -51,11 +51,7 @@ class MainNavigationActions(navController: NavHostController) {
 
     val navigateToPickDetail: (String) -> Unit = { pickId ->
         navController.navigate(PickInfoDestinations.pickDetail(pickId)) {
-            popUpTo(navController.graph.findStartDestination().id) {
-                saveState = true
-            }
             launchSingleTop = true
-            restoreState = true
         }
     }
 }
