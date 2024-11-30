@@ -3,6 +3,7 @@ package com.squirtles.data.datasource.remote.firebase
 import com.google.firebase.functions.FirebaseFunctions
 import com.google.firebase.functions.ktx.functions
 import com.google.firebase.ktx.Firebase
+import com.squirtles.data.BuildConfig
 import kotlinx.coroutines.tasks.await
 
 class CloudFunctionHelper {
@@ -12,7 +13,7 @@ class CloudFunctionHelper {
         return try {
             val data = hashMapOf("pickId" to pickId)
             val result = functions
-                .getHttpsCallable(UPDATE_DEFAULT)
+                .getHttpsCallable(BuildConfig.HTTPS_CALLABLE)
                 .call(data)
                 .await()
 
@@ -25,11 +26,5 @@ class CloudFunctionHelper {
             // 에러 처리
             Result.failure(e)
         }
-    }
-
-    companion object {
-        private const val UPDATE_DEFAULT = "updateFavoriteCountDefault"
-        private const val UPDATE_DEBUG = "updateFavoriteCountDebug"
-        private const val UPDATE_RELEASE = "updateFavoriteCountRelease"
     }
 }
