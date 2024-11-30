@@ -1,0 +1,72 @@
+package com.squirtles.musicroad.pick.components
+
+import android.util.Size
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Surface
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.painter.ColorPainter
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import coil3.compose.AsyncImage
+import coil3.request.ImageRequest
+import com.squirtles.musicroad.R
+import com.squirtles.musicroad.common.toImageUrlWithSize
+
+@Composable
+internal fun MusicVideoKnob(thumbnail: String, modifier: Modifier, onMusicVideoClick: () -> Unit) {
+    val infiniteTransition = rememberInfiniteTransition(label = "infinite repeatable")
+    val offsetX by infiniteTransition.animateFloat(
+        initialValue = 8f,
+        targetValue = 0f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(durationMillis = 600, easing = FastOutSlowInEasing),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "infinite repeatable"
+    )
+
+    Surface(
+        modifier = modifier
+            .size(width = 16.dp, height = 320.dp)
+            .offset(x = offsetX.dp)
+            .clickable(onClick = onMusicVideoClick),
+        shape = RoundedCornerShape(topStart = 30.dp, bottomStart = 30.dp)
+    ) {
+        AsyncImage(
+            model = ImageRequest.Builder(LocalContext.current)
+                .data(thumbnail.toImageUrlWithSize(Size(560, 320)))
+                .build(),
+            contentDescription = stringResource(R.string.pick_swipe_icon_description),
+            modifier = Modifier.fillMaxSize(),
+            placeholder = ColorPainter(Color.Transparent),
+            error = ColorPainter(Color.Transparent),
+            contentScale = ContentScale.Crop,
+        )
+    }
+}
+
+@Preview
+@Composable
+private fun MusicVideoKnobPreview() {
+    MusicVideoKnob(
+        thumbnail = "",
+        modifier = Modifier,
+        onMusicVideoClick = {}
+    )
+}

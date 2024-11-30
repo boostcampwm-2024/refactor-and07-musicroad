@@ -8,10 +8,10 @@ import androidx.lifecycle.viewModelScope
 import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
 import androidx.media3.exoplayer.ExoPlayer
+import com.squirtles.domain.model.Pick
 import com.squirtles.musicroad.R
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
@@ -19,6 +19,9 @@ import javax.inject.Inject
 
 @HiltViewModel
 class VideoPlayerViewModel @Inject constructor() : ViewModel() {
+
+    private var _currentPick: Pick? = null
+    val currentPick get() = _currentPick
 
     private var _player: ExoPlayer? = null
     val player get() = _player
@@ -45,10 +48,13 @@ class VideoPlayerViewModel @Inject constructor() : ViewModel() {
         _swipeState.value = newOffset
     }
 
-    fun initializePlayer(context: Context, videoUri: String) {
+    fun initializePlayer(context: Context, pick: Pick) {
         if (player != null) return
+
+        _currentPick = pick
+
         val exoPlayer = ExoPlayer.Builder(context).build().run {
-            val mediaItem = MediaItem.fromUri(videoUri)
+            val mediaItem = MediaItem.fromUri(pick.musicVideoUrl)
             setMediaItem(mediaItem)
             prepare()
             playWhenReady = false

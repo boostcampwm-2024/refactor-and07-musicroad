@@ -2,23 +2,20 @@ package com.squirtles.musicroad.videoplayer
 
 import androidx.annotation.OptIn
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.media3.common.util.UnstableApi
-import com.squirtles.domain.model.Pick
 
 @OptIn(UnstableApi::class)
 @Composable
 fun MusicVideoScreen(
-    pick: Pick,
-    swipePlayState: Boolean,
-    modifier: Modifier,
+    videoPlayerViewModel: VideoPlayerViewModel = hiltViewModel(),
     onBackClick: () -> Unit
 ) {
-    if (swipePlayState) {
-        Box(modifier = modifier) {
-            MusicVideoPlayer()
-            VideoPlayerOverlay(pick, onBackClick)
-        }
+    Box(modifier = Modifier.fillMaxSize()) {
+        MusicVideoPlayer()
+        //  VideoPlayerOverlay(pick, onBackClick)
     }
 }
