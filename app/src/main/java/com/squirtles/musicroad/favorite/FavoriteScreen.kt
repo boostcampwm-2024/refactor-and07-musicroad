@@ -37,6 +37,7 @@ import com.squirtles.musicroad.R
 import com.squirtles.musicroad.UiState
 import com.squirtles.musicroad.common.AlbumImage
 import com.squirtles.musicroad.common.CommentText
+import com.squirtles.musicroad.common.Constants.COLOR_STOPS
 import com.squirtles.musicroad.common.Constants.DEFAULT_PADDING
 import com.squirtles.musicroad.common.Constants.REQUEST_IMAGE_SIZE_DEFAULT
 import com.squirtles.musicroad.common.CreatedByOtherUserText
@@ -44,8 +45,7 @@ import com.squirtles.musicroad.common.DefaultTopAppBar
 import com.squirtles.musicroad.common.FavoriteCountText
 import com.squirtles.musicroad.common.SongInfoText
 import com.squirtles.musicroad.common.TotalCountText
-import com.squirtles.musicroad.create.HorizontalSpacer
-import com.squirtles.musicroad.ui.theme.Black
+import com.squirtles.musicroad.common.HorizontalSpacer
 import com.squirtles.musicroad.ui.theme.Gray
 import com.squirtles.musicroad.ui.theme.Primary
 import com.squirtles.musicroad.ui.theme.White
@@ -73,7 +73,7 @@ fun FavoriteScreen(
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(Brush.verticalGradient(colorStops = colorStops))
+                .background(Brush.verticalGradient(colorStops = COLOR_STOPS))
                 .padding(innerPadding)
         ) {
             when (uiState) {
@@ -192,8 +192,3 @@ fun PickItem(
         }
     }
 }
-
-private val colorStops = arrayOf(
-    0.0f to Primary,
-    0.25f to Black
-)

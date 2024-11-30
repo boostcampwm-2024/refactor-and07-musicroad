@@ -36,7 +36,7 @@ fun MapScreen(
     mapViewModel: MapViewModel,
     onFavoriteClick: () -> Unit,
     onCenterClick: () -> Unit,
-    onSettingClick: () -> Unit,
+    onUserInfoClick: () -> Unit,
     onPickSummaryClick: (String) -> Unit,
     playerViewModel: PlayerViewModel = hiltViewModel()
 ) {
@@ -129,9 +129,9 @@ fun MapScreen(
                         onCenterClick()
                         mapViewModel.saveCurLocationForced()
                     },
-                    onSettingClick = {
+                    onUserInfoClick = {
                         playerViewModel.pause()
-                        onSettingClick()
+                        onUserInfoClick()
                     }
                 )
             }

@@ -7,7 +7,6 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
@@ -17,7 +16,6 @@ import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBars
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
@@ -55,10 +53,11 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.squirtles.domain.model.Song
 import com.squirtles.musicroad.common.AlbumImage
+import com.squirtles.musicroad.common.Constants.COLOR_STOPS
 import com.squirtles.musicroad.common.Constants.REQUEST_IMAGE_SIZE_DEFAULT
-import com.squirtles.musicroad.ui.theme.Black
+import com.squirtles.musicroad.common.HorizontalSpacer
+import com.squirtles.musicroad.common.VerticalSpacer
 import com.squirtles.musicroad.ui.theme.Gray
-import com.squirtles.musicroad.ui.theme.Primary
 import com.squirtles.musicroad.ui.theme.White
 
 @Composable
@@ -94,7 +93,7 @@ fun SearchMusicScreen(
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(Brush.verticalGradient(colorStops = colorStops))
+                .background(Brush.verticalGradient(colorStops = COLOR_STOPS))
                 .padding(innerPadding)
                 .addFocusCleaner(focusManager)
         ) {
@@ -282,12 +281,6 @@ private fun SongItem(
 }
 
 @Composable
-fun HorizontalSpacer(width: Int) = Spacer(Modifier.width(width.dp))
-
-@Composable
-fun VerticalSpacer(height: Int) = Spacer(Modifier.height(height.dp))
-
-@Composable
 fun TextWithColorAndStyle(
     text: String,
     textColor: Color,
@@ -334,10 +327,6 @@ fun SongItemPreview() {
     }
 }
 
-private val colorStops = arrayOf(
-    0.0f to Primary,
-    0.25f to Black
-)
 private val SearchBarHeight = 56.dp
 private val DefaultPadding = 16.dp
 private val ItemSpacing = 24.dp
