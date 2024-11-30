@@ -12,7 +12,7 @@ class CloudFunctionHelper {
         return try {
             val data = hashMapOf("pickId" to pickId)
             val result = functions
-                .getHttpsCallable(UPDATE_DEBUG)
+                .getHttpsCallable(UPDATE_DEFAULT)
                 .call(data)
                 .await()
 
@@ -28,6 +28,7 @@ class CloudFunctionHelper {
     }
 
     companion object {
+        private const val UPDATE_DEFAULT = "updateFavoriteCountDefault"
         private const val UPDATE_DEBUG = "updateFavoriteCountDebug"
         private const val UPDATE_RELEASE = "updateFavoriteCountRelease"
     }
