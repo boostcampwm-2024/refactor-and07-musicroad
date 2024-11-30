@@ -33,6 +33,8 @@ import com.squirtles.domain.model.Song
 import com.squirtles.musicroad.common.AlbumImage
 import com.squirtles.musicroad.common.CreatedByOtherUserText
 import com.squirtles.musicroad.common.CreatedBySelfText
+import com.squirtles.musicroad.common.FavoriteCountText
+import com.squirtles.musicroad.common.SongInfoText
 import com.squirtles.musicroad.ui.theme.Gray
 import com.squirtles.musicroad.ui.theme.MusicRoadTheme
 

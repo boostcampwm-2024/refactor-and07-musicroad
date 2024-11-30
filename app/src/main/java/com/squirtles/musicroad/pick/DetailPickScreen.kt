@@ -3,8 +3,11 @@ package com.squirtles.musicroad.pick
 import android.app.Activity
 import android.content.Context
 import android.widget.Toast
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.Orientation
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -94,9 +97,9 @@ fun DetailPickScreen(
         orientation = Orientation.Vertical
     )
 
-    val isFavorite = false
     val uiState by pickViewModel.detailPickUiState.collectAsStateWithLifecycle()
     var showDeletePickDialog by rememberSaveable { mutableStateOf(false) }
+    var showProcessIndicator by rememberSaveable { mutableStateOf(false) }
 
     val swipePlayState by videoPlayerViewModel.swipePlayState.collectAsStateWithLifecycle(false)
     var isMusicVideoAvailable by remember { mutableStateOf(false) }
@@ -110,6 +113,8 @@ fun DetailPickScreen(
     LaunchedEffect(Unit) {
         pickViewModel.fetchPick(pickId)
     }
+
+    BackHandler(enabled = showProcessIndicator) { }
 
     when (uiState) {
         DetailPickUiState.Loading -> {
@@ -125,6 +130,7 @@ fun DetailPickScreen(
 
         is DetailPickUiState.Success -> {
             val pick = (uiState as DetailPickUiState.Success).pick
+            val isFavorite = (uiState as DetailPickUiState.Success).isFavorite
 
             // 비디오 플레이어 설정
             LaunchedEffect(pick) {
@@ -144,11 +150,19 @@ fun DetailPickScreen(
                     }
 
                     isFavorite -> {
-                        // TODO: 픽 담기 해제
+                        showProcessIndicator = true
+                        pickViewModel.deleteAtFavorite(pickId) {
+                            showProcessIndicator = false
+                            context.showShortToast(context.getString(R.string.success_delete_at_favorite))
+                        }
                     }
 
                     else -> {
-                        // TODO: 픽 담기
+                        showProcessIndicator = true
+                        pickViewModel.addToFavorite(pickId) {
+                            showProcessIndicator = false
+                            context.showShortToast(context.getString(R.string.success_add_to_favorite))
+                        }
                     }
                 }
             }
@@ -211,7 +225,7 @@ fun DetailPickScreen(
         }
 
         DetailPickUiState.Error -> {
-            // TODO: pick 로딩 실패
+            // TODO: pick 로딩 실패 or 담기 실패, 두 상태를 나눠야할지 고민
         }
     }
 
@@ -225,6 +239,22 @@ fun DetailPickScreen(
                 pickViewModel.deletePick(pickId)
             }
         )
+    }
+
+    if (showProcessIndicator) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Black.copy(alpha = 0.5F))
+                .clickable( // 클릭 효과 제거 및 클릭 이벤트 무시
+                    interactionSource = remember { MutableInteractionSource() },
+                    indication = null,
+                    onClick = {}
+                ),
+            contentAlignment = Alignment.Center
+        ) {
+            CircularProgressIndicator()
+        }
     }
 }
 
@@ -362,6 +392,10 @@ private fun DetailPick(
             }
         }
     }
+}
+
+fun Context.showShortToast(message: String) {
+    Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
 }
 
 @Preview

@@ -15,14 +15,15 @@ import com.squirtles.musicroad.ui.theme.Gray
 @Composable
 fun AlbumImage(
     imageUrl: String?,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    contentDescription: String = stringResource(R.string.map_album_image_description),
 ) {
     AsyncImage(
         model = ImageRequest.Builder(LocalContext.current)
             .data(imageUrl)
             .crossfade(true)
             .build(),
-        contentDescription = stringResource(R.string.map_album_image_description),
+        contentDescription = contentDescription,
         modifier = modifier,
         placeholder = ColorPainter(Gray),
         error = ColorPainter(Gray),
