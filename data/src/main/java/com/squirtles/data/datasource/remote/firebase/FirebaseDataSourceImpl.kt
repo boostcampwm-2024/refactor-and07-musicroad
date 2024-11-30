@@ -237,7 +237,7 @@ class FirebaseDataSourceImpl @Inject constructor(
         }
     }
 
-    override suspend fun getFavorites(userId: String): List<Pick> {
+    override suspend fun getFavoritePicks(userId: String): List<Pick> {
         val favoriteDocuments = fetchFavoritesByUserId(userId)
 
         val tasks = mutableListOf<Task<DocumentSnapshot>>()

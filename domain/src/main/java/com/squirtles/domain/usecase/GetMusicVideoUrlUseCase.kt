@@ -8,10 +8,10 @@ class GetMusicVideoUrlUseCase @Inject constructor(
     private val appleMusicRepository: AppleMusicRepository
 ) {
     suspend operator fun invoke(song: Song): String {
-        val keyword = song.songName + "-" + song.artistName
+        val keyword = "${song.songName}-${song.artistName}"
         appleMusicRepository.searchMusicVideos(keyword).onSuccess { musicVideos ->
             return musicVideos.find {
-                it.artistName == song.artistName
+                it.artistName == song.artistName && it.songName in song.songName
             }?.previewUrl ?: ""
         }
         return ""

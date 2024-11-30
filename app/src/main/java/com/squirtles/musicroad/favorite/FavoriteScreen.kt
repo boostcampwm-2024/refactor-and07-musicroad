@@ -59,7 +59,7 @@ fun FavoriteScreen(
     val uiState by favoriteViewModel.favoriteUiState.collectAsStateWithLifecycle()
 
     LaunchedEffect(Unit) {
-        favoriteViewModel.getFavoriteList()
+        favoriteViewModel.getFavoritePicks()
     }
 
     Scaffold(
@@ -87,7 +87,7 @@ fun FavoriteScreen(
                 }
 
                 is UiState.Success -> {
-                    val favorites = (uiState as UiState.Success<List<Pick>>).data
+                    val favoritePicks = (uiState as UiState.Success<List<Pick>>).data
 
                     Column(
                         modifier = Modifier.fillMaxSize()
@@ -96,7 +96,7 @@ fun FavoriteScreen(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(horizontal = DEFAULT_PADDING),
-                            totalCount = favorites.size,
+                            totalCount = favoritePicks.size,
                             defaultColor = White,
                         )
 
@@ -104,7 +104,7 @@ fun FavoriteScreen(
                             modifier = Modifier.weight(1f)
                         ) {
                             items(
-                                items = favorites,
+                                items = favoritePicks,
                                 key = { it.id }
                             ) { pick ->
                                 PickItem(
