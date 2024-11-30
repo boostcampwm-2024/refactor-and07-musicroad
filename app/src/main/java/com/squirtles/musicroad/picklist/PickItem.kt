@@ -30,6 +30,7 @@ import com.squirtles.musicroad.ui.theme.White
 @Composable
 internal fun PickItem(
     song: Song,
+    createdByOthers: Boolean,
     createUserName: String,
     favoriteCount: Int,
     comment: String,
@@ -67,13 +68,14 @@ internal fun PickItem(
             Row(
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                CreatedByOtherUserText(
-                    userName = createUserName,
-                    modifier = Modifier.weight(weight = 1f, fill = false),
-                    color = Gray
-                )
-
-                HorizontalSpacer(8)
+                if (createdByOthers) {
+                    CreatedByOtherUserText(
+                        userName = createUserName,
+                        modifier = Modifier.weight(weight = 1f, fill = false),
+                        color = Gray
+                    )
+                    HorizontalSpacer(8)
+                }
 
                 FavoriteCountText(
                     favoriteCount = favoriteCount,

@@ -44,7 +44,7 @@ fun PickListScreen(
         if (isFavoritePicks) {
             pickListViewModel.getFavoritePicks()
         } else {
-            // TODO: 내가 등록한 픽 불러오기
+            pickListViewModel.fetchMyPicks()
         }
     }
 
@@ -97,6 +97,7 @@ fun PickListScreen(
                             ) { pick ->
                                 PickItem(
                                     song = pick.song,
+                                    createdByOthers = isFavoritePicks,
                                     createUserName = pick.createdBy.userName,
                                     favoriteCount = pick.favoriteCount,
                                     comment = pick.comment,
