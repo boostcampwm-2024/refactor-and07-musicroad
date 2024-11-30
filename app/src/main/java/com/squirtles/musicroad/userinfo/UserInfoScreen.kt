@@ -61,7 +61,7 @@ fun UserInfoScreen(
 
                 VerticalSpacer(40)
 
-                TitleAndMenus(
+                UserInfoMenus(
                     title = stringResource(R.string.user_info_pick_category_title),
                     menus = listOf(
                         MenuItem(
@@ -81,7 +81,7 @@ fun UserInfoScreen(
 
                 VerticalSpacer(20)
 
-                TitleAndMenus(
+                UserInfoMenus(
                     title = stringResource(R.string.user_info_setting_category_title),
                     menus = listOf(
                         MenuItem(

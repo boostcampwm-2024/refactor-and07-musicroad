@@ -31,7 +31,7 @@ import com.squirtles.musicroad.ui.theme.Gray
 import com.squirtles.musicroad.ui.theme.White
 
 @Composable
-internal fun TitleAndMenus(
+internal fun UserInfoMenus(
     title: String,
     titleTextColor: Color = White,
     titleTextStyle: TextStyle = MaterialTheme.typography.titleMedium,
