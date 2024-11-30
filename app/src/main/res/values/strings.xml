@@ -23,6 +23,7 @@
     <string name="pick_app_bar_title_user">님의 픽</string>
     <string name="pick_app_bar_upload_description">등록하기</string>
     <string name="pick_album_description">앨범 이미지</string>
+    <string name="pick_app_bar_back_description">뒤로 가기</string>
     <string name="pick_comment_placeholder">거리에 남길 한마디를 입력하세요.</string>
     <string name="pick_delete_icon_description">삭제하기</string>
     <string name="pick_favorite_true_icon_description">담은 픽</string>
