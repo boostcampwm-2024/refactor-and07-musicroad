@@ -47,7 +47,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.luminance
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -57,9 +56,9 @@ import androidx.compose.ui.unit.dp
 import androidx.core.graphics.toColorInt
 import androidx.core.view.WindowInsetsControllerCompat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import coil3.compose.AsyncImage
 import com.squirtles.domain.model.Song
 import com.squirtles.musicroad.R
+import com.squirtles.musicroad.common.AlbumImage
 import com.squirtles.musicroad.ui.theme.Black
 import com.squirtles.musicroad.ui.theme.Dark
 import com.squirtles.musicroad.ui.theme.Gray
@@ -217,15 +216,14 @@ private fun CreatePickContent(
             style = MaterialTheme.typography.bodyLarge
         )
 
-        AsyncImage(
-            model = song.getImageUrlWithSize(RequestImageSize),
-            contentDescription = song.albumName + stringResource(id = R.string.pick_album_description),
+        AlbumImage(
+            imageUrl = song.getImageUrlWithSize(RequestImageSize),
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 30.dp)
                 .aspectRatio(1f)
                 .clip(RoundedCornerShape(20.dp)),
-            contentScale = ContentScale.Crop
+            contentDescription = song.albumName + stringResource(id = R.string.pick_album_description)
         )
 
         Spacer(modifier = Modifier.height(40.dp))
