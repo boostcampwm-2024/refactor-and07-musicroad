@@ -4,6 +4,7 @@ agp = "8.5.1"
 appcompat = "1.7.0"
 coil = "3.0.0"
 composeBom = "2024.10.01"
+composeMaterial = "1.4.0"
 constraintlayout = "2.2.0"
 coreKtx = "1.13.1"
 datastorePreferences = "1.1.1"
@@ -11,6 +12,7 @@ espressoCore = "3.6.1"
 firebaseBom = "33.5.1"
 firebaseDynamicModuleSupportVersion = "16.0.0-beta03"
 firebaseFirestoreKtx = "25.1.1"
+firebaseFunctionsKtx = "21.1.0"
 geofireAndroidCommon = "3.2.0"
 googleServices = "4.4.2"
 hilt = "2.51.1"
@@ -32,8 +34,6 @@ playServicesLocation = "21.3.0"
 retrofit = "2.11.0"
 splashscreen = "1.0.1"
 uiViewbinding = "1.7.5"
-composeMaterial = "1.4.0"
-firebaseFunctionsKtx = "21.1.0"
 
 [libraries]
 # AndroidX
@@ -65,6 +65,8 @@ androidx-compose-material = { group = "androidx.wear.compose", name = "compose-m
 firebase-analytics = { module = "com.google.firebase:firebase-analytics" }
 firebase-bom = { module = "com.google.firebase:firebase-bom", version.ref = "firebaseBom" }
 firebase-firestore-ktx = { group = "com.google.firebase", name = "firebase-firestore-ktx", version.ref = "firebaseFirestoreKtx" }
+firebase-functions-ktx = { group = "com.google.firebase", name = "firebase-functions-ktx", version.ref = "firebaseFunctionsKtx" }
+kotlinx-coroutines-play-services = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-play-services", version.ref = "kotlinxCoroutinesPlayServices" }
 
 # Test
 geofire-android-common = { module = "com.firebase:geofire-android-common", version.ref = "geofireAndroidCommon" }
@@ -74,7 +76,6 @@ junit = { group = "junit", name = "junit", version.ref = "junit" }
 # Map
 map-sdk = { module = "com.naver.maps:map-sdk", version.ref = "mapSdk" }
 play-services-location = { module = "com.google.android.gms:play-services-location", version.ref = "playServicesLocation" }
-kotlinx-coroutines-play-services = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-play-services", version.ref = "kotlinxCoroutinesPlayServices" }
 
 # Material Design
 material = { group = "com.google.android.material", name = "material", version.ref = "material" }
@@ -106,7 +107,6 @@ androidx-ui-viewbinding = { group = "androidx.compose.ui", name = "ui-viewbindin
 coil = { module = "io.coil-kt.coil3:coil", version.ref = "coil" }
 coil-compose = { module = "io.coil-kt.coil3:coil-compose", version.ref = "coil" }
 coil-network-okhttp = { module = "io.coil-kt.coil3:coil-network-okhttp", version.ref = "coil" }
-firebase-functions-ktx = { group = "com.google.firebase", name = "firebase-functions-ktx", version.ref = "firebaseFunctionsKtx" }
 
 # Plugins
 [plugins]
