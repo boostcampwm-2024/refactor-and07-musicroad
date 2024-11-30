@@ -12,6 +12,7 @@ import com.squirtles.musicroad.R
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -23,13 +24,13 @@ class VideoPlayerViewModel @Inject constructor() : ViewModel() {
     val player get() = _player
 
     private var _swipePlayState = MutableStateFlow(false) // swipe 상태에 따른 play 여부
-    val swipePlayState: StateFlow<Boolean> = _swipePlayState
+    val swipePlayState = _swipePlayState.asStateFlow()
 
     private var _playerState = MutableStateFlow(VideoPlayerState.Playing) // 현재 플레이어의 상태
-    val playerState: StateFlow<VideoPlayerState> = _playerState
+    val playerState = _playerState.asStateFlow()
 
     private val _swipeState = MutableStateFlow(0f) // 현재 offset 저장
-    val swipeState: StateFlow<Float> = _swipeState
+    val swipeState = _swipeState.asStateFlow()
 
     private var _showMusicVideo = false
     val showMusicVideo get() = _showMusicVideo
