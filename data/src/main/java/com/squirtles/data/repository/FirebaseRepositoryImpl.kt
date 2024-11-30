@@ -66,9 +66,9 @@ class FirebaseRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun getFavorites(userId: String): Result<List<Pick>> {
+    override suspend fun getFavoritePicks(userId: String): Result<List<Pick>> {
         return handleResult {
-            firebaseRemoteDataSource.getFavorites(userId)
+            firebaseRemoteDataSource.getFavoritePicks(userId)
         }
     }
 
