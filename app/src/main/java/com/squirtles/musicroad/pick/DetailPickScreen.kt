@@ -22,6 +22,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
@@ -31,21 +32,17 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.luminance
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalView
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
-import androidx.core.graphics.toColorInt
 import androidx.core.view.WindowInsetsControllerCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -53,14 +50,11 @@ import androidx.wear.compose.material.ExperimentalWearMaterialApi
 import androidx.wear.compose.material.FractionalThreshold
 import androidx.wear.compose.material.rememberSwipeableState
 import androidx.wear.compose.material.swipeable
-import coil3.compose.AsyncImage
-import com.squirtles.domain.model.Creator
-import com.squirtles.domain.model.LocationPoint
 import com.squirtles.domain.model.Pick
 import com.squirtles.musicroad.R
 import com.squirtles.musicroad.musicplayer.PlayerViewModel
-import com.squirtles.musicroad.pick.components.CircleAlbumCover
 import com.squirtles.musicroad.pick.PickViewModel.Companion.DEFAULT_PICK
+import com.squirtles.musicroad.pick.components.CircleAlbumCover
 import com.squirtles.musicroad.pick.components.CommentText
 import com.squirtles.musicroad.pick.components.DeletePickDialog
 import com.squirtles.musicroad.pick.components.DetailPickTopAppBar
@@ -70,6 +64,8 @@ import com.squirtles.musicroad.pick.components.SwipeUpIcon
 import com.squirtles.musicroad.pick.components.music.MusicPlayer
 import com.squirtles.musicroad.ui.theme.Black
 import com.squirtles.musicroad.ui.theme.White
+import com.squirtles.musicroad.videoplayer.MusicVideoScreen
+import com.squirtles.musicroad.videoplayer.VideoPlayerViewModel
 import kotlin.math.roundToInt
 
 @OptIn(ExperimentalWearMaterialApi::class)
@@ -79,15 +75,18 @@ fun DetailPickScreen(
     onBackClick: () -> Unit,
     onDeleted: (Context) -> Unit,
     pickViewModel: PickViewModel = hiltViewModel(),
-    playerViewModel: PlayerViewModel = hiltViewModel()
+    playerViewModel: PlayerViewModel = hiltViewModel(),
+    videoPlayerViewModel: VideoPlayerViewModel = hiltViewModel()
 ) {
     val context = LocalContext.current
     val screenHeight = LocalConfiguration.current.screenHeightDp.dp
     val screenHeightPx = with(LocalDensity.current) { screenHeight.toPx() }
     val statusBarHeight = with(LocalDensity.current) { WindowInsets.statusBars.getTop(this) }
     val contentHeightPx = screenHeightPx + statusBarHeight
-    val anchors = mapOf(contentHeightPx to 0, 0f to 1)
-    val swipeableState = rememberSwipeableState(initialValue = 0)
+
+    val initialOffset by videoPlayerViewModel.swipeState.collectAsStateWithLifecycle()
+    val swipeableState = rememberSwipeableState(initialValue = if (initialOffset != 0f) contentHeightPx else 0f)
+    val anchors = mapOf(contentHeightPx to 0f, 0f to 1f)
     val swipeableModifier = Modifier.swipeable(
         state = swipeableState,
         anchors = anchors,
@@ -97,9 +96,16 @@ fun DetailPickScreen(
 
     val isFavorite = false
     val uiState by pickViewModel.detailPickUiState.collectAsStateWithLifecycle()
-    var isMusicVideoAvailable by remember { mutableStateOf(false) }
-    var showMusicVideo by remember { mutableStateOf(false) }
     var showDeletePickDialog by rememberSaveable { mutableStateOf(false) }
+
+    val swipePlayState by videoPlayerViewModel.swipePlayState.collectAsStateWithLifecycle(false)
+    var isMusicVideoAvailable by remember { mutableStateOf(false) }
+
+    DisposableEffect(Unit) {
+        onDispose {
+            videoPlayerViewModel.updateSwipeState(swipeableState.offset.value)
+        }
+    }
 
     LaunchedEffect(Unit) {
         pickViewModel.fetchPick(pickId)
@@ -119,7 +125,15 @@ fun DetailPickScreen(
 
         is DetailPickUiState.Success -> {
             val pick = (uiState as DetailPickUiState.Success).pick
-            isMusicVideoAvailable = pick.musicVideoUrl.isNotEmpty()
+
+            // 비디오 플레이어 설정
+            LaunchedEffect(pick) {
+                isMusicVideoAvailable = pick.musicVideoUrl.isNotEmpty()
+
+                if (isMusicVideoAvailable) {
+                    videoPlayerViewModel.initializePlayer(context, pick.musicVideoUrl)
+                }
+            }
 
             val isCreatedBySelf = pickViewModel.getUserId() == pick.createdBy.userId
             val onActionClick: () -> Unit = {
@@ -154,25 +168,31 @@ fun DetailPickScreen(
 
                 // 최초 Swipe 동작 전에 MusicVideoScreen이 생성되지 않도록 함
                 if (swipeableState.offset.value != 0.0f && contentHeightPx != swipeableState.offset.value) {
-                    showMusicVideo = true
+                    videoPlayerViewModel.setShowMusicVideo(true)
                 }
 
-                if (isMusicVideoAvailable && showMusicVideo) {
-                    val isPlaying = swipeableState.offset.value < contentHeightPx * 0.8f
-                    val alpha =
-                        (1 - (swipeableState.offset.value / contentHeightPx)).coerceIn(0f, 1f)
+                if (isMusicVideoAvailable && videoPlayerViewModel.showMusicVideo) {
+                    videoPlayerViewModel.setSwipePlayState(swipeableState.offset.value < contentHeightPx * 0.9f)
+                    val alpha = (1 - (swipeableState.offset.value / contentHeightPx)).coerceIn(0f, 1f)
 
                     MusicVideoScreen(
-                        videoUri = pick.musicVideoUrl,
-                        isPlaying = isPlaying,
+                        pick = pick,
+                        swipePlayState = swipePlayState,
                         modifier = swipeableModifier
                             .fillMaxSize()
                             .offset { IntOffset(0, swipeableState.offset.value.roundToInt()) }
-                            .graphicsLayer { this.alpha = alpha }
+                            .graphicsLayer { this.alpha = alpha },
+                        onBackClick = onBackClick
                     )
 
-                    LaunchedEffect(isPlaying) {
-                        if (isPlaying) playerViewModel.pause()
+                    LaunchedEffect(swipePlayState) {
+                        if (swipePlayState) playerViewModel.pause()
+                        else {
+                            videoPlayerViewModel.setShowMusicVideo(false)
+
+                            // 비디오 플레이어 초기화
+                            videoPlayerViewModel.initializePlayer(context, pick.musicVideoUrl)
+                        }
                     }
                 }
             }

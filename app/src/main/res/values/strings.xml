@@ -33,6 +33,8 @@
     <string name="player_forward_description">5초 앞으로</string>
     <string name="player_replay_description">5초 뒤로</string>
     <string name="player_play_pause_description">재생/일시정지</string>
+    <string name="video_player_ended_message">Apple Music에서 제공하는 30초 미리보기 영상입니다.</string>
+    <string name="video_quality_description">480p</string>
     <string name="success_delete_pick">삭제되었습니다</string>
 
     <!-- Search Music -->
