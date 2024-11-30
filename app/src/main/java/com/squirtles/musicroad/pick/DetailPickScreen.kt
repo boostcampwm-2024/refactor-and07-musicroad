@@ -22,6 +22,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
@@ -29,7 +30,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
@@ -84,8 +84,8 @@ fun DetailPickScreen(
     val statusBarHeight = with(LocalDensity.current) { WindowInsets.statusBars.getTop(this) }
     val contentHeightPx = screenHeightPx + statusBarHeight
 
-    val initialOffset = videoPlayerViewModel.swipeState.collectAsStateWithLifecycle().value
-    val swipeableState = rememberSwipeableState(initialValue = initialOffset)
+    val initialOffset by videoPlayerViewModel.swipeState.collectAsStateWithLifecycle()
+    val swipeableState = rememberSwipeableState(initialValue = if (initialOffset != 0f) contentHeightPx else 0f)
     val anchors = mapOf(contentHeightPx to 0f, 0f to 1f)
     val swipeableModifier = Modifier.swipeable(
         state = swipeableState,
@@ -101,15 +101,14 @@ fun DetailPickScreen(
     val swipePlayState by videoPlayerViewModel.swipePlayState.collectAsStateWithLifecycle(false)
     var isMusicVideoAvailable by remember { mutableStateOf(false) }
 
-    LaunchedEffect(Unit) {
-        pickViewModel.fetchPick(pickId)
+    DisposableEffect(Unit) {
+        onDispose {
+            videoPlayerViewModel.updateSwipeState(swipeableState.offset.value)
+        }
     }
 
-    LaunchedEffect(swipeableState) {
-        snapshotFlow { swipeableState.offset.value }
-            .collect { newOffset ->
-                videoPlayerViewModel.updateSwipeState(newOffset)
-            }
+    LaunchedEffect(Unit) {
+        pickViewModel.fetchPick(pickId)
     }
 
     when (uiState) {
