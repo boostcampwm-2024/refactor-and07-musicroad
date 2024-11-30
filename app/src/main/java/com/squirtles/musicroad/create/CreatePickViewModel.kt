@@ -11,7 +11,7 @@ import com.squirtles.domain.model.Song
 import com.squirtles.domain.usecase.CreatePickUseCase
 import com.squirtles.domain.usecase.FetchLastLocationUseCase
 import com.squirtles.domain.usecase.GetCurrentUserUseCase
-import com.squirtles.domain.usecase.GetMusicVideoUrlUseCase
+import com.squirtles.domain.usecase.GetMusicVideoUseCase
 import com.squirtles.domain.usecase.SearchSongsUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.FlowPreview
@@ -30,7 +30,7 @@ import javax.inject.Inject
 class CreatePickViewModel @Inject constructor(
     fetchLastLocationUseCase: FetchLastLocationUseCase,
     private val searchSongsUseCase: SearchSongsUseCase,
-    private val getMusicVideoUrlUseCase: GetMusicVideoUrlUseCase,
+    private val getMusicVideoUseCase: GetMusicVideoUseCase,
     private val createPickUseCase: CreatePickUseCase,
     private val getCurrentUserUseCase: GetCurrentUserUseCase
 ) : ViewModel() {
@@ -133,7 +133,7 @@ class CreatePickViewModel @Inject constructor(
                     return@launch
                 }
 
-                val musicVideoUrl = getMusicVideoUrlUseCase(song)
+                val musicVideo = getMusicVideoUseCase(song)
 
                 /* 등록 결과 - pick ID 담긴 Result */
                 val user = getCurrentUserUseCase()
@@ -148,7 +148,8 @@ class CreatePickViewModel @Inject constructor(
                             userName = user.userName
                         ),
                         location = LocationPoint(lastLocation!!.latitude, lastLocation!!.longitude),
-                        musicVideoUrl = musicVideoUrl
+                        musicVideoUrl = musicVideo?.previewUrl ?: "",
+                        musicVideoThumbnailUrl = musicVideo?.thumbnailUrl ?: ""
                     )
                 )
 

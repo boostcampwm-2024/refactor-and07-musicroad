@@ -12,6 +12,7 @@ data class Pick(
     val createdAt: String,
     val location: LocationPoint,
     val musicVideoUrl: String = "",
+    val musicVideoThumbnailUrl: String = ""
 )
 
 data class LocationPoint(

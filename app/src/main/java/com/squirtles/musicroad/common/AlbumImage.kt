@@ -1,5 +1,6 @@
 package com.squirtles.musicroad.common
 
+import android.util.Size
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.painter.ColorPainter
@@ -28,4 +29,10 @@ fun AlbumImage(
         error = ColorPainter(Gray),
         contentScale = ContentScale.Crop,
     )
+}
+
+fun String.toImageUrlWithSize(size: Size): String? {
+    return if (isEmpty()) null
+    else replace("{w}", size.width.toString())
+        .replace("{h}", size.height.toString())
 }

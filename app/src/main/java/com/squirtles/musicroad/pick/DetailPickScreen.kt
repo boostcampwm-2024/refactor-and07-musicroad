@@ -2,7 +2,14 @@ package com.squirtles.musicroad.pick
 
 import android.app.Activity
 import android.content.Context
+import android.util.Size
 import android.widget.Toast
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.layout.Arrangement
@@ -11,16 +18,17 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -34,14 +42,15 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.luminance
+import androidx.compose.ui.graphics.painter.ColorPainter
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalView
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.core.view.WindowInsetsControllerCompat
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -50,8 +59,11 @@ import androidx.wear.compose.material.ExperimentalWearMaterialApi
 import androidx.wear.compose.material.FractionalThreshold
 import androidx.wear.compose.material.rememberSwipeableState
 import androidx.wear.compose.material.swipeable
+import coil3.compose.AsyncImage
+import coil3.request.ImageRequest
 import com.squirtles.domain.model.Pick
 import com.squirtles.musicroad.R
+import com.squirtles.musicroad.common.toImageUrlWithSize
 import com.squirtles.musicroad.musicplayer.PlayerViewModel
 import com.squirtles.musicroad.pick.PickViewModel.Companion.DEFAULT_PICK
 import com.squirtles.musicroad.pick.components.CircleAlbumCover
@@ -60,13 +72,10 @@ import com.squirtles.musicroad.pick.components.DeletePickDialog
 import com.squirtles.musicroad.pick.components.DetailPickTopAppBar
 import com.squirtles.musicroad.pick.components.PickInformation
 import com.squirtles.musicroad.pick.components.SongInfo
-import com.squirtles.musicroad.pick.components.SwipeUpIcon
 import com.squirtles.musicroad.pick.components.music.MusicPlayer
 import com.squirtles.musicroad.ui.theme.Black
 import com.squirtles.musicroad.ui.theme.White
-import com.squirtles.musicroad.videoplayer.MusicVideoScreen
 import com.squirtles.musicroad.videoplayer.VideoPlayerViewModel
-import kotlin.math.roundToInt
 
 @OptIn(ExperimentalWearMaterialApi::class)
 @Composable
@@ -165,35 +174,15 @@ fun DetailPickScreen(
                     onBackClick = onBackClick,
                     onActionClick = onActionClick
                 )
+            }
 
-                // 최초 Swipe 동작 전에 MusicVideoScreen이 생성되지 않도록 함
-                if (swipeableState.offset.value != 0.0f && contentHeightPx != swipeableState.offset.value) {
-                    videoPlayerViewModel.setShowMusicVideo(true)
-                }
+            LaunchedEffect(swipePlayState) {
+                if (swipePlayState) playerViewModel.pause()
+                else {
+                    videoPlayerViewModel.setShowMusicVideo(false)
 
-                if (isMusicVideoAvailable && videoPlayerViewModel.showMusicVideo) {
-                    videoPlayerViewModel.setSwipePlayState(swipeableState.offset.value < contentHeightPx * 0.9f)
-                    val alpha = (1 - (swipeableState.offset.value / contentHeightPx)).coerceIn(0f, 1f)
-
-                    MusicVideoScreen(
-                        pick = pick,
-                        swipePlayState = swipePlayState,
-                        modifier = swipeableModifier
-                            .fillMaxSize()
-                            .offset { IntOffset(0, swipeableState.offset.value.roundToInt()) }
-                            .graphicsLayer { this.alpha = alpha },
-                        onBackClick = onBackClick
-                    )
-
-                    LaunchedEffect(swipePlayState) {
-                        if (swipePlayState) playerViewModel.pause()
-                        else {
-                            videoPlayerViewModel.setShowMusicVideo(false)
-
-                            // 비디오 플레이어 초기화
-                            videoPlayerViewModel.initializePlayer(context, pick.musicVideoUrl)
-                        }
-                    }
+                    // 비디오 플레이어 초기화
+                    videoPlayerViewModel.initializePlayer(context, pick.musicVideoUrl)
                 }
             }
         }
@@ -294,8 +283,7 @@ private fun DetailPick(
                     )
                 )
                 .padding(innerPadding)
-                .verticalScroll(scrollState),
-            verticalArrangement = Arrangement.SpaceBetween
+                .verticalScroll(scrollState)
         ) {
             Column(
                 modifier = Modifier
@@ -309,19 +297,32 @@ private fun DetailPick(
                     dynamicOnBackgroundColor = onDynamicBackgroundColor
                 )
 
-                CircleAlbumCover(
+                Box(
                     modifier = Modifier
-                        .size(320.dp)
-                        .align(Alignment.CenterHorizontally),
-                    song = pick.song,
-                    playerState = playerState,
-                    duration = duration,
-                    audioSessionId = audioSessionId,
-                    audioEffectColor = audioEffectColor,
-                    onSeekChanged = { timeMs ->
-                        playerViewModel.playerSeekTo(timeMs)
-                    },
-                )
+                        .fillMaxWidth()
+                        .align(Alignment.CenterHorizontally)
+                ) {
+                    CircleAlbumCover(
+                        modifier = Modifier
+                            .size(320.dp)
+                            .align(Alignment.Center),
+                        song = pick.song,
+                        playerState = playerState,
+                        duration = duration,
+                        audioSessionId = audioSessionId,
+                        audioEffectColor = audioEffectColor,
+                        onSeekChanged = { timeMs ->
+                            playerViewModel.playerSeekTo(timeMs)
+                        },
+                    )
+
+                    if (isMusicVideoAvailable) {
+                        MusicVideoKnob(
+                            thumbnail = pick.musicVideoThumbnailUrl,
+                            modifier = Modifier.align(Alignment.CenterEnd)
+                        )
+                    }
+                }
 
                 PickInformation(formattedDate = pick.createdAt, favoriteCount = pick.favoriteCount)
 
@@ -351,16 +352,49 @@ private fun DetailPick(
                     )
                 }
             }
-
-            if (isMusicVideoAvailable) {
-                SwipeUpIcon(
-                    swipeableModifier
-                        .fillMaxWidth()
-                        .heightIn(min = 100.dp)
-                )
-            }
         }
     }
+}
+
+@Composable
+private fun MusicVideoKnob(thumbnail: String, modifier: Modifier) {
+    val infiniteTransition = rememberInfiniteTransition(label = "infinite repeatable")
+    val offsetX by infiniteTransition.animateFloat(
+        initialValue = 8f,
+        targetValue = 0f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(durationMillis = 600, easing = FastOutSlowInEasing),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "infinite repeatable"
+    )
+
+    Surface(
+        modifier = modifier
+            .size(width = 16.dp, height = 320.dp)
+            .offset(x = offsetX.dp),
+        shape = RoundedCornerShape(topStart = 30.dp, bottomStart = 30.dp)
+    ) {
+        AsyncImage(
+            model = ImageRequest.Builder(LocalContext.current)
+                .data(thumbnail.toImageUrlWithSize(Size(560, 320)))
+                .build(),
+            contentDescription = stringResource(R.string.pick_swipe_icon_description),
+            modifier = Modifier.fillMaxSize(),
+            placeholder = ColorPainter(Color.Transparent),
+            error = ColorPainter(Color.Transparent),
+            contentScale = ContentScale.Crop,
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun MusicVideoKnobPreview() {
+    MusicVideoKnob(
+        thumbnail = "",
+        modifier = Modifier
+    )
 }
 
 @Preview

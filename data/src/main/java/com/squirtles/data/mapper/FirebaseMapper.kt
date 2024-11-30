@@ -46,7 +46,8 @@ internal fun FirebasePick.toPick(): Pick = Pick(
         latitude = location?.latitude ?: 0.0,
         longitude = location?.longitude ?: 0.0
     ),
-    musicVideoUrl = musicVideoUrl ?: ""
+    musicVideoUrl = musicVideoUrl ?: "",
+    musicVideoThumbnailUrl = musicVideoThumbnail ?: ""
 )
 
 /**
@@ -66,6 +67,7 @@ internal fun Pick.toFirebasePick(): FirebasePick = FirebasePick(
     location = GeoPoint(location.latitude, location.longitude),
     previewUrl = song.previewUrl,
     musicVideoUrl = musicVideoUrl,
+    musicVideoThumbnail = musicVideoThumbnailUrl,
     songId = song.id,
     songName = song.songName,
 )
