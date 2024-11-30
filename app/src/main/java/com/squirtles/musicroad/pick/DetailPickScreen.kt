@@ -296,8 +296,8 @@ private fun DetailPick(
                         song = pick.song,
                         playerState = playerState,
                         duration = duration,
-                        audioSessionId = { playerViewModel.audioSessionId },
                         audioEffectColor = audioEffectColor,
+                        audioSessionId = { playerViewModel.audioSessionId },
                         onSeekChanged = { timeMs ->
                             playerViewModel.playerSeekTo(timeMs)
                         },
