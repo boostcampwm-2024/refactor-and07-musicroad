@@ -27,8 +27,8 @@ internal fun CircleAlbumCover(
     song: Song,
     playerState: PlayerState,
     duration: Long,
-    audioSessionId: () -> Int,
     audioEffectColor: Color,
+    audioSessionId: () -> Int,
     onSeekChanged: (Long) -> Unit,
 ) {
     Box(
