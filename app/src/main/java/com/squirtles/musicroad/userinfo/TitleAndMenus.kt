@@ -66,15 +66,13 @@ internal fun TitleAndMenus(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
+                    .padding(horizontal = MENU_PADDING_HORIZONTAL)
                     .clickable(
                         interactionSource = remember { MutableInteractionSource() },
                         indication = ripple(color = White),
                         onClick = menu.onMenuClick
                     )
-                    .padding(
-                        horizontal = MENU_PADDING_HORIZONTAL,
-                        vertical = MENU_PADDING_VERTICAL
-                    ),
+                    .padding(vertical = MENU_PADDING_VERTICAL),
                 horizontalArrangement = Arrangement.spacedBy(DEFAULT_PADDING),
                 verticalAlignment = Alignment.CenterVertically
             ) {
