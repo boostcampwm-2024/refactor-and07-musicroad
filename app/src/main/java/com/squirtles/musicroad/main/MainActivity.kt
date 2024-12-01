@@ -111,7 +111,8 @@ class MainActivity : AppCompatActivity() {
 
     private fun checkSelfPermission(): Boolean {
         return PERMISSIONS.all { permission ->
-            PermissionChecker.checkSelfPermission(this, permission) == PermissionChecker.PERMISSION_GRANTED
+            PermissionChecker.checkSelfPermission(this, permission) ==
+                    PermissionChecker.PERMISSION_GRANTED
         }
     }
 
