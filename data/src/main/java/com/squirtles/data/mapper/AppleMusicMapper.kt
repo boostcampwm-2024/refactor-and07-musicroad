@@ -26,6 +26,7 @@ fun Data.toMusicVideo(): MusicVideo = MusicVideo(
     albumName = this.attributes.albumName.toString(),
     releaseDate = this.attributes.releaseDate.toLocalDate(),
     previewUrl = this.attributes.previews[0].url.toString(),
+    thumbnailUrl = this.attributes.previews[0].artwork?.url.toString()
 )
 
 private fun String.toLocalDate(): LocalDate {

@@ -1,6 +1,7 @@
 [versions]
 activityCompose = "1.9.3"
 agp = "8.5.1"
+animation = "1.7.5"
 appcompat = "1.7.0"
 coil = "3.0.0"
 composeBom = "2024.10.01"
@@ -39,6 +40,7 @@ pagingComposeAndroid = "3.3.4"
 
 [libraries]
 # AndroidX
+androidx-animation = { module = "androidx.compose.animation:animation", version.ref = "animation" }
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 androidx-datastore-preferences = { module = "androidx.datastore:datastore-preferences", version.ref = "datastorePreferences" }
 androidx-hilt-navigation-compose = { module = "androidx.hilt:hilt-navigation-compose", version.ref = "hiltNavigationCompose" }

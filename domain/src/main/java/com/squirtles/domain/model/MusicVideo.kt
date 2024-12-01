@@ -9,4 +9,5 @@ data class MusicVideo(
     val albumName: String,
     val releaseDate: LocalDate,
     val previewUrl: String,
+    val thumbnailUrl: String
 )
