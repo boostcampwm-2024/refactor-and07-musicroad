@@ -4,15 +4,17 @@ import android.location.Location
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.paging.PagingData
+import androidx.paging.cachedIn
 import com.squirtles.domain.model.Creator
 import com.squirtles.domain.model.LocationPoint
 import com.squirtles.domain.model.Pick
 import com.squirtles.domain.model.Song
-import com.squirtles.domain.usecase.mypick.CreatePickUseCase
 import com.squirtles.domain.usecase.local.FetchLastLocationUseCase
-import com.squirtles.domain.usecase.music.FetchMusicVideoUrlUseCase
 import com.squirtles.domain.usecase.local.GetCurrentUserUseCase
+import com.squirtles.domain.usecase.music.FetchMusicVideoUseCase
 import com.squirtles.domain.usecase.music.SearchSongsUseCase
+import com.squirtles.domain.usecase.mypick.CreatePickUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.Job
@@ -20,6 +22,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.launch
