@@ -170,7 +170,6 @@ fun DetailPickScreen(
 
                 // 페이지 전환에 따른 음원과 뮤비 재생 상태
                 if (page != DETAIL_PICK_TAB) playerViewModel.pause()
-                videoPlayerViewModel.setSwipePlayState(page == MUSIC_VIDEO_TAB)
             }
         }
 
