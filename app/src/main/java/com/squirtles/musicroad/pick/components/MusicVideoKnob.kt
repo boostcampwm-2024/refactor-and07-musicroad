@@ -7,7 +7,6 @@ import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.size
@@ -29,7 +28,10 @@ import com.squirtles.musicroad.R
 import com.squirtles.musicroad.common.toImageUrlWithSize
 
 @Composable
-internal fun MusicVideoKnob(thumbnail: String, modifier: Modifier, onMusicVideoClick: () -> Unit) {
+internal fun MusicVideoKnob(
+    thumbnail: String,
+    modifier: Modifier
+) {
     val infiniteTransition = rememberInfiniteTransition(label = "infinite repeatable")
     val offsetX by infiniteTransition.animateFloat(
         initialValue = 8f,
@@ -44,8 +46,7 @@ internal fun MusicVideoKnob(thumbnail: String, modifier: Modifier, onMusicVideoC
     Surface(
         modifier = modifier
             .size(width = 16.dp, height = 320.dp)
-            .offset(x = offsetX.dp)
-            .clickable(onClick = onMusicVideoClick),
+            .offset(x = offsetX.dp),
         shape = RoundedCornerShape(topStart = 30.dp, bottomStart = 30.dp)
     ) {
         AsyncImage(
@@ -66,7 +67,6 @@ internal fun MusicVideoKnob(thumbnail: String, modifier: Modifier, onMusicVideoC
 private fun MusicVideoKnobPreview() {
     MusicVideoKnob(
         thumbnail = "",
-        modifier = Modifier,
-        onMusicVideoClick = {}
+        modifier = Modifier
     )
 }

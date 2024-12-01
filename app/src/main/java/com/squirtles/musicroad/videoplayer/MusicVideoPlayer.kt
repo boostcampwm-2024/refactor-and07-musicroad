@@ -7,20 +7,28 @@ import android.view.TextureView
 import androidx.annotation.OptIn
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.media3.common.util.UnstableApi
+import com.squirtles.domain.model.Pick
 
 @OptIn(UnstableApi::class)
 @Composable
 fun MusicVideoPlayer(
+    pick: Pick,
     videoPlayerViewModel: VideoPlayerViewModel = hiltViewModel()
 ) {
     val context = LocalContext.current
-    val player = remember { videoPlayerViewModel.player }
+    val player by videoPlayerViewModel.player.collectAsStateWithLifecycle()
     val textureView = remember { TextureView(context) }
+    var currentSurfaceTexture by remember { mutableStateOf<SurfaceTexture?>(null) }
 
     DisposableEffect(Unit) {
         onDispose {
@@ -33,13 +41,20 @@ fun MusicVideoPlayer(
         }
     }
 
+    LaunchedEffect(player, currentSurfaceTexture) {
+        if (player != null && currentSurfaceTexture != null) {
+            val surface = Surface(currentSurfaceTexture)
+            player?.setVideoSurface(surface)
+        }
+    }
+
     AndroidView(
         factory = {
+            videoPlayerViewModel.initializePlayer(context, pick)
             textureView.apply {
                 surfaceTextureListener = object : TextureView.SurfaceTextureListener {
                     override fun onSurfaceTextureAvailable(surfaceTexture: SurfaceTexture, width: Int, height: Int) {
-                        val surface = Surface(surfaceTexture)
-                        player?.setVideoSurface(surface)
+                        currentSurfaceTexture = surfaceTexture
                         setVideoSize(width, height, textureView)
                     }
 

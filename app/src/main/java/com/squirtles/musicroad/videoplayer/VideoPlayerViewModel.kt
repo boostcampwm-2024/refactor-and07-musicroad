@@ -20,38 +20,19 @@ import javax.inject.Inject
 @HiltViewModel
 class VideoPlayerViewModel @Inject constructor() : ViewModel() {
 
-    private var _currentPick: Pick? = null
-    val currentPick get() = _currentPick
-
-    private var _player: ExoPlayer? = null
-    val player get() = _player
+    private val _player = MutableStateFlow<ExoPlayer?>(null)
+    val player = _player.asStateFlow()
 
     private var _swipePlayState = MutableStateFlow(false) // swipe 상태에 따른 play 여부
-    val swipePlayState = _swipePlayState.asStateFlow()
+    private val swipePlayState = _swipePlayState.asStateFlow()
 
     private var _playerState = MutableStateFlow(VideoPlayerState.Playing) // 현재 플레이어의 상태
     val playerState = _playerState.asStateFlow()
 
-    private val _swipeState = MutableStateFlow(0f) // 현재 offset 저장
-    val swipeState = _swipeState.asStateFlow()
-
-    private var _showMusicVideo = false
-    val showMusicVideo get() = _showMusicVideo
-
     private var lastPosition = 0L
 
-    fun setShowMusicVideo(isShow: Boolean) {
-        _showMusicVideo = isShow
-    }
-
-    fun updateSwipeState(newOffset: Float) {
-        _swipeState.value = newOffset
-    }
-
     fun initializePlayer(context: Context, pick: Pick) {
-        if (player != null) return
-
-        _currentPick = pick
+        if (player.value != null) return
 
         val exoPlayer = ExoPlayer.Builder(context).build().run {
             val mediaItem = MediaItem.fromUri(pick.musicVideoUrl)
@@ -74,12 +55,12 @@ class VideoPlayerViewModel @Inject constructor() : ViewModel() {
             }
         })
 
-        _player = exoPlayer
+        _player.value = exoPlayer
         setPlayer()
     }
 
     fun releasePlayer() {
-        _player = null
+        _player.value = null
     }
 
     fun setPlayState(playerState: VideoPlayerState) {
@@ -104,9 +85,9 @@ class VideoPlayerViewModel @Inject constructor() : ViewModel() {
                 swipeState && (playState == VideoPlayerState.Playing)
             }.collect { shouldPlay ->
                 if (shouldPlay) {
-                    player?.play()
+                    player.value?.play()
                 } else {
-                    player?.pause()
+                    player.value?.pause()
                 }
             }
         }

@@ -14,8 +14,7 @@ object CreatePickDestinations {
 }
 
 object PickInfoDestinations {
-    const val PICK_DETAIL_ROUTE = "pick_detail"
-    const val MUSIC_VIDEO_ROUTE = "music_video"
+    private const val PICK_DETAIL_ROUTE = "pick_detail"
 
     fun pickDetail(pickId: String) = "$PICK_DETAIL_ROUTE/$pickId"
 }
