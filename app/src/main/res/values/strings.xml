@@ -41,6 +41,8 @@
     <string name="favorite_picks_empty">담은 픽이 없습니다</string>
     <string name="my_picks_empty">등록한 픽이 없습니다</string>
     <string name="error_loading_pick_list">일시적인 오류가 발생했습니다.</string>
+    <string name="latest_create_order">최근 등록순</string>
+    <string name="latest_favorite_order">최근 담은순</string>
 
     <!-- Search Music -->
     <string name="search_music_album_description">노래 앨범 이미지</string>

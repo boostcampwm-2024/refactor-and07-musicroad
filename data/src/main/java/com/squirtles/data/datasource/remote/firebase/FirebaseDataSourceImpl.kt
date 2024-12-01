@@ -239,7 +239,7 @@ class FirebaseDataSourceImpl @Inject constructor(
             }
         }
 
-        return myPicks
+        return myPicks.reversed()
     }
 
     override suspend fun fetchFavoritePicks(userId: String): List<Pick> {
@@ -349,6 +349,7 @@ class FirebaseDataSourceImpl @Inject constructor(
         return suspendCancellableCoroutine { continuation ->
             db.collection(COLLECTION_FAVORITES)
                 .whereEqualTo(FIELD_USER_ID, userId)
+                .orderBy(FIELD_ADDED_AT, Query.Direction.DESCENDING)
                 .get()
                 .addOnSuccessListener { result ->
                     continuation.resume(result)
@@ -401,5 +402,6 @@ class FirebaseDataSourceImpl @Inject constructor(
 
         private const val FIELD_PICK_ID = "pickId"
         private const val FIELD_USER_ID = "userId"
+        private const val FIELD_ADDED_AT = "addedAt"
     }
 }
