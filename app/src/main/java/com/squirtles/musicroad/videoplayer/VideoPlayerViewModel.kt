@@ -1,6 +1,7 @@
 package com.squirtles.musicroad.videoplayer
 
 import android.content.Context
+import android.view.Surface
 import android.widget.Toast
 import androidx.core.content.ContextCompat.getString
 import androidx.lifecycle.ViewModel
@@ -20,8 +21,7 @@ import javax.inject.Inject
 @HiltViewModel
 class VideoPlayerViewModel @Inject constructor() : ViewModel() {
 
-    private val _player = MutableStateFlow<ExoPlayer?>(null)
-    val player = _player.asStateFlow()
+    private var player: ExoPlayer? = null
 
     private var _playerState = MutableStateFlow(VideoPlayerState.Playing) // 현재 플레이어의 상태
     val playerState = _playerState.asStateFlow()
@@ -31,47 +31,63 @@ class VideoPlayerViewModel @Inject constructor() : ViewModel() {
 
     private var lastPosition = 0L
 
-    fun initializePlayer(context: Context, musicVideoUrl: String) {
-        if (player.value != null) return
-
-        val exoPlayer = ExoPlayer.Builder(context).build().run {
-            val mediaItem = MediaItem.fromUri(musicVideoUrl)
-            setMediaItem(mediaItem)
-            prepare()
-            playWhenReady = false
-            seekTo(lastPosition)
-            this
+    fun initializePlayer(context: Context, url: String) {
+        if (player != null) {
+            setPlayer()
+            return
         }
 
-        exoPlayer.addListener(object : Player.Listener {
-            override fun onPlaybackStateChanged(state: Int) {
-                viewModelScope.launch {
-                    when (state) {
-                        Player.STATE_IDLE,
-                        Player.STATE_BUFFERING -> {
-                            _isLoading.emit(true)
-                        }
+        val exoPlayer = ExoPlayer.Builder(context).build().apply {
+            playWhenReady = false
+            addListener(object : Player.Listener {
+                override fun onPlaybackStateChanged(state: Int) {
+                    viewModelScope.launch {
+                        when (state) {
+                            Player.STATE_IDLE,
+                            Player.STATE_BUFFERING -> {
+                                _isLoading.emit(true)
+                            }
 
-                        Player.STATE_READY -> {
-                            _isLoading.emit(false)
-                        }
+                            Player.STATE_READY -> {
+                                _isLoading.emit(false)
+                            }
 
-                        Player.STATE_ENDED -> {
-                            Toast.makeText(context, getString(context, R.string.video_player_ended_message), Toast.LENGTH_SHORT).show()
-                            _playerState.emit(VideoPlayerState.Replay)
-                            exoPlayer.seekTo(0)
+                            Player.STATE_ENDED -> {
+                                Toast.makeText(context, getString(context, R.string.video_player_ended_message), Toast.LENGTH_SHORT).show()
+                                _playerState.emit(VideoPlayerState.Replay)
+                                seekTo(0)
+                            }
                         }
                     }
                 }
-            }
-        })
+            })
+        }
+        player = exoPlayer
 
-        _player.value = exoPlayer
+        setPlayerSource(url)
+    }
+
+    fun play(){
+        player?.play()
+    }
+
+    fun pause(){
+        player?.pause()
+    }
+
+    private fun setPlayerSource(url: String){
+        player?.run {
+            val mediaItem = MediaItem.fromUri(url)
+            setMediaItem(mediaItem)
+            prepare()
+            seekTo(lastPosition)
+        }
         setPlayer()
     }
 
-    fun releasePlayer() {
-        _player.value = null
+    private fun releasePlayer() {
+        player?.release()
+        player = null
     }
 
     fun setPlayState(playerState: VideoPlayerState) {
@@ -80,8 +96,12 @@ class VideoPlayerViewModel @Inject constructor() : ViewModel() {
         }
     }
 
-    fun setLastPosition(time: Long) {
-        lastPosition = time
+    fun setLastPosition() {
+        lastPosition = player?.currentPosition ?: 0
+    }
+
+    fun setSurface(surface: Surface?) {
+        player?.setVideoSurface(surface)
     }
 
     private fun setPlayer() {
@@ -90,11 +110,16 @@ class VideoPlayerViewModel @Inject constructor() : ViewModel() {
                 !isLoading && (playState == VideoPlayerState.Playing)
             }.collect { shouldPlay ->
                 if (shouldPlay) {
-                    player.value?.play()
+                    player?.play()
                 } else {
-                    player.value?.pause()
+                    player?.pause()
                 }
             }
         }
+    }
+
+    override fun onCleared() {
+        releasePlayer()
+        super.onCleared()
     }
 }

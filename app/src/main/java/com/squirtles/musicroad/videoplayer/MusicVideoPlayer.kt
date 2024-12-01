@@ -26,26 +26,23 @@ fun MusicVideoPlayer(
     videoPlayerViewModel: VideoPlayerViewModel = hiltViewModel()
 ) {
     val context = LocalContext.current
-    val player by videoPlayerViewModel.player.collectAsStateWithLifecycle()
 
     val textureView = remember { TextureView(context) }
     var currentSurfaceTexture by remember { mutableStateOf<SurfaceTexture?>(null) }
 
     DisposableEffect(Unit) {
         onDispose {
-            player?.pause()
-            videoPlayerViewModel.setLastPosition(player?.currentPosition ?: 0)
-            player?.release()
+            videoPlayerViewModel.pause()
+            videoPlayerViewModel.setLastPosition()
             textureView.surfaceTexture?.release()
             textureView.surfaceTextureListener = null
-            videoPlayerViewModel.releasePlayer()
         }
     }
 
-    LaunchedEffect(player, currentSurfaceTexture) {
-        if (player != null && currentSurfaceTexture != null) {
+    LaunchedEffect(currentSurfaceTexture) {
+        if (currentSurfaceTexture != null) {
             val surface = Surface(currentSurfaceTexture)
-            player?.setVideoSurface(surface)
+            videoPlayerViewModel.setSurface(surface)
         }
     }
 
@@ -64,7 +61,7 @@ fun MusicVideoPlayer(
                     }
 
                     override fun onSurfaceTextureDestroyed(surfaceTexture: SurfaceTexture): Boolean {
-                        player?.setVideoSurface(null)
+                        videoPlayerViewModel.setSurface(null)
                         return true
                     }
 
