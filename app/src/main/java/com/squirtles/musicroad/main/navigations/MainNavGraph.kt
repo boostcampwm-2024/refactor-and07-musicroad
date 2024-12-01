@@ -78,29 +78,25 @@ fun MainNavGraph(
 
         navigation(
             startDestination = CreatePickDestinations.SEARCH_MUSIC_ROUTE,
-            route = CreatePickDestinations.SEARCH_ROUTE
+            route = CreatePickDestinations.CREATE_ROUTE
         ) {
             composable(CreatePickDestinations.SEARCH_MUSIC_ROUTE) {
                 val parentEntry = remember(it) {
-                    navController.getBackStackEntry(CreatePickDestinations.SEARCH_ROUTE)
+                    navController.getBackStackEntry(CreatePickDestinations.CREATE_ROUTE)
                 }
                 SearchMusicScreen(
                     createPickViewModel = hiltViewModel<CreatePickViewModel>(parentEntry),
-                    onBackClick = {
-                        navController.popBackStack()
-                    },
+                    onBackClick = { navController.navigateUp() },
                     onItemClick = navigationActions.navigateToCreate
                 )
             }
             composable(CreatePickDestinations.CREATE_PICK_ROUTE) {
                 val parentEntry = remember(it) {
-                    navController.getBackStackEntry(CreatePickDestinations.SEARCH_ROUTE)
+                    navController.getBackStackEntry(CreatePickDestinations.CREATE_ROUTE)
                 }
                 CreatePickScreen(
                     createPickViewModel = hiltViewModel<CreatePickViewModel>(parentEntry),
-                    onBackClick = {
-                        navController.popBackStack()
-                    },
+                    onBackClick = { navController.navigateUp() },
                     onCreateClick = { pickId ->
                         navigationActions.navigateToPickDetail(pickId)
                     }
@@ -115,7 +111,13 @@ fun MainNavGraph(
             val pickId = backStackEntry.arguments?.getString("pickId") ?: ""
             DetailPickScreen(
                 pickId = pickId,
-                onBackClick = { navController.navigateUp() },
+                onBackClick = { // 픽  등록에서 정보 화면으로 간 것이라면 뒤로 가기 시 메인으로, 아니라면 이전 화면으로
+                    if (navController.previousBackStackEntry?.destination?.route == CreatePickDestinations.CREATE_PICK_ROUTE) {
+                        navigationActions.navigateToMain()
+                    } else {
+                        navController.navigateUp()
+                    }
+                },
                 onDeleted = { mapViewModel.resetClickedMarkerState(it) },
             )
         }

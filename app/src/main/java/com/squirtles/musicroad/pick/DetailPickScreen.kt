@@ -116,6 +116,8 @@ fun DetailPickScreen(
 
     BackHandler(enabled = showProcessIndicator) { }
 
+    BackHandler { onBackClick() }
+
     when (uiState) {
         DetailPickUiState.Loading -> {
             Box(

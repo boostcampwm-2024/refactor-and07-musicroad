@@ -5,12 +5,11 @@ object MainDestinations {
     const val FAVORITE_PICKS_ROUTE = "favorite_picks"
     const val MY_PICKS_ROUTE = "my_picks"
     const val SETTING_ROUTE = "setting"
-    const val CREATE_ROUTE = "create"
     const val USER_INFO_ROUTE = "userinfo"
 }
 
 object CreatePickDestinations {
-    const val SEARCH_ROUTE = "create"
+    const val CREATE_ROUTE = "create"
     const val SEARCH_MUSIC_ROUTE = "search_music"
     const val CREATE_PICK_ROUTE = "create_pick"
 }

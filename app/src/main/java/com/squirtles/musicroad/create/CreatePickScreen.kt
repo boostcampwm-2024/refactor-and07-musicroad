@@ -34,6 +34,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -113,9 +114,11 @@ fun CreatePickScreen(
         }
 
         is CreateUiState.Success -> {
-            showCreateIndicator = false
-            val pickId = (uiState as CreateUiState.Success<String>).data
-            onCreateClick(pickId)
+            LaunchedEffect(Unit) {
+                showCreateIndicator = false
+                val pickId = (uiState as CreateUiState.Success<String>).data
+                onCreateClick(pickId)
+            }
         }
 
         CreateUiState.Error -> {

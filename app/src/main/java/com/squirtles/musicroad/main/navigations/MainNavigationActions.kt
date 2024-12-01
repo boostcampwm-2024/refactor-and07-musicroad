@@ -6,11 +6,10 @@ import androidx.navigation.NavHostController
 class MainNavigationActions(navController: NavHostController) {
     val navigateToMain: () -> Unit = {
         navController.navigate(MainDestinations.MAIN_ROUTE) {
-            popUpTo(navController.graph.findStartDestination().id) {
-                saveState = true
+            popUpTo(route = MainDestinations.MAIN_ROUTE) {
+                inclusive = true
             }
             launchSingleTop = true
-            restoreState = true
         }
     }
 
@@ -43,10 +42,7 @@ class MainNavigationActions(navController: NavHostController) {
     }
 
     val navigateToSearch: () -> Unit = {
-        navController.navigate(CreatePickDestinations.SEARCH_ROUTE) {
-            popUpTo(navController.graph.findStartDestination().id) {
-                saveState = true
-            }
+        navController.navigate(CreatePickDestinations.SEARCH_MUSIC_ROUTE) {
             launchSingleTop = true
         }
     }
