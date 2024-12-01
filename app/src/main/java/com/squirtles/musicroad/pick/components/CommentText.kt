@@ -5,6 +5,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentHeight
@@ -34,8 +35,7 @@ internal fun CommentText(
         text = comment.ifEmpty { stringResource(id = R.string.pick_comment_empty) },
         modifier = modifier
             .fillMaxWidth()
-            .wrapContentHeight()
-            .heightIn(max = 100.dp)
+            .height(100.dp)
             .padding(horizontal = 30.dp)
             .clip(shape = RoundedCornerShape(10.dp))
             .background(Dark)

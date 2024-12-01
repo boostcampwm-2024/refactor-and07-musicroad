@@ -43,6 +43,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.squirtles.domain.model.Pick
 import com.squirtles.musicroad.R
+import com.squirtles.musicroad.create.VerticalSpacer
 import com.squirtles.musicroad.musicplayer.PlayerViewModel
 import com.squirtles.musicroad.pick.PickViewModel.Companion.DEFAULT_PICK
 import com.squirtles.musicroad.pick.components.CircleAlbumCover
@@ -316,6 +317,8 @@ private fun DetailPick(
                     scrollState = scrollState
                 )
 
+                VerticalSpacer(height = 8)
+                
                 if (pick.song.previewUrl.isBlank().not()) {
                     MusicPlayer(
                         previewUrl = pick.song.previewUrl,
