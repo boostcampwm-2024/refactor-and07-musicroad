@@ -72,6 +72,7 @@ fun SearchMusicScreen(
 ) {
     val focusManager = LocalFocusManager.current
     val searchText by createPickViewModel.searchText.collectAsStateWithLifecycle()
+    val searchUiState by createPickViewModel.searchUiState.collectAsStateWithLifecycle()
     val searchResult = createPickViewModel.searchResult.collectAsLazyPagingItems()
 
     Scaffold(
@@ -112,16 +113,20 @@ fun SearchMusicScreen(
             }
 
             // 검색 결과
-            if (searchText.isNotBlank()) {
-                SearchResult(
-                    searchResult = searchResult,
-                    onItemClick = { song ->
-                        createPickViewModel.onSongItemClick(song)
-                        onItemClick()
-                    }
-                )
-            } else {
-                // TODO INIT 상태 (HOT 리스트)
+            when (searchUiState) {
+                is SearchUiState.HotResult -> {
+                    // TODO HOT 리스트
+                }
+
+                is SearchUiState.SearchResult -> {
+                    SearchResult(
+                        searchResult = searchResult,
+                        onItemClick = { song ->
+                            createPickViewModel.onSongItemClick(song)
+                            onItemClick()
+                        }
+                    )
+                }
             }
         }
     }
@@ -209,23 +214,29 @@ private fun SearchResult(
         VerticalSpacer(20)
 
         LazyColumn(modifier = Modifier.padding(bottom = DefaultPadding)) {
-            when (searchResult.itemCount) {
-                0 -> item {
-                    Text(
-                        text = stringResource(id = R.string.search_music_empty_description),
-                        modifier = Modifier.padding(horizontal = DefaultPadding),
-                        color = White
-                    )
-                }
-
-                else -> items(searchResult.itemCount) { index ->
-                    searchResult[index]?.let {
-                        SongItem(it) {
-                            onItemClick(it)
-                        }
+            items(searchResult.itemCount) { index ->
+                searchResult[index]?.let {
+                    SongItem(it) {
+                        onItemClick(it)
                     }
                 }
             }
+        }
+
+        if (searchResult.loadState.refresh is LoadState.NotLoading) {
+            if (searchResult.itemCount == 0) {
+                Text(
+                    text = stringResource(id = R.string.search_music_empty_description),
+                    modifier = Modifier.padding(horizontal = DefaultPadding),
+                    color = White
+                )
+            }
+        } else if (searchResult.loadState.refresh is LoadState.Error) {
+            Text(
+                text = stringResource(id = R.string.search_music_error_description),
+                modifier = Modifier.padding(horizontal = DefaultPadding),
+                color = White
+            )
         }
     }
 }

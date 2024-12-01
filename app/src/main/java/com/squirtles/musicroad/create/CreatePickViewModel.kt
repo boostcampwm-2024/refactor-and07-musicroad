@@ -39,6 +39,9 @@ class CreatePickViewModel @Inject constructor(
 ) : ViewModel() {
 
     // SearchMusicScreen
+    private val _searchUiState = MutableStateFlow<SearchUiState>(SearchUiState.HotResult)
+    val searchUiState = _searchUiState.asStateFlow()
+
     private val _searchResult = MutableStateFlow<PagingData<Song>>(PagingData.empty())
     val searchResult = _searchResult.asStateFlow()
 
@@ -75,6 +78,8 @@ class CreatePickViewModel @Inject constructor(
                     searchJob?.cancel()
                     if (searchKeyword.isNotBlank()) {
                         searchJob = launch { searchSongs(searchKeyword) }
+                    } else {
+                        _searchUiState.emit(SearchUiState.HotResult)
                     }
                 }
         }
@@ -94,6 +99,7 @@ class CreatePickViewModel @Inject constructor(
             .cachedIn(viewModelScope)
             .collectLatest {
                 _searchResult.emit(it)
+                _searchUiState.emit(SearchUiState.SearchResult)
             }
     }
 
