@@ -46,6 +46,10 @@
     <string name="search_music_album_description">노래 앨범 이미지</string>
     <string name="search_music_search_button_description">노래 검색 버튼</string>
 
+    <!-- Loading Location Dialog -->
+    <string name="loading_current_location_dialog_text">현재 위치 로딩 중...</string>
+    <string name="close_loading_current_location_dialog">종료</string>
+
     <!-- Delete Pick Dialog -->
     <string name="delete_pick_dialog_title">삭제하시겠습니까?</string>
     <string name="delete_pick_dialog_body">등록하신 픽이 삭제됩니다.</string>
