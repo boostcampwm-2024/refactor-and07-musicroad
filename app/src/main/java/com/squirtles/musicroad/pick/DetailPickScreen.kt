@@ -395,5 +395,5 @@ private fun DetailPickPreview() {
     )
 }
 
-private const val DETAIL_PICK_TAB = 0
-private const val MUSIC_VIDEO_TAB = 1
+internal const val DETAIL_PICK_TAB = 0
+internal const val MUSIC_VIDEO_TAB = 1

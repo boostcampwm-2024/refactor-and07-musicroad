@@ -33,7 +33,7 @@ class PickViewModel @Inject constructor(
     private val _detailPickUiState = MutableStateFlow<DetailPickUiState>(DetailPickUiState.Loading)
     val detailPickUiState = _detailPickUiState.asStateFlow()
 
-    private var _currentTab = 0
+    private var _currentTab = DETAIL_PICK_TAB
     val currentTab get() = _currentTab
 
     fun getUserId() = getCurrentUserUseCase().userId
