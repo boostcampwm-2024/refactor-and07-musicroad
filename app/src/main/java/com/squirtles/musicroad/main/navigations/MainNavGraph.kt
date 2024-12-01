@@ -90,6 +90,7 @@ fun MainNavGraph(
                     onItemClick = navigationActions.navigateToCreate
                 )
             }
+
             composable(CreatePickDestinations.CREATE_PICK_ROUTE) {
                 val parentEntry = remember(it) {
                     navController.getBackStackEntry(CreatePickDestinations.CREATE_ROUTE)
@@ -109,6 +110,7 @@ fun MainNavGraph(
             arguments = listOf(navArgument("pickId") { type = NavType.StringType })
         ) { backStackEntry ->
             val pickId = backStackEntry.arguments?.getString("pickId") ?: ""
+
             DetailPickScreen(
                 pickId = pickId,
                 onBackClick = { // 픽  등록에서 정보 화면으로 간 것이라면 뒤로 가기 시 메인으로, 아니라면 이전 화면으로

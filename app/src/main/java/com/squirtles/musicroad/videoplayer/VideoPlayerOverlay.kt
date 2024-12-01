@@ -83,7 +83,11 @@ fun VideoPlayerOverlay(
             .pointerInput(Unit) {
                 detectTapGestures(
                     onTap = {
-                        if (alpha.value == 0f) videoPlayerViewModel.setPlayState(VideoPlayerState.Pause)
+                        when (playerState.value) {
+                            VideoPlayerState.Pause -> videoPlayerViewModel.setPlayState(VideoPlayerState.Playing)
+                            VideoPlayerState.Playing -> videoPlayerViewModel.setPlayState(VideoPlayerState.Pause)
+                            VideoPlayerState.Replay -> videoPlayerViewModel.setPlayState(VideoPlayerState.Playing)
+                        }
                     }
                 )
             }
@@ -116,19 +120,11 @@ fun VideoPlayerOverlay(
             )
         )
 
-        IconButton(
-            onClick = {
-                when (playerState.value) {
-                    VideoPlayerState.Pause -> videoPlayerViewModel.setPlayState(VideoPlayerState.Playing)
-                    VideoPlayerState.Playing -> videoPlayerViewModel.setPlayState(VideoPlayerState.Pause)
-                    VideoPlayerState.Replay -> videoPlayerViewModel.setPlayState(VideoPlayerState.Playing)
-                }
-            },
+        Box(
             modifier = Modifier
+                .size(70.dp)
                 .align(Alignment.Center)
                 .background(Black.copy(0.5f), shape = CircleShape)
-                .padding(8.dp),
-            enabled = alpha.value > 0.5f
         ) {
             Icon(
                 imageVector = when (playerState.value) {
@@ -137,7 +133,9 @@ fun VideoPlayerOverlay(
                     VideoPlayerState.Replay -> Icons.Default.Replay
                 },
                 contentDescription = stringResource(id = R.string.player_play_pause_description),
-                modifier = Modifier.size(30.dp),
+                modifier = Modifier
+                    .align(Alignment.Center)
+                    .size(40.dp),
                 tint = White
             )
         }
@@ -173,16 +171,18 @@ fun VideoPlayerOverlay(
 
             VerticalSpacer(24)
 
-            Text(
-                text = pick.comment,
-                color = White,
-                fontSize = 16.sp,
-                overflow = TextOverflow.Ellipsis,
-                maxLines = 2,
-                style = MaterialTheme.typography.titleLarge
-            )
+            if (pick.comment.isNotEmpty()) {
+                Text(
+                    text = pick.comment,
+                    color = White,
+                    fontSize = 16.sp,
+                    overflow = TextOverflow.Ellipsis,
+                    maxLines = 2,
+                    style = MaterialTheme.typography.titleLarge
+                )
 
-            VerticalSpacer(24)
+                VerticalSpacer(24)
+            }
 
             Row(
                 modifier = Modifier.fillMaxWidth(),

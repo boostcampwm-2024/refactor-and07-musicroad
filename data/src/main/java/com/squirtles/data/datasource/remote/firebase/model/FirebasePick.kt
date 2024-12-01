@@ -22,6 +22,7 @@ data class FirebasePick(
     val location: GeoPoint? = null,
     val previewUrl: String? = null,
     val musicVideoUrl: String? = null,
+    val musicVideoThumbnail: String? = null,
     val songId: String? = null,
     val songName: String? = null,
 )

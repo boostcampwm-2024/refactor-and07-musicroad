@@ -7,39 +7,51 @@ import android.view.TextureView
 import androidx.annotation.OptIn
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.media3.common.util.UnstableApi
+import com.squirtles.domain.model.Pick
 
 @OptIn(UnstableApi::class)
 @Composable
 fun MusicVideoPlayer(
+    pick: Pick,
     videoPlayerViewModel: VideoPlayerViewModel = hiltViewModel()
 ) {
     val context = LocalContext.current
-    val player = remember { videoPlayerViewModel.player }
+
     val textureView = remember { TextureView(context) }
+    var currentSurfaceTexture by remember { mutableStateOf<SurfaceTexture?>(null) }
 
     DisposableEffect(Unit) {
         onDispose {
-            player?.pause()
-            videoPlayerViewModel.setLastPosition(player?.currentPosition ?: 0)
-            player?.release()
+            videoPlayerViewModel.pause()
+            videoPlayerViewModel.setLastPosition()
             textureView.surfaceTexture?.release()
             textureView.surfaceTextureListener = null
-            videoPlayerViewModel.releasePlayer()
+        }
+    }
+
+    LaunchedEffect(currentSurfaceTexture) {
+        if (currentSurfaceTexture != null) {
+            val surface = Surface(currentSurfaceTexture)
+            videoPlayerViewModel.setSurface(surface)
         }
     }
 
     AndroidView(
         factory = {
+            videoPlayerViewModel.initializePlayer(context, pick.musicVideoUrl)
             textureView.apply {
                 surfaceTextureListener = object : TextureView.SurfaceTextureListener {
                     override fun onSurfaceTextureAvailable(surfaceTexture: SurfaceTexture, width: Int, height: Int) {
-                        val surface = Surface(surfaceTexture)
-                        player?.setVideoSurface(surface)
+                        currentSurfaceTexture = surfaceTexture
                         setVideoSize(width, height, textureView)
                     }
 
@@ -48,7 +60,7 @@ fun MusicVideoPlayer(
                     }
 
                     override fun onSurfaceTextureDestroyed(surfaceTexture: SurfaceTexture): Boolean {
-                        player?.setVideoSurface(null)
+                        videoPlayerViewModel.setSurface(null)
                         return true
                     }
 
