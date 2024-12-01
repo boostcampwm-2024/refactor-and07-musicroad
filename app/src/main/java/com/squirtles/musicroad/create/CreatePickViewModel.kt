@@ -4,15 +4,17 @@ import android.location.Location
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.paging.PagingData
+import androidx.paging.cachedIn
 import com.squirtles.domain.model.Creator
 import com.squirtles.domain.model.LocationPoint
 import com.squirtles.domain.model.Pick
 import com.squirtles.domain.model.Song
-import com.squirtles.domain.usecase.mypick.CreatePickUseCase
 import com.squirtles.domain.usecase.local.FetchLastLocationUseCase
-import com.squirtles.domain.usecase.music.FetchMusicVideoUrlUseCase
 import com.squirtles.domain.usecase.local.GetCurrentUserUseCase
+import com.squirtles.domain.usecase.music.FetchMusicVideoUrlUseCase
 import com.squirtles.domain.usecase.music.SearchSongsUseCase
+import com.squirtles.domain.usecase.mypick.CreatePickUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.Job
@@ -20,6 +22,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.launch
@@ -36,8 +39,8 @@ class CreatePickViewModel @Inject constructor(
 ) : ViewModel() {
 
     // SearchMusicScreen
-    private val _searchUiState = MutableStateFlow<SearchUiState<List<Song>>>(SearchUiState.Init)
-    val searchUiState = _searchUiState.asStateFlow()
+    private val _searchResult = MutableStateFlow<PagingData<Song>>(PagingData.empty())
+    val searchResult = _searchResult.asStateFlow()
 
     private var _selectedSong: Song? = null
     val selectedSong get() = _selectedSong
@@ -45,7 +48,6 @@ class CreatePickViewModel @Inject constructor(
     private val _searchText = MutableStateFlow("")
     val searchText = _searchText.asStateFlow()
 
-    private var searchResult: List<Song>? = null
     private var searchJob: Job? = null
 
     // CreatePickScreen
@@ -71,10 +73,7 @@ class CreatePickViewModel @Inject constructor(
                 .debounce(300)
                 .collect { searchKeyword ->
                     searchJob?.cancel()
-                    if (searchKeyword.isBlank()) {
-                        searchResult = null
-                        _searchUiState.value = SearchUiState.Init
-                    } else {
+                    if (searchKeyword.isNotBlank()) {
                         searchJob = launch { searchSongs(searchKeyword) }
                     }
                 }
@@ -91,16 +90,11 @@ class CreatePickViewModel @Inject constructor(
     }
 
     private suspend fun searchSongs(searchKeyword: String) {
-        _searchUiState.value = SearchUiState.Loading(searchResult)
-        val result = searchSongsUseCase(searchKeyword)
-
-        result.onSuccess {
-            searchResult = it
-            _searchUiState.value = SearchUiState.Success(it)
-        }.onFailure {
-            searchResult = null
-            _searchUiState.value = SearchUiState.Error // NotFoundException(message=No such resource)
-        }
+        searchSongsUseCase(searchKeyword)
+            .cachedIn(viewModelScope)
+            .collectLatest {
+                _searchResult.emit(it)
+            }
     }
 
     fun onSongItemClick(song: Song) {

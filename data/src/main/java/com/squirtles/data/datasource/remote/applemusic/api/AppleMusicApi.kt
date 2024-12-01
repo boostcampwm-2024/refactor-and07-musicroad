@@ -12,6 +12,8 @@ interface AppleMusicApi {
     suspend fun searchSongs(
         @Path("storefront") storefront: String,
         @Query("types") types: String,
-        @QueryMap queryMap: Map<String, String>
+        @Query("term") term: String,
+        @Query("limit") limit: Int,
+        @Query("offset") offset: String
     ): Response<SearchResponse>
 }

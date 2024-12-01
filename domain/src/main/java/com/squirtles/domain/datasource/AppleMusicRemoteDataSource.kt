@@ -1,10 +1,12 @@
 package com.squirtles.domain.datasource
 
+import androidx.paging.PagingData
 import com.squirtles.domain.model.MusicVideo
 import com.squirtles.domain.model.Song
+import kotlinx.coroutines.flow.Flow
 
 interface AppleMusicRemoteDataSource {
-    suspend fun searchSongs(searchText: String): List<Song>
+    fun searchSongs(searchText: String): Flow<PagingData<Song>>
     suspend fun searchSongById(songId: String): Song
     suspend fun searchMusicVideos(searchText: String): List<MusicVideo>
 }

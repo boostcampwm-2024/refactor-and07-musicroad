@@ -1,10 +1,12 @@
 package com.squirtles.domain.repository
 
+import androidx.paging.PagingData
 import com.squirtles.domain.model.MusicVideo
 import com.squirtles.domain.model.Song
+import kotlinx.coroutines.flow.Flow
 
 interface AppleMusicRepository {
-    suspend fun searchSongs(searchText: String): Result<List<Song>>
+    fun searchSongs(searchText: String): Flow<PagingData<Song>>
     suspend fun searchSongById(songId: String): Result<Song>
     suspend fun searchMusicVideos(searchText: String): Result<List<MusicVideo>>
 }
