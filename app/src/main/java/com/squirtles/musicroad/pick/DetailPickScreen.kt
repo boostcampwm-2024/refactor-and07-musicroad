@@ -6,20 +6,17 @@ import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.heightIn
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.CircularProgressIndicator
@@ -39,86 +36,54 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.luminance
-import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.util.lerp
 import androidx.core.view.WindowInsetsControllerCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.wear.compose.material.ExperimentalWearMaterialApi
-import androidx.wear.compose.material.FractionalThreshold
-import androidx.wear.compose.material.rememberSwipeableState
-import androidx.wear.compose.material.swipeable
 import com.squirtles.domain.model.Pick
 import com.squirtles.musicroad.R
+import com.squirtles.musicroad.common.VerticalSpacer
 import com.squirtles.musicroad.musicplayer.PlayerViewModel
 import com.squirtles.musicroad.pick.PickViewModel.Companion.DEFAULT_PICK
 import com.squirtles.musicroad.pick.components.CircleAlbumCover
 import com.squirtles.musicroad.pick.components.CommentText
 import com.squirtles.musicroad.pick.components.DeletePickDialog
 import com.squirtles.musicroad.pick.components.DetailPickTopAppBar
+import com.squirtles.musicroad.pick.components.MusicVideoKnob
 import com.squirtles.musicroad.pick.components.PickInformation
 import com.squirtles.musicroad.pick.components.SongInfo
-import com.squirtles.musicroad.pick.components.SwipeUpIcon
 import com.squirtles.musicroad.pick.components.music.MusicPlayer
 import com.squirtles.musicroad.ui.theme.Black
 import com.squirtles.musicroad.ui.theme.White
 import com.squirtles.musicroad.videoplayer.MusicVideoScreen
-import com.squirtles.musicroad.videoplayer.VideoPlayerViewModel
-import kotlin.math.roundToInt
+import kotlin.math.absoluteValue
 
-@OptIn(ExperimentalWearMaterialApi::class)
 @Composable
 fun DetailPickScreen(
     pickId: String,
     onBackClick: () -> Unit,
     onDeleted: (Context) -> Unit,
     pickViewModel: PickViewModel = hiltViewModel(),
-    playerViewModel: PlayerViewModel = hiltViewModel(),
-    videoPlayerViewModel: VideoPlayerViewModel = hiltViewModel()
+    playerViewModel: PlayerViewModel = hiltViewModel()
 ) {
     val context = LocalContext.current
-    val screenHeight = LocalConfiguration.current.screenHeightDp.dp
-    val screenHeightPx = with(LocalDensity.current) { screenHeight.toPx() }
-    val statusBarHeight = with(LocalDensity.current) { WindowInsets.statusBars.getTop(this) }
-    val contentHeightPx = screenHeightPx + statusBarHeight
-
-    val initialOffset by videoPlayerViewModel.swipeState.collectAsStateWithLifecycle()
-    val swipeableState =
-        rememberSwipeableState(initialValue = if (initialOffset != 0f) contentHeightPx else 0f)
-    val anchors = mapOf(contentHeightPx to 0f, 0f to 1f)
-    val swipeableModifier = Modifier.swipeable(
-        state = swipeableState,
-        anchors = anchors,
-        thresholds = { _, _ -> FractionalThreshold(0.3f) },
-        orientation = Orientation.Vertical
-    )
-
     val uiState by pickViewModel.detailPickUiState.collectAsStateWithLifecycle()
     var showDeletePickDialog by rememberSaveable { mutableStateOf(false) }
     var showProcessIndicator by rememberSaveable { mutableStateOf(false) }
-
-    val swipePlayState by videoPlayerViewModel.swipePlayState.collectAsStateWithLifecycle(false)
     var isMusicVideoAvailable by remember { mutableStateOf(false) }
-
-    DisposableEffect(Unit) {
-        onDispose {
-            videoPlayerViewModel.updateSwipeState(swipeableState.offset.value)
-        }
-    }
-
-    LaunchedEffect(Unit) {
-        pickViewModel.fetchPick(pickId)
-    }
 
     BackHandler {
         if (showProcessIndicator.not()) {
             onBackClick()
         }
+    }
+
+    LaunchedEffect(Unit) {
+        pickViewModel.fetchPick(pickId)
     }
 
     when (uiState) {
@@ -136,16 +101,6 @@ fun DetailPickScreen(
         is DetailPickUiState.Success -> {
             val pick = (uiState as DetailPickUiState.Success).pick
             val isFavorite = (uiState as DetailPickUiState.Success).isFavorite
-
-            // 비디오 플레이어 설정
-            LaunchedEffect(pick) {
-                isMusicVideoAvailable = pick.musicVideoUrl.isNotEmpty()
-
-                if (isMusicVideoAvailable) {
-                    videoPlayerViewModel.initializePlayer(context, pick.musicVideoUrl)
-                }
-            }
-
             val isCreatedBySelf = pickViewModel.getUserId() == pick.createdBy.userId
             val onActionClick: () -> Unit = {
                 when {
@@ -172,49 +127,65 @@ fun DetailPickScreen(
                 }
             }
 
-            Box(modifier = Modifier.fillMaxSize()) {
-                DetailPick(
-                    pick = pick,
-                    isCreatedBySelf = isCreatedBySelf,
-                    isFavorite = isFavorite, // TODO
-                    userName = pick.createdBy.userName,
-                    isMusicVideoAvailable = isMusicVideoAvailable,
-                    swipeableModifier = swipeableModifier,
-                    playerViewModel = playerViewModel,
-                    onBackClick = onBackClick,
-                    onActionClick = onActionClick
-                )
+            val pagerState = rememberPagerState(
+                pageCount = { if (isMusicVideoAvailable) 2 else 1 }
+            )
 
-                // 최초 Swipe 동작 전에 MusicVideoScreen이 생성되지 않도록 함
-                if (swipeableState.offset.value != 0.0f && contentHeightPx != swipeableState.offset.value) {
-                    videoPlayerViewModel.setShowMusicVideo(true)
+            // 비디오 플레이어 설정
+            LaunchedEffect(pick) {
+                isMusicVideoAvailable = pick.musicVideoUrl.isNotEmpty()
+            }
+
+            LaunchedEffect(pagerState) {
+                pagerState.scrollToPage(page = pickViewModel.currentTab)
+            }
+
+            DisposableEffect(Unit) {
+                onDispose {
+                    pickViewModel.setCurrentTab(pagerState.currentPage)
                 }
+            }
 
-                if (isMusicVideoAvailable && videoPlayerViewModel.showMusicVideo) {
-                    videoPlayerViewModel.setSwipePlayState(swipeableState.offset.value < contentHeightPx * 0.9f)
-                    val alpha =
-                        (1 - (swipeableState.offset.value / contentHeightPx)).coerceIn(0f, 1f)
+            HorizontalPager(
+                state = pagerState
+            ) { page ->
+                when (page) {
+                    DETAIL_PICK_TAB -> {
+                        DetailPick(
+                            pick = pick,
+                            isCreatedBySelf = isCreatedBySelf,
+                            isFavorite = isFavorite, // TODO
+                            userName = pick.createdBy.userName,
+                            isMusicVideoAvailable = isMusicVideoAvailable,
+                            playerViewModel = playerViewModel,
+                            onBackClick = onBackClick,
+                            onActionClick = onActionClick,
+                        )
+                    }
 
-                    MusicVideoScreen(
-                        pick = pick,
-                        swipePlayState = swipePlayState,
-                        modifier = swipeableModifier
-                            .fillMaxSize()
-                            .offset { IntOffset(0, swipeableState.offset.value.roundToInt()) }
-                            .graphicsLayer { this.alpha = alpha },
-                        onBackClick = onBackClick
-                    )
-
-                    LaunchedEffect(swipePlayState) {
-                        if (swipePlayState) playerViewModel.pause()
-                        else {
-                            videoPlayerViewModel.setShowMusicVideo(false)
-
-                            // 비디오 플레이어 초기화
-                            videoPlayerViewModel.initializePlayer(context, pick.musicVideoUrl)
-                        }
+                    MUSIC_VIDEO_TAB -> {
+                        MusicVideoScreen(
+                            pick = pick,
+                            modifier = Modifier
+                                .background(Black)
+                                .graphicsLayer {
+                                    val pageOffset = (
+                                            (pagerState.currentPage - page) + pagerState
+                                                .currentPageOffsetFraction
+                                            ).absoluteValue
+                                    alpha = lerp(
+                                        start = 0.5f,
+                                        stop = 1f,
+                                        fraction = 1f - pageOffset.coerceIn(0f, 1f)
+                                    )
+                                },
+                            onBackClick = onBackClick,
+                        )
                     }
                 }
+
+                // 페이지 전환에 따른 음원과 뮤비 재생 상태
+                if (page != DETAIL_PICK_TAB) playerViewModel.pause()
             }
         }
 
@@ -271,7 +242,6 @@ private fun DetailPick(
     isFavorite: Boolean,
     userName: String,
     isMusicVideoAvailable: Boolean,
-    swipeableModifier: Modifier,
     playerViewModel: PlayerViewModel,
     onBackClick: () -> Unit,
     onActionClick: () -> Unit
@@ -329,8 +299,7 @@ private fun DetailPick(
                     )
                 )
                 .padding(innerPadding)
-                .verticalScroll(scrollState),
-            verticalArrangement = Arrangement.SpaceBetween
+                .verticalScroll(scrollState)
         ) {
             Column(
                 modifier = Modifier
@@ -344,20 +313,33 @@ private fun DetailPick(
                     dynamicOnBackgroundColor = onDynamicBackgroundColor
                 )
 
-                if (playerState.isReady) {
-                    CircleAlbumCover(
-                        modifier = Modifier
-                            .size(320.dp)
-                            .align(Alignment.CenterHorizontally),
-                        song = pick.song,
-                        playerState = playerState,
-                        duration = duration,
-                        audioEffectColor = audioEffectColor,
-                        audioSessionId = { playerViewModel.audioSessionId },
-                        onSeekChanged = { timeMs ->
-                            playerViewModel.playerSeekTo(timeMs)
-                        },
-                    )
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .align(Alignment.CenterHorizontally)
+                ) {
+                    if (playerState.isReady) {
+                        CircleAlbumCover(
+                            modifier = Modifier
+                                .size(320.dp)
+                                .align(Alignment.Center),
+                            song = pick.song,
+                            playerState = playerState,
+                            duration = duration,
+                            audioEffectColor = audioEffectColor,
+                            audioSessionId = { playerViewModel.audioSessionId },
+                            onSeekChanged = { timeMs ->
+                                playerViewModel.playerSeekTo(timeMs)
+                            },
+                        )
+                    }
+
+                    if (isMusicVideoAvailable) {
+                        MusicVideoKnob(
+                            thumbnail = pick.musicVideoThumbnailUrl,
+                            modifier = Modifier.align(Alignment.CenterEnd)
+                        )
+                    }
                 }
 
                 PickInformation(formattedDate = pick.createdAt, favoriteCount = pick.favoriteCount)
@@ -366,6 +348,8 @@ private fun DetailPick(
                     comment = pick.comment,
                     scrollState = scrollState
                 )
+
+                VerticalSpacer(height = 8)
 
                 if (pick.song.previewUrl.isBlank().not()) {
                     MusicPlayer(
@@ -388,14 +372,6 @@ private fun DetailPick(
                     )
                 }
             }
-
-            if (isMusicVideoAvailable) {
-                SwipeUpIcon(
-                    swipeableModifier
-                        .fillMaxWidth()
-                        .heightIn(min = 100.dp)
-                )
-            }
         }
     }
 }
@@ -413,9 +389,11 @@ private fun DetailPickPreview() {
         isFavorite = false,
         userName = "짱구",
         isMusicVideoAvailable = true,
-        swipeableModifier = Modifier,
         playerViewModel = PlayerViewModel(),
         onBackClick = {},
         onActionClick = {}
     )
 }
+
+internal const val DETAIL_PICK_TAB = 0
+internal const val MUSIC_VIDEO_TAB = 1

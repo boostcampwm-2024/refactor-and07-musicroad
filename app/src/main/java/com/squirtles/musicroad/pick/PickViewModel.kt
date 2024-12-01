@@ -9,10 +9,10 @@ import com.squirtles.domain.model.Pick
 import com.squirtles.domain.model.Song
 import com.squirtles.domain.usecase.favoritepick.CreateFavoriteUseCase
 import com.squirtles.domain.usecase.favoritepick.DeleteFavoriteUseCase
+import com.squirtles.domain.usecase.local.GetCurrentUserUseCase
 import com.squirtles.domain.usecase.mypick.DeletePickUseCase
 import com.squirtles.domain.usecase.pick.FetchIsFavoriteUseCase
 import com.squirtles.domain.usecase.pick.FetchPickUseCase
-import com.squirtles.domain.usecase.local.GetCurrentUserUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -32,6 +32,9 @@ class PickViewModel @Inject constructor(
 
     private val _detailPickUiState = MutableStateFlow<DetailPickUiState>(DetailPickUiState.Loading)
     val detailPickUiState = _detailPickUiState.asStateFlow()
+
+    private var _currentTab = DETAIL_PICK_TAB
+    val currentTab get() = _currentTab
 
     fun getUserId() = getCurrentUserUseCase().userId
 
@@ -107,6 +110,10 @@ class PickViewModel @Inject constructor(
                     _detailPickUiState.emit(DetailPickUiState.Error)
                 }
         }
+    }
+
+    fun setCurrentTab(index: Int) {
+        _currentTab = index
     }
 
     companion object {
