@@ -25,8 +25,8 @@ class PlayerViewModel @Inject constructor() : ViewModel() {
 
     private var player: ExoPlayer? = null
 
-    private val _audioSessionId = MutableStateFlow(0)
-    val audioSessionId: StateFlow<Int> = _audioSessionId
+    private var _audioSessionId = 0
+    val audioSessionId get() = _audioSessionId
 
     private val _playerState = MutableStateFlow(PLAYER_STATE_INITIAL)
     val playerState: StateFlow<PlayerState> = _playerState
@@ -37,6 +37,7 @@ class PlayerViewModel @Inject constructor() : ViewModel() {
     private val _duration = MutableStateFlow(30_000L)
     val duration: StateFlow<Long> = _duration
 
+    @OptIn(UnstableApi::class)
     private fun initializePlayer(context: Context) {
         val exoPlayer = ExoPlayer.Builder(context).build().also {
             it.addListener(object : Player.Listener {
@@ -54,9 +55,9 @@ class PlayerViewModel @Inject constructor() : ViewModel() {
             it.volume = 0.8f
         }
         this.player = exoPlayer
+        _audioSessionId = exoPlayer.audioSessionId
     }
 
-    @OptIn(UnstableApi::class)
     fun readyPlayer(context: Context, sourceUrl: String) {
         if (player != null) return
 
@@ -74,8 +75,6 @@ class PlayerViewModel @Inject constructor() : ViewModel() {
 
             _duration.value =
                 if (it.duration == TIME_UNSET) 30_000L else it.duration
-
-            _audioSessionId.value = it.audioSessionId
 
             updatePlayerStatePeriodically(it)
         }

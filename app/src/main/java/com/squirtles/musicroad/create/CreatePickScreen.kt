@@ -10,7 +10,6 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -35,6 +34,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -47,7 +47,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.luminance
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -57,9 +56,10 @@ import androidx.compose.ui.unit.dp
 import androidx.core.graphics.toColorInt
 import androidx.core.view.WindowInsetsControllerCompat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import coil3.compose.AsyncImage
 import com.squirtles.domain.model.Song
 import com.squirtles.musicroad.R
+import com.squirtles.musicroad.common.AlbumImage
+import com.squirtles.musicroad.common.VerticalSpacer
 import com.squirtles.musicroad.ui.theme.Black
 import com.squirtles.musicroad.ui.theme.Dark
 import com.squirtles.musicroad.ui.theme.Gray
@@ -114,9 +114,11 @@ fun CreatePickScreen(
         }
 
         is CreateUiState.Success -> {
-            showCreateIndicator = false
-            val pickId = (uiState as CreateUiState.Success<String>).data
-            onCreateClick(pickId)
+            LaunchedEffect(Unit) {
+                showCreateIndicator = false
+                val pickId = (uiState as CreateUiState.Success<String>).data
+                onCreateClick(pickId)
+            }
         }
 
         CreateUiState.Error -> {
@@ -217,18 +219,17 @@ private fun CreatePickContent(
             style = MaterialTheme.typography.bodyLarge
         )
 
-        AsyncImage(
-            model = song.getImageUrlWithSize(RequestImageSize),
-            contentDescription = song.albumName + stringResource(id = R.string.pick_album_description),
+        AlbumImage(
+            imageUrl = song.getImageUrlWithSize(RequestImageSize),
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 30.dp)
                 .aspectRatio(1f)
                 .clip(RoundedCornerShape(20.dp)),
-            contentScale = ContentScale.Crop
+            contentDescription = song.albumName + stringResource(id = R.string.pick_album_description)
         )
 
-        Spacer(modifier = Modifier.height(40.dp))
+        VerticalSpacer(40)
 
         CommentTextBox(
             comment = comment,
@@ -288,7 +289,7 @@ private fun CreatePickScreenTopBar(
             IconButton(onClick = onBackClick) {
                 Icon(
                     imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                    contentDescription = stringResource(id = R.string.pick_app_bar_back_description),
+                    contentDescription = stringResource(id = R.string.top_app_bar_back_description),
                     tint = dynamicOnBackgroundColor
                 )
             }

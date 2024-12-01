@@ -21,9 +21,9 @@
     <!-- Pick -->
     <string name="pick_app_bar_title">픽 등록</string>
     <string name="pick_app_bar_title_user">님의 픽</string>
-    <string name="pick_app_bar_back_description">뒤로가기</string>
     <string name="pick_app_bar_upload_description">등록하기</string>
     <string name="pick_album_description">앨범 이미지</string>
+    <string name="pick_app_bar_back_description">뒤로 가기</string>
     <string name="pick_comment_placeholder">거리에 남길 한마디를 입력하세요.</string>
     <string name="pick_comment_empty">등록된 한마디가 없습니다.</string>
     <string name="pick_delete_icon_description">삭제하기</string>
@@ -37,6 +37,11 @@
     <string name="video_player_ended_message">Apple Music에서 제공하는 30초 미리보기 영상입니다.</string>
     <string name="video_quality_description">480p</string>
     <string name="success_delete_pick">삭제되었습니다</string>
+    <string name="success_add_to_favorite">픽 보관함에 추가되었습니다.</string>
+    <string name="success_delete_at_favorite">픽 보관함에서 제거되었습니다.</string>
+    <string name="favorite_picks_empty">담은 픽이 없습니다</string>
+    <string name="my_picks_empty">등록한 픽이 없습니다</string>
+    <string name="error_loading_pick_list">일시적인 오류가 발생했습니다.</string>
 
     <!-- Search Music -->
     <string name="search_music_album_description">노래 앨범 이미지</string>
@@ -47,4 +52,23 @@
     <string name="delete_pick_dialog_body">등록하신 픽이 삭제됩니다.</string>
     <string name="delete_pick_dialog_cancel">취소</string>
     <string name="delete_pick_dialog_delete">삭제하기</string>
+
+    <!-- Top App Bar -->
+    <string name="top_app_bar_back_description">상단 바 뒤로 가기 버튼</string>
+    <string name="favorite_picks_top_app_bar_title">픽 보관함</string>
+    <string name="my_picks_top_app_bar_title">등록한 픽</string>
+
+    <!-- User Info -->
+    <string name="user_info_navigate_to_menu">메뉴로 이동하기 아이콘</string>
+    <string name="user_info_default_profile_image">기본 프로필 이미지</string>
+    <string name="user_info_pick_category_title">Pick</string>
+    <string name="user_info_favorite_menu_title">픽 보관함</string>
+    <string name="user_info_created_by_self_menu_title">등록한 픽</string>
+    <string name="user_info_favorite_menu_icon_description">픽 보관함 메뉴 아이콘</string>
+    <string name="user_info_created_by_self_menu_icon_description">등록한 픽 메뉴 아이콘</string>
+    <string name="user_info_setting_category_title">Settings</string>
+    <string name="user_info_setting_profile_menu_title">프로필</string>
+    <string name="user_info_setting_notification_menu_title">알림</string>
+    <string name="user_info_setting_profile_menu_icon_description">프로필 설정 메뉴 아이콘</string>
+    <string name="user_info_setting_notification_menu_icon_description">알림 메뉴 아이콘</string>
 </resources>

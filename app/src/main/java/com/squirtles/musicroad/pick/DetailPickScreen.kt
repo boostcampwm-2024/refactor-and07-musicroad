@@ -3,17 +3,21 @@ package com.squirtles.musicroad.pick
 import android.app.Activity
 import android.content.Context
 import android.widget.Toast
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.statusBarsPadding
-import androidx.compose.foundation.pager.HorizontalPager
-import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.CircularProgressIndicator
@@ -33,33 +37,39 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.luminance
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.util.lerp
 import androidx.core.view.WindowInsetsControllerCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.wear.compose.material.ExperimentalWearMaterialApi
+import androidx.wear.compose.material.FractionalThreshold
+import androidx.wear.compose.material.rememberSwipeableState
+import androidx.wear.compose.material.swipeable
 import com.squirtles.domain.model.Pick
 import com.squirtles.musicroad.R
-import com.squirtles.musicroad.create.VerticalSpacer
 import com.squirtles.musicroad.musicplayer.PlayerViewModel
 import com.squirtles.musicroad.pick.PickViewModel.Companion.DEFAULT_PICK
 import com.squirtles.musicroad.pick.components.CircleAlbumCover
 import com.squirtles.musicroad.pick.components.CommentText
 import com.squirtles.musicroad.pick.components.DeletePickDialog
 import com.squirtles.musicroad.pick.components.DetailPickTopAppBar
-import com.squirtles.musicroad.pick.components.MusicVideoKnob
 import com.squirtles.musicroad.pick.components.PickInformation
 import com.squirtles.musicroad.pick.components.SongInfo
+import com.squirtles.musicroad.pick.components.SwipeUpIcon
 import com.squirtles.musicroad.pick.components.music.MusicPlayer
 import com.squirtles.musicroad.ui.theme.Black
 import com.squirtles.musicroad.ui.theme.White
 import com.squirtles.musicroad.videoplayer.MusicVideoScreen
 import com.squirtles.musicroad.videoplayer.VideoPlayerViewModel
-import kotlin.math.absoluteValue
+import kotlin.math.roundToInt
 
+@OptIn(ExperimentalWearMaterialApi::class)
 @Composable
 fun DetailPickScreen(
     pickId: String,
@@ -70,11 +80,16 @@ fun DetailPickScreen(
     videoPlayerViewModel: VideoPlayerViewModel = hiltViewModel()
 ) {
     val context = LocalContext.current
-    val isFavorite = false
     val uiState by pickViewModel.detailPickUiState.collectAsStateWithLifecycle()
     var showDeletePickDialog by rememberSaveable { mutableStateOf(false) }
-
+    var showProcessIndicator by rememberSaveable { mutableStateOf(false) }
     var isMusicVideoAvailable by remember { mutableStateOf(false) }
+
+    BackHandler {
+        if (showProcessIndicator.not()) {
+            onBackClick()
+        }
+    }
 
     LaunchedEffect(Unit) {
         pickViewModel.fetchPick(pickId)
@@ -94,6 +109,7 @@ fun DetailPickScreen(
 
         is DetailPickUiState.Success -> {
             val pick = (uiState as DetailPickUiState.Success).pick
+            val isFavorite = (uiState as DetailPickUiState.Success).isFavorite
             val isCreatedBySelf = pickViewModel.getUserId() == pick.createdBy.userId
             val onActionClick: () -> Unit = {
                 when {
@@ -103,11 +119,19 @@ fun DetailPickScreen(
                     }
 
                     isFavorite -> {
-                        // TODO: 픽 담기 해제
+                        showProcessIndicator = true
+                        pickViewModel.deleteAtFavorite(pickId) {
+                            showProcessIndicator = false
+                            context.showShortToast(context.getString(R.string.success_delete_at_favorite))
+                        }
                     }
 
                     else -> {
-                        // TODO: 픽 담기
+                        showProcessIndicator = true
+                        pickViewModel.addToFavorite(pickId) {
+                            showProcessIndicator = false
+                            context.showShortToast(context.getString(R.string.success_add_to_favorite))
+                        }
                     }
                 }
             }
@@ -187,7 +211,7 @@ fun DetailPickScreen(
         }
 
         DetailPickUiState.Error -> {
-            // TODO: pick 로딩 실패
+            // TODO: pick 로딩 실패 or 담기 실패, 두 상태를 나눠야할지 고민
         }
     }
 
@@ -201,6 +225,22 @@ fun DetailPickScreen(
                 pickViewModel.deletePick(pickId)
             }
         )
+    }
+
+    if (showProcessIndicator) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Black.copy(alpha = 0.5F))
+                .clickable( // 클릭 효과 제거 및 클릭 이벤트 무시
+                    interactionSource = remember { MutableInteractionSource() },
+                    indication = null,
+                    onClick = {}
+                ),
+            contentAlignment = Alignment.Center
+        ) {
+            CircularProgressIndicator()
+        }
     }
 }
 
@@ -228,7 +268,6 @@ private fun DetailPick(
     )
 
     // PlayerViewModel Collect
-    val audioSessionId by playerViewModel.audioSessionId.collectAsStateWithLifecycle()
     val playerState by playerViewModel.playerState.collectAsStateWithLifecycle()
     val bufferPercentage by playerViewModel.bufferPercentage.collectAsStateWithLifecycle()
     val duration by playerViewModel.duration.collectAsStateWithLifecycle()
@@ -288,19 +327,21 @@ private fun DetailPick(
                         .fillMaxWidth()
                         .align(Alignment.CenterHorizontally)
                 ) {
-                    CircleAlbumCover(
-                        modifier = Modifier
-                            .size(320.dp)
-                            .align(Alignment.Center),
-                        song = pick.song,
-                        playerState = playerState,
-                        duration = duration,
-                        audioSessionId = audioSessionId,
-                        audioEffectColor = audioEffectColor,
-                        onSeekChanged = { timeMs ->
-                            playerViewModel.playerSeekTo(timeMs)
-                        },
-                    )
+                    if (playerState.isReady) {
+                        CircleAlbumCover(
+                            modifier = Modifier
+                                .size(320.dp)
+                                .align(Alignment.Center),
+                            song = pick.song,
+                            playerState = playerState,
+                            duration = duration,
+                            audioEffectColor = audioEffectColor,
+                            audioSessionId = { playerViewModel.audioSessionId },
+                            onSeekChanged = { timeMs ->
+                                playerViewModel.playerSeekTo(timeMs)
+                            },
+                        )
+                    }
 
                     if (isMusicVideoAvailable) {
                         MusicVideoKnob(
@@ -318,7 +359,7 @@ private fun DetailPick(
                 )
 
                 VerticalSpacer(height = 8)
-                
+
                 if (pick.song.previewUrl.isBlank().not()) {
                     MusicPlayer(
                         previewUrl = pick.song.previewUrl,
@@ -342,6 +383,10 @@ private fun DetailPick(
             }
         }
     }
+}
+
+fun Context.showShortToast(message: String) {
+    Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
 }
 
 @Preview

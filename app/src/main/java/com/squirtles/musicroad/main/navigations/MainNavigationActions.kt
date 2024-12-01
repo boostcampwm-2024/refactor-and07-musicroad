@@ -6,21 +6,28 @@ import androidx.navigation.NavHostController
 class MainNavigationActions(navController: NavHostController) {
     val navigateToMain: () -> Unit = {
         navController.navigate(MainDestinations.MAIN_ROUTE) {
-            popUpTo(navController.graph.findStartDestination().id) {
-                saveState = true
+            popUpTo(route = MainDestinations.MAIN_ROUTE) {
+                inclusive = true
             }
             launchSingleTop = true
-            restoreState = true
         }
     }
 
-    val navigateToFavorite: () -> Unit = {
-        navController.navigate(MainDestinations.FAVORITE_ROUTE) {
-            popUpTo(navController.graph.findStartDestination().id) {
-                saveState = true
-            }
+    val navigateToFavoritePicks: () -> Unit = {
+        navController.navigate(MainDestinations.FAVORITE_PICKS_ROUTE) {
             launchSingleTop = true
-            restoreState = true
+        }
+    }
+
+    val navigateToMyPicks: () -> Unit = {
+        navController.navigate(MainDestinations.MY_PICKS_ROUTE) {
+            launchSingleTop = true
+        }
+    }
+
+    val navigateToUserInfo: () -> Unit = {
+        navController.navigate(MainDestinations.USER_INFO_ROUTE) {
+            launchSingleTop = true
         }
     }
 
@@ -35,10 +42,7 @@ class MainNavigationActions(navController: NavHostController) {
     }
 
     val navigateToSearch: () -> Unit = {
-        navController.navigate(CreatePickDestinations.SEARCH_ROUTE) {
-            popUpTo(navController.graph.findStartDestination().id) {
-                saveState = true
-            }
+        navController.navigate(CreatePickDestinations.SEARCH_MUSIC_ROUTE) {
             launchSingleTop = true
         }
     }
@@ -51,11 +55,7 @@ class MainNavigationActions(navController: NavHostController) {
 
     val navigateToPickDetail: (String) -> Unit = { pickId ->
         navController.navigate(PickInfoDestinations.pickDetail(pickId)) {
-            popUpTo(navController.graph.findStartDestination().id) {
-                saveState = true
-            }
             launchSingleTop = true
-            restoreState = true
         }
     }
 }

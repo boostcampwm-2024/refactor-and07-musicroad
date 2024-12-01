@@ -1,4 +1,4 @@
-package com.squirtles.domain.usecase
+package com.squirtles.domain.usecase.music
 
 import com.squirtles.domain.repository.AppleMusicRepository
 import javax.inject.Inject

@@ -1,4 +1,4 @@
-package com.squirtles.domain.usecase
+package com.squirtles.domain.usecase.pick
 
 import com.squirtles.domain.repository.FirebaseRepository
 import javax.inject.Inject

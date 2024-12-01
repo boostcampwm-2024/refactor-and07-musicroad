@@ -8,11 +8,11 @@ import com.squirtles.domain.model.Creator
 import com.squirtles.domain.model.LocationPoint
 import com.squirtles.domain.model.Pick
 import com.squirtles.domain.model.Song
-import com.squirtles.domain.usecase.CreatePickUseCase
-import com.squirtles.domain.usecase.FetchLastLocationUseCase
-import com.squirtles.domain.usecase.GetCurrentUserUseCase
-import com.squirtles.domain.usecase.GetMusicVideoUseCase
-import com.squirtles.domain.usecase.SearchSongsUseCase
+import com.squirtles.domain.usecase.mypick.CreatePickUseCase
+import com.squirtles.domain.usecase.local.FetchLastLocationUseCase
+import com.squirtles.domain.usecase.music.FetchMusicVideoUrlUseCase
+import com.squirtles.domain.usecase.local.GetCurrentUserUseCase
+import com.squirtles.domain.usecase.music.SearchSongsUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.Job
@@ -30,7 +30,7 @@ import javax.inject.Inject
 class CreatePickViewModel @Inject constructor(
     fetchLastLocationUseCase: FetchLastLocationUseCase,
     private val searchSongsUseCase: SearchSongsUseCase,
-    private val getMusicVideoUseCase: GetMusicVideoUseCase,
+    private val fetchMusicVideoUseCase: FetchMusicVideoUseCase,
     private val createPickUseCase: CreatePickUseCase,
     private val getCurrentUserUseCase: GetCurrentUserUseCase
 ) : ViewModel() {
@@ -133,7 +133,7 @@ class CreatePickViewModel @Inject constructor(
                     return@launch
                 }
 
-                val musicVideo = getMusicVideoUseCase(song)
+                val musicVideo = fetchMusicVideoUseCase(song)
 
                 /* 등록 결과 - pick ID 담긴 Result */
                 val user = getCurrentUserUseCase()

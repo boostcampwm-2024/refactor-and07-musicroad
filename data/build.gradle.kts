@@ -39,6 +39,12 @@ android {
                 "FIRESTORE_DB_ID",
                 "\"${properties.getProperty("FIRESTORE_DB_ID_DEBUG")}\""
             )
+
+            buildConfigField(
+                "String",
+                "HTTPS_CALLABLE",
+                "\"${properties.getProperty("HTTPS_CALLABLE_DEBUG")}\""
+            )
         }
 
         release {
@@ -52,6 +58,12 @@ android {
                 "String",
                 "FIRESTORE_DB_ID",
                 "\"${properties.getProperty("FIRESTORE_DB_ID_RELEASE")}\""
+            )
+
+            buildConfigField(
+                "String",
+                "HTTPS_CALLABLE",
+                "\"${properties.getProperty("HTTPS_CALLABLE_RELEASE")}\""
             )
         }
     }
@@ -79,7 +91,9 @@ dependencies {
 
     // Firebase
     implementation(libs.firebase.firestore.ktx)
+    implementation(libs.firebase.functions.ktx)
     implementation(libs.geofire.android.common)
+    implementation(libs.kotlinx.coroutines.play.services)
 
     // Hilt
     implementation(libs.hilt.android)

@@ -33,7 +33,7 @@ fun BottomNavigation(
     lastLocation: Location?,
     onFavoriteClick: () -> Unit,
     onCenterClick: () -> Unit,
-    onSettingClick: () -> Unit
+    onUserInfoClick: () -> Unit
 ) {
     Box(
         modifier = modifier,
@@ -66,7 +66,7 @@ fun BottomNavigation(
                 modifier = Modifier
                     .weight(1f)
                     .fillMaxHeight()
-                    .clickable { onSettingClick() },
+                    .clickable { onUserInfoClick() },
                 contentAlignment = Alignment.CenterEnd
             ) {
                 Icon(
@@ -111,7 +111,7 @@ fun BottomNavigationLightPreview() {
             onFavoriteClick = {},
             lastLocation = null,
             onCenterClick = {},
-            onSettingClick = {}
+            onUserInfoClick = {}
         )
     }
 }
@@ -124,7 +124,7 @@ fun BottomNavigationDarkPreview() {
             onFavoriteClick = {},
             lastLocation = null,
             onCenterClick = {},
-            onSettingClick = {}
+            onUserInfoClick = {}
         )
     }
 }

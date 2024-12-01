@@ -23,19 +23,19 @@ import com.squirtles.musicroad.pick.components.music.visualizer.CircleVisualizer
 
 @Composable
 internal fun CircleAlbumCover(
-    modifier: Modifier = Modifier,
     song: Song,
     playerState: PlayerState,
     duration: Long,
-    audioSessionId: Int,
     audioEffectColor: Color,
+    audioSessionId: () -> Int,
     onSeekChanged: (Long) -> Unit,
+    modifier: Modifier = Modifier,
 ) {
     Box(
         modifier = modifier
     ) {
         CircleVisualizer(
-            audioSessionId = audioSessionId,
+            audioSessionId = audioSessionId(),
             color = audioEffectColor,
             sizeRatio = 0.5f,
             modifier = Modifier.align(Alignment.Center)

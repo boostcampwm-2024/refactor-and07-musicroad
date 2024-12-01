@@ -13,11 +13,12 @@ import androidx.navigation.navArgument
 import com.squirtles.musicroad.create.CreatePickScreen
 import com.squirtles.musicroad.create.CreatePickViewModel
 import com.squirtles.musicroad.create.SearchMusicScreen
-import com.squirtles.musicroad.favorite.FavoriteScreen
 import com.squirtles.musicroad.map.MapScreen
 import com.squirtles.musicroad.map.MapViewModel
 import com.squirtles.musicroad.pick.DetailPickScreen
+import com.squirtles.musicroad.picklist.PickListScreen
 import com.squirtles.musicroad.setting.SettingScreen
+import com.squirtles.musicroad.userinfo.UserInfoScreen
 
 @Composable
 fun MainNavGraph(
@@ -34,21 +35,41 @@ fun MainNavGraph(
         composable(MainDestinations.MAIN_ROUTE) {
             MapScreen(
                 mapViewModel = mapViewModel,
-                onFavoriteClick = {
-                    // FIXME: 임시로 화면 전환 막아놓음
-                },
+                onFavoriteClick = navigationActions.navigateToFavoritePicks,
                 onCenterClick = navigationActions.navigateToSearch,
-                onSettingClick = {
-                    // FIXME: 임시로 화면 전환 막아놓음
-                },
+                onUserInfoClick = navigationActions.navigateToUserInfo,
                 onPickSummaryClick = { pickId ->
                     navigationActions.navigateToPickDetail(pickId)
                 },
             )
         }
 
-        composable(MainDestinations.FAVORITE_ROUTE) {
-            FavoriteScreen()
+        composable(MainDestinations.FAVORITE_PICKS_ROUTE) {
+            PickListScreen(
+                isFavoritePicks = true,
+                onBackClick = { navController.navigateUp() },
+                onItemClick = { pickId ->
+                    navigationActions.navigateToPickDetail(pickId)
+                }
+            )
+        }
+
+        composable(MainDestinations.MY_PICKS_ROUTE) {
+            PickListScreen(
+                isFavoritePicks = false,
+                onBackClick = { navController.navigateUp() },
+                onItemClick = { pickId ->
+                    navigationActions.navigateToPickDetail(pickId)
+                }
+            )
+        }
+
+        composable(MainDestinations.USER_INFO_ROUTE) {
+            UserInfoScreen(
+                onBackClick = { navController.navigateUp() },
+                onFavoritePicksClick = navigationActions.navigateToFavoritePicks,
+                onMyPicksClick = navigationActions.navigateToMyPicks,
+            )
         }
 
         composable(MainDestinations.SETTING_ROUTE) {
@@ -57,30 +78,26 @@ fun MainNavGraph(
 
         navigation(
             startDestination = CreatePickDestinations.SEARCH_MUSIC_ROUTE,
-            route = CreatePickDestinations.SEARCH_ROUTE
+            route = CreatePickDestinations.CREATE_ROUTE
         ) {
             composable(CreatePickDestinations.SEARCH_MUSIC_ROUTE) {
                 val parentEntry = remember(it) {
-                    navController.getBackStackEntry(CreatePickDestinations.SEARCH_ROUTE)
+                    navController.getBackStackEntry(CreatePickDestinations.CREATE_ROUTE)
                 }
                 SearchMusicScreen(
                     createPickViewModel = hiltViewModel<CreatePickViewModel>(parentEntry),
-                    onBackClick = {
-                        navController.popBackStack()
-                    },
+                    onBackClick = { navController.navigateUp() },
                     onItemClick = navigationActions.navigateToCreate
                 )
             }
 
             composable(CreatePickDestinations.CREATE_PICK_ROUTE) {
                 val parentEntry = remember(it) {
-                    navController.getBackStackEntry(CreatePickDestinations.SEARCH_ROUTE)
+                    navController.getBackStackEntry(CreatePickDestinations.CREATE_ROUTE)
                 }
                 CreatePickScreen(
                     createPickViewModel = hiltViewModel<CreatePickViewModel>(parentEntry),
-                    onBackClick = {
-                        navController.popBackStack()
-                    },
+                    onBackClick = { navController.navigateUp() },
                     onCreateClick = { pickId ->
                         navigationActions.navigateToPickDetail(pickId)
                     }
@@ -96,8 +113,14 @@ fun MainNavGraph(
 
             DetailPickScreen(
                 pickId = pickId,
-                onBackClick = { navController.navigateUp() },
-                onDeleted = { mapViewModel.resetClickedMarkerState(it) }
+                onBackClick = { // 픽  등록에서 정보 화면으로 간 것이라면 뒤로 가기 시 메인으로, 아니라면 이전 화면으로
+                    if (navController.previousBackStackEntry?.destination?.route == CreatePickDestinations.CREATE_PICK_ROUTE) {
+                        navigationActions.navigateToMain()
+                    } else {
+                        navController.navigateUp()
+                    }
+                },
+                onDeleted = { mapViewModel.resetClickedMarkerState(it) },
             )
         }
     }
