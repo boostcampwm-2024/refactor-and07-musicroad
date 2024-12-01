@@ -31,11 +31,11 @@ class VideoPlayerViewModel @Inject constructor() : ViewModel() {
 
     private var lastPosition = 0L
 
-    fun initializePlayer(context: Context, pick: Pick) {
+    fun initializePlayer(context: Context, musicVideoUrl: String) {
         if (player.value != null) return
 
         val exoPlayer = ExoPlayer.Builder(context).build().run {
-            val mediaItem = MediaItem.fromUri(pick.musicVideoUrl)
+            val mediaItem = MediaItem.fromUri(musicVideoUrl)
             setMediaItem(mediaItem)
             prepare()
             playWhenReady = false

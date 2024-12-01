@@ -51,7 +51,7 @@ fun MusicVideoPlayer(
 
     AndroidView(
         factory = {
-            videoPlayerViewModel.initializePlayer(context, pick)
+            videoPlayerViewModel.initializePlayer(context, pick.musicVideoUrl)
             textureView.apply {
                 surfaceTextureListener = object : TextureView.SurfaceTextureListener {
                     override fun onSurfaceTextureAvailable(surfaceTexture: SurfaceTexture, width: Int, height: Int) {
