@@ -9,10 +9,10 @@ import com.squirtles.domain.model.Pick
 import com.squirtles.domain.model.Song
 import com.squirtles.domain.usecase.favoritepick.CreateFavoriteUseCase
 import com.squirtles.domain.usecase.favoritepick.DeleteFavoriteUseCase
+import com.squirtles.domain.usecase.local.GetCurrentUserUseCase
 import com.squirtles.domain.usecase.mypick.DeletePickUseCase
 import com.squirtles.domain.usecase.pick.FetchIsFavoriteUseCase
 import com.squirtles.domain.usecase.pick.FetchPickUseCase
-import com.squirtles.domain.usecase.local.GetCurrentUserUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
