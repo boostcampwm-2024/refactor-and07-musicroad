@@ -9,12 +9,14 @@ import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.ColorPainter
 import androidx.compose.ui.layout.ContentScale
@@ -26,6 +28,7 @@ import coil3.compose.AsyncImage
 import coil3.request.ImageRequest
 import com.squirtles.musicroad.R
 import com.squirtles.musicroad.common.toImageUrlWithSize
+import com.squirtles.musicroad.ui.theme.White
 
 @Composable
 internal fun MusicVideoKnob(
@@ -47,6 +50,7 @@ internal fun MusicVideoKnob(
         modifier = modifier
             .size(width = 16.dp, height = 320.dp)
             .offset(x = offsetX.dp),
+        color = White,
         shape = RoundedCornerShape(topStart = 30.dp, bottomStart = 30.dp)
     ) {
         AsyncImage(
@@ -54,7 +58,11 @@ internal fun MusicVideoKnob(
                 .data(thumbnail.toImageUrlWithSize(Size(560, 320)))
                 .build(),
             contentDescription = stringResource(R.string.pick_swipe_icon_description),
-            modifier = Modifier.fillMaxSize(),
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(vertical = 2.dp)
+                .padding(start = 2.dp)
+                .clip(RoundedCornerShape(topStart = 30.dp, bottomStart = 30.dp)),
             placeholder = ColorPainter(Color.Transparent),
             error = ColorPainter(Color.Transparent),
             contentScale = ContentScale.Crop,
