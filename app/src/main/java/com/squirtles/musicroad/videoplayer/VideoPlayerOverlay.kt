@@ -171,16 +171,18 @@ fun VideoPlayerOverlay(
 
             VerticalSpacer(24)
 
-            Text(
-                text = pick.comment,
-                color = White,
-                fontSize = 16.sp,
-                overflow = TextOverflow.Ellipsis,
-                maxLines = 2,
-                style = MaterialTheme.typography.titleLarge
-            )
+            if (pick.comment.isNotEmpty()) {
+                Text(
+                    text = pick.comment,
+                    color = White,
+                    fontSize = 16.sp,
+                    overflow = TextOverflow.Ellipsis,
+                    maxLines = 2,
+                    style = MaterialTheme.typography.titleLarge
+                )
 
-            VerticalSpacer(24)
+                VerticalSpacer(24)
+            }
 
             Row(
                 modifier = Modifier.fillMaxWidth(),
