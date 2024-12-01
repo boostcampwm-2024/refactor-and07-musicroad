@@ -24,6 +24,12 @@ class MainNavigationActions(navController: NavHostController) {
         }
     }
 
+    val navigateToUserInfo: () -> Unit = {
+        navController.navigate(MainDestinations.USER_INFO_ROUTE) {
+            launchSingleTop = true
+        }
+    }
+
     val navigateToSetting: () -> Unit = {
         navController.navigate(MainDestinations.SETTING_ROUTE) {
             popUpTo(navController.graph.findStartDestination().id) {

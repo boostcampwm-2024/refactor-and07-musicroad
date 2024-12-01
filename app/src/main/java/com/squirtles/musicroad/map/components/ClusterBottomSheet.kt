@@ -33,7 +33,7 @@ import com.squirtles.musicroad.common.CreatedBySelfText
 import com.squirtles.musicroad.common.FavoriteCountText
 import com.squirtles.musicroad.common.SongInfoText
 import com.squirtles.musicroad.common.TotalCountText
-import com.squirtles.musicroad.create.HorizontalSpacer
+import com.squirtles.musicroad.common.HorizontalSpacer
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)

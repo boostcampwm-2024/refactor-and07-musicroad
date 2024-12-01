@@ -18,6 +18,7 @@ import com.squirtles.musicroad.map.MapScreen
 import com.squirtles.musicroad.map.MapViewModel
 import com.squirtles.musicroad.pick.DetailPickScreen
 import com.squirtles.musicroad.setting.SettingScreen
+import com.squirtles.musicroad.userinfo.UserInfoScreen
 
 @Composable
 fun MainNavGraph(
@@ -36,9 +37,7 @@ fun MainNavGraph(
                 mapViewModel = mapViewModel,
                 onFavoriteClick = navigationActions.navigateToFavorite,
                 onCenterClick = navigationActions.navigateToSearch,
-                onSettingClick = {
-                    // FIXME: 임시로 화면 전환 막아놓음
-                },
+                onUserInfoClick = navigationActions.navigateToUserInfo,
                 onPickSummaryClick = { pickId ->
                     navigationActions.navigateToPickDetail(pickId)
                 },
@@ -51,6 +50,12 @@ fun MainNavGraph(
                 onItemClick = { pickId ->
                     navigationActions.navigateToPickDetail(pickId)
                 }
+            )
+        }
+
+        composable(MainDestinations.USER_INFO_ROUTE) {
+            UserInfoScreen(
+                onBackClick = { navController.navigateUp() },
             )
         }
 
