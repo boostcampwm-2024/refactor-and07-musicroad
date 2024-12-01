@@ -19,6 +19,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
@@ -110,13 +111,28 @@ fun DetailPickScreen(
                 }
             }
 
+            val pagerState = rememberPagerState(
+                pageCount = { if (isMusicVideoAvailable) 2 else 1 }
+            )
+
             // 비디오 플레이어 설정
             LaunchedEffect(pick) {
                 isMusicVideoAvailable = pick.musicVideoUrl.isNotEmpty()
             }
 
-            val pagerState = rememberPagerState(pageCount = { if (isMusicVideoAvailable) 2 else 1 })
-            HorizontalPager(state = pagerState) { page ->
+            LaunchedEffect(pagerState) {
+                pagerState.scrollToPage(page = pickViewModel.currentTab)
+            }
+
+            DisposableEffect(Unit) {
+                onDispose {
+                    pickViewModel.setCurrentTab(pagerState.currentPage)
+                }
+            }
+
+            HorizontalPager(
+                state = pagerState
+            ) { page ->
                 when (page) {
                     DETAIL_PICK_TAB -> {
                         DetailPick(
@@ -134,17 +150,19 @@ fun DetailPickScreen(
                     MUSIC_VIDEO_TAB -> {
                         MusicVideoScreen(
                             pick = pick,
-                            modifier = Modifier.graphicsLayer {
-                                val pageOffset = (
-                                        (pagerState.currentPage - page) + pagerState
-                                            .currentPageOffsetFraction
-                                        ).absoluteValue
-                                alpha = lerp(
-                                    start = 0.5f,
-                                    stop = 1f,
-                                    fraction = 1f - pageOffset.coerceIn(0f, 1f)
-                                )
-                            },
+                            modifier = Modifier
+                                .background(Black)
+                                .graphicsLayer {
+                                    val pageOffset = (
+                                            (pagerState.currentPage - page) + pagerState
+                                                .currentPageOffsetFraction
+                                            ).absoluteValue
+                                    alpha = lerp(
+                                        start = 0.5f,
+                                        stop = 1f,
+                                        fraction = 1f - pageOffset.coerceIn(0f, 1f)
+                                    )
+                                },
                             onBackClick = onBackClick,
                         )
                     }

@@ -26,6 +26,9 @@ class PickViewModel @Inject constructor(
     private val _detailPickUiState = MutableStateFlow<DetailPickUiState>(DetailPickUiState.Loading)
     val detailPickUiState = _detailPickUiState.asStateFlow()
 
+    private var _currentTab = 0
+    val currentTab get() = _currentTab
+
     fun getUserId() = getCurrentUserUseCase().userId
 
     fun fetchPick(pickId: String) {
@@ -51,6 +54,10 @@ class PickViewModel @Inject constructor(
                     _detailPickUiState.emit(DetailPickUiState.Error)
                 }
         }
+    }
+
+    fun setCurrentTab(index: Int) {
+        _currentTab = index
     }
 
     companion object {
