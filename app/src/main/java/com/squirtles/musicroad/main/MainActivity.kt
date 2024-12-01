@@ -85,27 +85,24 @@ class MainActivity : AppCompatActivity() {
                                 }
 
                                 is LoadingState.NetworkError -> {
-                                    Toast.makeText(this@MainActivity, getString(R.string.main_network_error_message), Toast.LENGTH_LONG)
-                                        .show()
+                                    showToast(getString(R.string.main_network_error_message))
                                     finish()
                                 }
 
                                 is LoadingState.UserNotFoundError -> {
-                                    Toast.makeText(this@MainActivity, getString(R.string.main_user_not_found_message), Toast.LENGTH_LONG)
-                                        .show()
+                                    showToast(getString(R.string.main_user_not_found_message))
                                     finish()
                                 }
 
                                 is LoadingState.CreatedUserError -> {
-                                    Toast.makeText(this@MainActivity, getString(R.string.main_create_user_fail_message), Toast.LENGTH_LONG)
-                                        .show()
+                                    showToast(getString(R.string.main_create_user_fail_message))
                                     finish()
                                 }
                             }
                         }
                     }
                 } catch (e: TimeoutCancellationException) {
-                    Toast.makeText(this@MainActivity, getString(R.string.main_network_error_message), Toast.LENGTH_LONG).show()
+                    showToast(getString(R.string.main_network_error_message))
                     finish()
                 }
             }
@@ -116,6 +113,10 @@ class MainActivity : AppCompatActivity() {
         return PERMISSIONS.all { permission ->
             PermissionChecker.checkSelfPermission(this, permission) == PermissionChecker.PERMISSION_GRANTED
         }
+    }
+
+    private fun Context.showToast(message: String) {
+        Toast.makeText(this, message, Toast.LENGTH_LONG).show()
     }
 
     companion object {
