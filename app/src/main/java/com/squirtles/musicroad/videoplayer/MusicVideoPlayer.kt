@@ -27,7 +27,9 @@ fun MusicVideoPlayer(
 ) {
     val context = LocalContext.current
     val player by videoPlayerViewModel.player.collectAsStateWithLifecycle()
+
     val textureView = remember { TextureView(context) }
+    val videoSize by videoPlayerViewModel.videoSize.collectAsStateWithLifecycle()
     var currentSurfaceTexture by remember { mutableStateOf<SurfaceTexture?>(null) }
 
     DisposableEffect(Unit) {
@@ -48,6 +50,12 @@ fun MusicVideoPlayer(
         }
     }
 
+    LaunchedEffect(videoSize) {
+        videoSize?.let { size ->
+            adjustVideoSize(size.width, size.height, textureView.width, textureView.height, textureView)
+        }
+    }
+
     AndroidView(
         factory = {
             videoPlayerViewModel.initializePlayer(context, pick)
@@ -55,11 +63,10 @@ fun MusicVideoPlayer(
                 surfaceTextureListener = object : TextureView.SurfaceTextureListener {
                     override fun onSurfaceTextureAvailable(surfaceTexture: SurfaceTexture, width: Int, height: Int) {
                         currentSurfaceTexture = surfaceTexture
-                        setVideoSize(width, height, textureView)
                     }
 
                     override fun onSurfaceTextureSizeChanged(surfaceTexture: SurfaceTexture, width: Int, height: Int) {
-                        setVideoSize(width, height, textureView)
+
                     }
 
                     override fun onSurfaceTextureDestroyed(surfaceTexture: SurfaceTexture): Boolean {
@@ -76,16 +83,18 @@ fun MusicVideoPlayer(
     )
 }
 
-private fun setVideoSize(width: Int, height: Int, textureView: TextureView) {
+fun adjustVideoSize(videoWidth: Int, videoHeight: Int, surfaceWidth: Int, surfaceHeight: Int, textureView: TextureView) {
+
     // 세로가 더 긴 경우 영상을 화면 크기에 맞게 확대
-    if (height > width) {
+    if (surfaceHeight > surfaceWidth) {
         val matrix = Matrix()
-        val scaleFactor = height.toFloat() / width.toFloat()
-        matrix.setScale(scaleFactor, 1f)
+        val scaleFactor = surfaceHeight.toFloat() / videoHeight.toFloat()
+        matrix.setScale(scaleFactor, scaleFactor)
 
         // 영상 중앙 정렬
-        val translateX = (width - width * scaleFactor) / 2f
+        val translateX = (surfaceWidth - surfaceWidth * scaleFactor) / 2f
         matrix.postTranslate(translateX, 0f)
+
         textureView.setTransform(matrix)
     }
 }

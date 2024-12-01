@@ -7,6 +7,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
+import androidx.media3.common.VideoSize
 import androidx.media3.exoplayer.ExoPlayer
 import com.squirtles.domain.model.Pick
 import com.squirtles.musicroad.R
@@ -29,6 +30,9 @@ class VideoPlayerViewModel @Inject constructor() : ViewModel() {
     private var _playerState = MutableStateFlow(VideoPlayerState.Playing) // 현재 플레이어의 상태
     val playerState = _playerState.asStateFlow()
 
+    private val _videoSize = MutableStateFlow<VideoSize?>(null)
+    val videoSize = _videoSize.asStateFlow()
+
     private var lastPosition = 0L
 
     fun initializePlayer(context: Context, pick: Pick) {
@@ -44,6 +48,10 @@ class VideoPlayerViewModel @Inject constructor() : ViewModel() {
         }
 
         exoPlayer.addListener(object : Player.Listener {
+            override fun onVideoSizeChanged(videoSize: VideoSize) {
+                _videoSize.value = videoSize
+            }
+
             override fun onPlaybackStateChanged(state: Int) {
                 if (state == Player.STATE_ENDED) {
                     viewModelScope.launch {
