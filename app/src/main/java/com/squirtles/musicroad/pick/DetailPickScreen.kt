@@ -115,9 +115,11 @@ fun DetailPickScreen(
         pickViewModel.fetchPick(pickId)
     }
 
-    BackHandler(enabled = showProcessIndicator) { }
-
-    BackHandler { onBackClick() }
+    BackHandler {
+        if (showProcessIndicator.not()) {
+            onBackClick()
+        }
+    }
 
     when (uiState) {
         DetailPickUiState.Loading -> {

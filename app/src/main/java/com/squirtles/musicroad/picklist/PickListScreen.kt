@@ -28,6 +28,7 @@ import com.squirtles.musicroad.common.Constants.COLOR_STOPS
 import com.squirtles.musicroad.common.Constants.DEFAULT_PADDING
 import com.squirtles.musicroad.common.DefaultTopAppBar
 import com.squirtles.musicroad.common.TotalCountText
+import com.squirtles.musicroad.common.VerticalSpacer
 import com.squirtles.musicroad.ui.theme.Primary
 import com.squirtles.musicroad.ui.theme.White
 
@@ -88,6 +89,8 @@ fun PickListScreen(
                             defaultColor = White,
                         )
 
+                        VerticalSpacer(8)
+
                         if (pickList.isEmpty()) {
                             Box(
                                 modifier = Modifier.fillMaxSize(),
@@ -125,7 +128,7 @@ fun PickListScreen(
 
                 PickListUiState.Error -> {
                     Text(
-                        text = "일시적인 오류가 발생했습니다.",
+                        text = stringResource(R.string.error_loading_pick_list),
                         modifier = Modifier.align(Alignment.Center),
                         color = White,
                         style = MaterialTheme.typography.bodyLarge
