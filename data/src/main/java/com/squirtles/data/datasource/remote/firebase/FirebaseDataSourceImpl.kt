@@ -212,32 +212,37 @@ class FirebaseDataSourceImpl @Inject constructor(
         // TODO: favorite에서 이 픽 id 삭제
     }
 
-    override suspend fun fetchIsFavorite(pickId: String, userId: String): Boolean {
-        val favoriteDocument = fetchFavoriteByPickIdAndUserId(pickId, userId)
-        return favoriteDocument.isEmpty.not()
-    }
+    override suspend fun fetchMyPicks(userId: String): List<Pick> {
+        val userDocument = fetchUserDocument(userId)
+        if (userDocument.exists().not()) throw Exception("No user info in database")
 
-    override suspend fun createFavorite(pickId: String, userId: String): Boolean {
-        return suspendCancellableCoroutine { continuation ->
-            val firebaseFavorite = FirebaseFavorite(
-                pickId = pickId,
-                userId = userId
-            )
+        val tasks = mutableListOf<Task<DocumentSnapshot>>()
+        val myPicks = mutableListOf<Pick>()
 
-            db.collection(COLLECTION_FAVORITES)
-                .add(firebaseFavorite)
-                .addOnSuccessListener {
-                    updateFavoriteCount(pickId) // 클라우드 함수 호출
-                    continuation.resume(true)
-                }
-                .addOnFailureListener { exception ->
-                    Log.e("FirebaseDataSourceImpl", "Failed to create favorite", exception)
-                    continuation.resumeWithException(exception)
-                }
+        try {
+            userDocument.toObject<FirebaseUser>()?.myPicks?.forEach { pickId ->
+                tasks.add(
+                    db.collection(COLLECTION_PICKS)
+                        .document(pickId)
+                        .get()
+                )
+            }
+            Tasks.whenAllComplete(tasks).await()
+        } catch (exception: Exception) {
+            Log.e("FirebaseDataSourceImpl", "Failed to fetch my picks", exception)
+            throw exception
         }
+
+        tasks.forEach { task ->
+            task.result.toObject<FirebasePick>()?.run {
+                myPicks.add(this.toPick().copy(id = task.result.id))
+            }
+        }
+
+        return myPicks
     }
 
-    override suspend fun getFavoritePicks(userId: String): List<Pick> {
+    override suspend fun fetchFavoritePicks(userId: String): List<Pick> {
         val favoriteDocuments = fetchFavoritesByUserId(userId)
 
         val tasks = mutableListOf<Task<DocumentSnapshot>>()
@@ -263,6 +268,31 @@ class FirebaseDataSourceImpl @Inject constructor(
         }
 
         return favorites
+    }
+
+    override suspend fun fetchIsFavorite(pickId: String, userId: String): Boolean {
+        val favoriteDocument = fetchFavoriteByPickIdAndUserId(pickId, userId)
+        return favoriteDocument.isEmpty.not()
+    }
+
+    override suspend fun createFavorite(pickId: String, userId: String): Boolean {
+        return suspendCancellableCoroutine { continuation ->
+            val firebaseFavorite = FirebaseFavorite(
+                pickId = pickId,
+                userId = userId
+            )
+
+            db.collection(COLLECTION_FAVORITES)
+                .add(firebaseFavorite)
+                .addOnSuccessListener {
+                    updateFavoriteCount(pickId) // 클라우드 함수 호출
+                    continuation.resume(true)
+                }
+                .addOnFailureListener { exception ->
+                    Log.e("FirebaseDataSourceImpl", "Failed to create favorite", exception)
+                    continuation.resumeWithException(exception)
+                }
+        }
     }
 
     override suspend fun deleteFavorite(pickId: String, userId: String): Boolean {
@@ -334,6 +364,20 @@ class FirebaseDataSourceImpl @Inject constructor(
         }
     }
 
+    private suspend fun fetchUserDocument(userId: String): DocumentSnapshot {
+        return suspendCancellableCoroutine { continuation ->
+            db.collection(COLLECTION_USERS).document(userId)
+                .get()
+                .addOnSuccessListener { document ->
+                    continuation.resume(document)
+                }
+                .addOnFailureListener { exception ->
+                    Log.e("FirebaseDataSourceImpl", "Failed to get user document", exception)
+                    continuation.resumeWithException(exception)
+                }
+        }
+    }
+
     private fun updateFavoriteCount(pickId: String) {
         CoroutineScope(Dispatchers.IO).launch {
             try {
@@ -353,6 +397,7 @@ class FirebaseDataSourceImpl @Inject constructor(
     companion object {
         private const val COLLECTION_FAVORITES = "favorites"
         private const val COLLECTION_PICKS = "picks"
+        private const val COLLECTION_USERS = "users"
 
         private const val FIELD_PICK_ID = "pickId"
         private const val FIELD_USER_ID = "userId"

@@ -3,12 +3,12 @@ package com.squirtles.musicroad.main
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.squirtles.domain.exception.FirebaseException
-import com.squirtles.domain.usecase.CreateUserUseCase
-import com.squirtles.domain.usecase.FetchUserUseCase
-import com.squirtles.domain.usecase.GetUserIdFromLocalStorageUseCase
+import com.squirtles.domain.usecase.local.GetUserIdFromLocalStorageUseCase
+import com.squirtles.domain.usecase.user.CreateUserUseCase
+import com.squirtles.domain.usecase.user.FetchUserUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -28,7 +28,7 @@ class MainViewModel @Inject constructor(
 ) : ViewModel() {
 
     private val _loadingState = MutableStateFlow<LoadingState>(LoadingState.Loading)
-    val loadingState: StateFlow<LoadingState> = _loadingState
+    val loadingState = _loadingState.asStateFlow()
 
     private val _localUserId = getUserIdFromLocalStorageUseCase()
 

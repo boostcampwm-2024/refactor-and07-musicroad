@@ -88,7 +88,8 @@ fun DetailPickScreen(
     val contentHeightPx = screenHeightPx + statusBarHeight
 
     val initialOffset by videoPlayerViewModel.swipeState.collectAsStateWithLifecycle()
-    val swipeableState = rememberSwipeableState(initialValue = if (initialOffset != 0f) contentHeightPx else 0f)
+    val swipeableState =
+        rememberSwipeableState(initialValue = if (initialOffset != 0f) contentHeightPx else 0f)
     val anchors = mapOf(contentHeightPx to 0f, 0f to 1f)
     val swipeableModifier = Modifier.swipeable(
         state = swipeableState,
@@ -114,7 +115,11 @@ fun DetailPickScreen(
         pickViewModel.fetchPick(pickId)
     }
 
-    BackHandler(enabled = showProcessIndicator) { }
+    BackHandler {
+        if (showProcessIndicator.not()) {
+            onBackClick()
+        }
+    }
 
     when (uiState) {
         DetailPickUiState.Loading -> {
@@ -187,7 +192,8 @@ fun DetailPickScreen(
 
                 if (isMusicVideoAvailable && videoPlayerViewModel.showMusicVideo) {
                     videoPlayerViewModel.setSwipePlayState(swipeableState.offset.value < contentHeightPx * 0.9f)
-                    val alpha = (1 - (swipeableState.offset.value / contentHeightPx)).coerceIn(0f, 1f)
+                    val alpha =
+                        (1 - (swipeableState.offset.value / contentHeightPx)).coerceIn(0f, 1f)
 
                     MusicVideoScreen(
                         pick = pick,
@@ -338,7 +344,7 @@ private fun DetailPick(
                     dynamicOnBackgroundColor = onDynamicBackgroundColor
                 )
 
-                if(playerState.isReady){
+                if (playerState.isReady) {
                     CircleAlbumCover(
                         modifier = Modifier
                             .size(320.dp)

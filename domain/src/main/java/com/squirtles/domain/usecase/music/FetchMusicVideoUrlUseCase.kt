@@ -1,10 +1,10 @@
-package com.squirtles.domain.usecase
+package com.squirtles.domain.usecase.music
 
 import com.squirtles.domain.model.Song
 import com.squirtles.domain.repository.AppleMusicRepository
 import javax.inject.Inject
 
-class GetMusicVideoUrlUseCase @Inject constructor(
+class FetchMusicVideoUrlUseCase @Inject constructor(
     private val appleMusicRepository: AppleMusicRepository
 ) {
     suspend operator fun invoke(song: Song): String {
