@@ -95,6 +95,8 @@ internal fun UserInfoMenus(
                 )
             }
         }
+
+        VerticalSpacer(20)
     }
 }
 

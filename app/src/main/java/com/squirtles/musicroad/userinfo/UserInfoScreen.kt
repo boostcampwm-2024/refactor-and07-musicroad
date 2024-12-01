@@ -7,7 +7,9 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.MusicNote
 import androidx.compose.material.icons.outlined.Archive
@@ -34,6 +36,8 @@ fun UserInfoScreen(
     onFavoritePicksClick: () -> Unit,
     onMyPicksClick: () -> Unit,
 ) {
+    val scrollState = rememberScrollState()
+
     Scaffold(
         topBar = {
             DefaultTopAppBar(
@@ -49,6 +53,7 @@ fun UserInfoScreen(
                 .padding(innerPadding)
         ) {
             Column(
+                modifier = Modifier.verticalScroll(scrollState),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 VerticalSpacer(16)
@@ -81,8 +86,6 @@ fun UserInfoScreen(
                         )
                     )
                 )
-
-                VerticalSpacer(20)
 
                 UserInfoMenus(
                     title = stringResource(R.string.user_info_setting_category_title),
