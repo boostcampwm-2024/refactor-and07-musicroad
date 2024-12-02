@@ -49,7 +49,7 @@ class MainActivity : AppCompatActivity() {
         if (!checkSelfPermission()) {
             requestPermissions(PERMISSIONS, REQUEST_PERMISSION_CODE)
         } else {
-            setMusicRoad()
+            setMusicRoadContent()
         }
     }
 
@@ -66,7 +66,7 @@ class MainActivity : AppCompatActivity() {
 
         if (requestCode == REQUEST_PERMISSION_CODE) {
             if (deniedPermission.isEmpty()) { // 모든 권한이 허용된 경우
-                setMusicRoad()
+                setMusicRoadContent()
             } else { // 권한이 하나라도 거부된 경우
                 if (shouldShowRequestPermissionRationale(deniedPermission[0])) { // 권한 요청 가능 시 재요청
                     showNeedPermissionDialog(true) {
@@ -85,7 +85,7 @@ class MainActivity : AppCompatActivity() {
         super.onResume()
 
         if (checkSelfPermission()) {
-            setMusicRoad()
+            setMusicRoadContent()
         } else if (mainViewModel.canRequestPermission.not()) {
             showPermissionSnackbar()
         }
@@ -144,7 +144,7 @@ class MainActivity : AppCompatActivity() {
         Toast.makeText(this, message, Toast.LENGTH_LONG).show()
     }
 
-    private fun setMusicRoad() {
+    private fun setMusicRoadContent() {
         setContent {
             MusicRoadTheme {
                 val navController = rememberNavController()
