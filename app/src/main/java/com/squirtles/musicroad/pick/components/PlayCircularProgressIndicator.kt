@@ -1,5 +1,6 @@
 package com.squirtles.musicroad.pick.components
 
+import android.util.Half.toFloat
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.aspectRatio
@@ -14,6 +15,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.squirtles.musicroad.ui.theme.White
 import kotlin.math.atan2
+import kotlin.math.hypot
 
 @Composable
 internal fun PlayCircularProgressIndicator(
@@ -21,6 +23,7 @@ internal fun PlayCircularProgressIndicator(
     currentTime: () -> Float,
     strokeWidth: Dp,
     duration: Float,
+    innerRadiusRatio: Float = 0.5f, // 터치 비활성 비율
     onSeekChanged: (Float) -> Unit
 ) {
     Box(
@@ -31,12 +34,12 @@ internal fun PlayCircularProgressIndicator(
                     val centerX = size.width / 2
                     val centerY = size.height / 2
 
+                    val distanceFromCenter = hypot(offset.x - centerX, offset.y - centerY) // 터치 좌표랑 중심 사이
+                    val innerRadius = size.width * innerRadiusRatio / 2
+                    if (distanceFromCenter < innerRadius) return@detectTapGestures // 중앙의 반경 내 터치 무시
+
                     // 중심 기준 터치좌표의 각도
-                    val angle = Math
-                        .toDegrees(
-                            atan2(offset.y - centerY, offset.x - centerX).toDouble()
-                        )
-                        .toFloat()
+                    val angle = Math.toDegrees(atan2(offset.y - centerY, offset.x - centerX).toDouble()).toFloat()
 
                     // 원의 위쪽 점(12시 방향)을 기준으로 시계 방향
                     val normalizedAngle = ((angle + 360) % 360 + 90) % 360
