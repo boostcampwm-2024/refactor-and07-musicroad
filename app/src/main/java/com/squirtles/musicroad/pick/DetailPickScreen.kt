@@ -26,6 +26,7 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -102,6 +103,7 @@ fun DetailPickScreen(
             val pick = (uiState as DetailPickUiState.Success).pick
             val isFavorite = (uiState as DetailPickUiState.Success).isFavorite
             val isCreatedBySelf = pickViewModel.getUserId() == pick.createdBy.userId
+            var favoriteCount by rememberSaveable { mutableIntStateOf(pick.favoriteCount) }
             val onActionClick: () -> Unit = {
                 when {
                     isCreatedBySelf -> {
@@ -113,6 +115,7 @@ fun DetailPickScreen(
                         showProcessIndicator = true
                         pickViewModel.deleteAtFavorite(pickId) {
                             showProcessIndicator = false
+                            favoriteCount -= 1
                             context.showShortToast(context.getString(R.string.success_delete_at_favorite))
                         }
                     }
@@ -121,6 +124,7 @@ fun DetailPickScreen(
                         showProcessIndicator = true
                         pickViewModel.addToFavorite(pickId) {
                             showProcessIndicator = false
+                            favoriteCount += 1
                             context.showShortToast(context.getString(R.string.success_add_to_favorite))
                         }
                     }
@@ -154,8 +158,9 @@ fun DetailPickScreen(
                         DetailPick(
                             pick = pick,
                             isCreatedBySelf = isCreatedBySelf,
-                            isFavorite = isFavorite, // TODO
+                            isFavorite = isFavorite,
                             userName = pick.createdBy.userName,
+                            favoriteCount = favoriteCount,
                             isMusicVideoAvailable = isMusicVideoAvailable,
                             playerViewModel = playerViewModel,
                             onBackClick = onBackClick,
@@ -216,6 +221,7 @@ fun DetailPickScreen(
                 isCreatedBySelf = false,
                 isFavorite = false,
                 userName = "",
+                favoriteCount = 0,
                 isMusicVideoAvailable = false,
                 playerViewModel = playerViewModel,
                 onBackClick = onBackClick,
@@ -259,6 +265,7 @@ private fun DetailPick(
     isCreatedBySelf: Boolean,
     isFavorite: Boolean,
     userName: String,
+    favoriteCount: Int,
     isMusicVideoAvailable: Boolean,
     playerViewModel: PlayerViewModel,
     onBackClick: () -> Unit,
@@ -360,7 +367,10 @@ private fun DetailPick(
                     }
                 }
 
-                PickInformation(formattedDate = pick.createdAt, favoriteCount = pick.favoriteCount)
+                PickInformation(
+                    formattedDate = pick.createdAt,
+                    favoriteCount = favoriteCount
+                )
 
                 CommentText(
                     comment = pick.comment,
@@ -406,6 +416,7 @@ private fun DetailPickPreview() {
         isCreatedBySelf = false,
         isFavorite = false,
         userName = "짱구",
+        favoriteCount = 0,
         isMusicVideoAvailable = true,
         playerViewModel = PlayerViewModel(),
         onBackClick = {},
