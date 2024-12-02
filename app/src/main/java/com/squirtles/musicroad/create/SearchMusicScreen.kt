@@ -17,7 +17,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
@@ -44,6 +43,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
@@ -51,7 +51,11 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.paging.LoadState
+import androidx.paging.compose.LazyPagingItems
+import androidx.paging.compose.collectAsLazyPagingItems
 import com.squirtles.domain.model.Song
+import com.squirtles.musicroad.R
 import com.squirtles.musicroad.common.AlbumImage
 import com.squirtles.musicroad.common.Constants.COLOR_STOPS
 import com.squirtles.musicroad.common.Constants.REQUEST_IMAGE_SIZE_DEFAULT
@@ -67,9 +71,9 @@ fun SearchMusicScreen(
     onItemClick: () -> Unit,
 ) {
     val focusManager = LocalFocusManager.current
-
-    val uiState by createPickViewModel.searchUiState.collectAsStateWithLifecycle()
     val searchText by createPickViewModel.searchText.collectAsStateWithLifecycle()
+    val searchUiState by createPickViewModel.searchUiState.collectAsStateWithLifecycle()
+    val searchResult = createPickViewModel.searchResult.collectAsLazyPagingItems()
 
     Scaffold(
         contentWindowInsets = WindowInsets.navigationBars,
@@ -89,7 +93,7 @@ fun SearchMusicScreen(
             }
         },
     ) { innerPadding ->
-        // 배경색 설정
+
         Box(
             modifier = Modifier
                 .fillMaxSize()
@@ -97,42 +101,31 @@ fun SearchMusicScreen(
                 .padding(innerPadding)
                 .addFocusCleaner(focusManager)
         ) {
-            when (uiState) {
-                SearchUiState.Init -> {
-                    // TODO: HOT 리스트
+            if (searchResult.loadState.refresh is LoadState.Loading ||
+                searchResult.loadState.append is LoadState.Loading
+            ) {
+                LinearProgressIndicator(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 10.dp),
+                    trackColor = Gray
+                )
+            }
+
+            // 검색 결과
+            when (searchUiState) {
+                is SearchUiState.HotResult -> {
+                    // TODO HOT 리스트
                 }
 
-                is SearchUiState.Loading -> {
-                    LinearProgressIndicator(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(top = 10.dp),
-                        trackColor = Gray
-                    )
-                    (uiState as SearchUiState.Loading).prevData?.let {
-                        SearchResult(
-                            searchResult = it,
-                            onItemClick = { song ->
-                                createPickViewModel.onSongItemClick(song)
-                                onItemClick()
-                            }
-                        )
-                    }
-                }
-
-                is SearchUiState.Success -> {
+                is SearchUiState.SearchResult -> {
                     SearchResult(
-                        searchResult = (uiState as SearchUiState.Success).data,
+                        searchResult = searchResult,
                         onItemClick = { song ->
                             createPickViewModel.onSongItemClick(song)
                             onItemClick()
                         }
                     )
-                }
-
-                SearchUiState.Error -> {
-                    // TODO: 검색 결과가 없는 경우. 일단은 텍스트로만 처리해뒀습니다.
-                    Text("검색 결과가 없습니다.", color = White)
                 }
             }
         }
@@ -162,7 +155,7 @@ private fun SearchTopBar(
         ) {
             Icon(
                 imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                contentDescription = "뒤로 가기 버튼",
+                contentDescription = stringResource(id = R.string.top_app_bar_back_description),
                 tint = White
             )
         }
@@ -173,7 +166,7 @@ private fun SearchTopBar(
             onValueChange = onValueChange,
             modifier = Modifier.weight(1f),
             placeholder = {
-                Text("검색")
+                Text(stringResource(id = R.string.search))
             },
             // 키보드 완료버튼 -> Search로 변경, 누르면 Search 동작 실행
             keyboardOptions = KeyboardOptions(
@@ -197,14 +190,14 @@ private fun SearchTopBar(
                 unfocusedIndicatorColor = White,
                 focusedPlaceholderColor = Gray,
                 unfocusedPlaceholderColor = White
-            ),
+            )
         )
     }
 }
 
 @Composable
 private fun SearchResult(
-    searchResult: List<Song>,
+    searchResult: LazyPagingItems<Song>,
     onItemClick: (Song) -> Unit
 ) {
     Column(
@@ -213,24 +206,37 @@ private fun SearchResult(
         VerticalSpacer(20)
 
         TextWithColorAndStyle(
-            text = "Result",
+            text = stringResource(id = R.string.result),
             textColor = White,
             textStyle = MaterialTheme.typography.titleLarge,
             modifier = Modifier.padding(start = DefaultPadding)
         )
         VerticalSpacer(20)
 
-        LazyColumn(
-            modifier = Modifier.padding(bottom = DefaultPadding)
-        ) {
-            items(
-                items = searchResult,
-                key = { it.id }
-            ) { song ->
-                SongItem(song) {
-                    onItemClick(song)
+        LazyColumn(modifier = Modifier.padding(bottom = DefaultPadding)) {
+            items(searchResult.itemCount) { index ->
+                searchResult[index]?.let {
+                    SongItem(it) {
+                        onItemClick(it)
+                    }
                 }
             }
+        }
+
+        if (searchResult.loadState.refresh is LoadState.NotLoading) {
+            if (searchResult.itemCount == 0) {
+                Text(
+                    text = stringResource(id = R.string.search_music_empty_description),
+                    modifier = Modifier.padding(horizontal = DefaultPadding),
+                    color = White
+                )
+            }
+        } else if (searchResult.loadState.refresh is LoadState.Error) {
+            Text(
+                text = stringResource(id = R.string.search_music_error_description),
+                modifier = Modifier.padding(horizontal = DefaultPadding),
+                color = White
+            )
         }
     }
 }

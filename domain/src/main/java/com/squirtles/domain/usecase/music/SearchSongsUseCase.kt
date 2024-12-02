@@ -6,5 +6,5 @@ import javax.inject.Inject
 class SearchSongsUseCase @Inject constructor(
     private val appleMusicRepository: AppleMusicRepository
 ) {
-    suspend operator fun invoke(searchText: String) = appleMusicRepository.searchSongs(searchText)
+    operator fun invoke(searchText: String) = appleMusicRepository.searchSongs(searchText)
 }

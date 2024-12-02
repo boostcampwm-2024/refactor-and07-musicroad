@@ -1,12 +1,16 @@
 package com.squirtles.data.datasource.remote.applemusic
 
+import androidx.paging.Pager
+import androidx.paging.PagingConfig
+import androidx.paging.PagingData
+import com.squirtles.data.datasource.remote.applemusic.SearchSongsPagingSource.Companion.SEARCH_PAGE_SIZE
 import com.squirtles.data.datasource.remote.applemusic.api.AppleMusicApi
 import com.squirtles.data.datasource.remote.applemusic.model.SearchResponse
 import com.squirtles.data.mapper.toMusicVideo
-import com.squirtles.data.mapper.toSong
 import com.squirtles.domain.datasource.AppleMusicRemoteDataSource
 import com.squirtles.domain.model.MusicVideo
 import com.squirtles.domain.model.Song
+import kotlinx.coroutines.flow.Flow
 import retrofit2.Response
 import javax.inject.Inject
 
@@ -14,14 +18,14 @@ class AppleMusicDataSourceImpl @Inject constructor(
     private val appleMusicApi: AppleMusicApi
 ) : AppleMusicRemoteDataSource {
 
-    /**
-     * Apple Music API Search
-     */
-    override suspend fun searchSongs(searchText: String): List<Song> {
-        val searchResult = requestSearchApi(searchText, "songs")
-        return searchResult.results.songs?.data?.map {
-            it.toSong()
-        } ?: emptyList()
+    override fun searchSongs(searchText: String): Flow<PagingData<Song>> {
+        return Pager(
+            config = PagingConfig(
+                pageSize = SEARCH_PAGE_SIZE,
+                enablePlaceholders = false
+            ),
+            pagingSourceFactory = { SearchSongsPagingSource(appleMusicApi, searchText) }
+        ).flow
     }
 
     override suspend fun searchSongById(songId: String): Song {
@@ -36,17 +40,13 @@ class AppleMusicDataSourceImpl @Inject constructor(
     }
 
     private suspend fun requestSearchApi(searchText: String, types: String): SearchResponse {
-        val queryMap = mapOf(
-            "term" to searchText,
-            "limit" to "10",
-            "offset" to "0"
-        )
-
         return checkResponse(
             appleMusicApi.searchSongs(
                 storefront = DEFAULT_STOREFRONT,
                 types = types,
-                queryMap = queryMap
+                term = searchText,
+                limit = 10,
+                offset = "0",
             )
         )
     }

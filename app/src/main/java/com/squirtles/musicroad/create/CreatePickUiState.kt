@@ -1,10 +1,8 @@
 package com.squirtles.musicroad.create
 
-sealed class SearchUiState<out T> {
-    data object Init : SearchUiState<Nothing>()
-    data class Loading<T>(val prevData: T?) : SearchUiState<T>()
-    data class Success<T>(val data: T) : SearchUiState<T>()
-    data object Error : SearchUiState<Nothing>()
+sealed class SearchUiState {
+    data object HotResult : SearchUiState()
+    data object SearchResult : SearchUiState()
 }
 
 sealed class CreateUiState<out T> {

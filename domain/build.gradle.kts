@@ -39,4 +39,5 @@ dependencies {
     androidTestImplementation(libs.androidx.espresso.core)
 
     implementation(libs.inject)
+    implementation(libs.androidx.paging.runtime)
 }

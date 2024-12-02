@@ -1,21 +1,19 @@
 package com.squirtles.data.repository
 
+import androidx.paging.PagingData
 import com.squirtles.domain.datasource.AppleMusicRemoteDataSource
 import com.squirtles.domain.exception.AppleMusicException
 import com.squirtles.domain.model.MusicVideo
 import com.squirtles.domain.model.Song
 import com.squirtles.domain.repository.AppleMusicRepository
+import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 
 class AppleMusicRepositoryImpl @Inject constructor(
     private val appleMusicDataSource: AppleMusicRemoteDataSource
 ) : AppleMusicRepository {
 
-    override suspend fun searchSongs(searchText: String): Result<List<Song>> {
-        return handleResult(AppleMusicException.NotFoundException()) {
-            appleMusicDataSource.searchSongs(searchText).ifEmpty { null }
-        }
-    }
+    override fun searchSongs(searchText: String): Flow<PagingData<Song>> = appleMusicDataSource.searchSongs(searchText)
 
     override suspend fun searchSongById(songId: String): Result<Song> {
         TODO("Not yet implemented")
