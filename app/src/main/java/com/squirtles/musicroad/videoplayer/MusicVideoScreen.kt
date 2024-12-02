@@ -1,5 +1,6 @@
 package com.squirtles.musicroad.videoplayer
 
+import androidx.activity.compose.BackHandler
 import androidx.annotation.OptIn
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -22,6 +23,8 @@ fun MusicVideoScreen(
     videoPlayerViewModel: VideoPlayerViewModel = hiltViewModel()
 ) {
     val isLoading by videoPlayerViewModel.isLoading.collectAsStateWithLifecycle()
+
+    BackHandler { onBackClick() }
 
     Box(modifier = modifier.fillMaxSize()) {
         MusicVideoPlayer(pick)
