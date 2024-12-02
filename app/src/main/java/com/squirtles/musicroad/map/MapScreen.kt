@@ -38,7 +38,7 @@ fun MapScreen(
     mapViewModel: MapViewModel,
     onFavoriteClick: () -> Unit,
     onCenterClick: () -> Unit,
-    onUserInfoClick: () -> Unit,
+    onUserInfoClick: (String) -> Unit,
     onPickSummaryClick: (String) -> Unit,
     playerViewModel: PlayerViewModel = hiltViewModel()
 ) {
@@ -138,7 +138,7 @@ fun MapScreen(
                     },
                     onUserInfoClick = {
                         playerViewModel.pause()
-                        onUserInfoClick()
+                        onUserInfoClick(mapViewModel.getUserId())
                     }
                 )
             }

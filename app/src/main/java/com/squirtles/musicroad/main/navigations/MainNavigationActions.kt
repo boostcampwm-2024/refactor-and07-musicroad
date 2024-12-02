@@ -24,8 +24,8 @@ class MainNavigationActions(navController: NavHostController) {
         }
     }
 
-    val navigateToProfile: () -> Unit = {
-        navController.navigate(ProfileDestination.PROFILE_ROUTE) {
+    val navigateToProfile: (String) -> Unit = { userId ->
+        navController.navigate(ProfileDestination.profile(userId)) {
             launchSingleTop = true
         }
     }

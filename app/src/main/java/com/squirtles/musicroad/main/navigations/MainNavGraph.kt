@@ -38,7 +38,9 @@ fun MainNavGraph(
                 mapViewModel = mapViewModel,
                 onFavoriteClick = navigationActions.navigateToFavoritePicks,
                 onCenterClick = navigationActions.navigateToSearch,
-                onUserInfoClick = navigationActions.navigateToProfile,
+                onUserInfoClick = { userId ->
+                    navigationActions.navigateToProfile(userId)
+                },
                 onPickSummaryClick = { pickId ->
                     navigationActions.navigateToPickDetail(pickId)
                 },
@@ -65,8 +67,14 @@ fun MainNavGraph(
             )
         }
 
-        composable(ProfileDestination.PROFILE_ROUTE) {
+        composable(
+            route = ProfileDestination.profile("{userId}"),
+            arguments = listOf(navArgument("userId") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val userId = backStackEntry.arguments?.getString("userId") ?: ""
+
             ProfileScreen(
+                userId = userId,
                 onBackClick = { navController.navigateUp() },
                 onFavoritePicksClick = navigationActions.navigateToFavoritePicks,
                 onMyPicksClick = navigationActions.navigateToMyPicks,
