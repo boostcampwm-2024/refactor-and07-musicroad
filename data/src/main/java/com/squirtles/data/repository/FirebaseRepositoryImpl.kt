@@ -25,6 +25,12 @@ class FirebaseRepositoryImpl @Inject constructor(
         }
     }
 
+    override suspend fun updateUserName(userId: String, newUserName: String): Result<Boolean> {
+        return handleResult {
+            firebaseRemoteDataSource.updateUserName(userId, newUserName)
+        }
+    }
+
     override suspend fun fetchPick(pickID: String): Result<Pick> {
         return handleResult(FirebaseException.NoSuchPickException()) {
             firebaseRemoteDataSource.fetchPick(pickID)

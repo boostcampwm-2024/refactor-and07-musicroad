@@ -1,6 +1,7 @@
 package com.squirtles.musicroad.setting
 
 import android.content.Context
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -22,7 +23,9 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
@@ -35,6 +38,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.squirtles.musicroad.R
 import com.squirtles.musicroad.common.Constants.COLOR_STOPS
 import com.squirtles.musicroad.profile.ProfileViewModel
@@ -48,14 +52,27 @@ internal fun SettingProfileScreen(
     onBackClick: () -> Unit,
     profileViewModel: ProfileViewModel = hiltViewModel()
 ) {
+    val context = LocalContext.current
     val userName = remember { mutableStateOf(profileViewModel.currentUser.userName) }
     val nickNameErrorMessage = remember { mutableStateOf("") }
+    val updateSuccess by profileViewModel.updateSuccess.collectAsStateWithLifecycle(false)
+
+    LaunchedEffect(updateSuccess) {
+        if (updateSuccess) {
+            Toast.makeText(
+                context,
+                context.getString(R.string.setting_profile_update_nickname_success),
+                Toast.LENGTH_LONG
+            ).show()
+            onBackClick.invoke()
+        }
+    }
 
     Scaffold(
         topBar = {
             SettingProfileAppBar(
-                confirmEnabled = nickNameErrorMessage.value.isNotEmpty(),
-                onConfirmClick = {},
+                confirmEnabled = nickNameErrorMessage.value.isEmpty(),
+                onConfirmClick = { profileViewModel.updateUsername(userName.value) },
                 onBackClick = onBackClick
             )
         }
@@ -104,7 +121,7 @@ private fun SettingProfileAppBar(
                 Icon(
                     imageVector = Icons.Default.Check,
                     contentDescription = stringResource(R.string.setting_profile_confirm_icon_description),
-                    tint = White
+                    tint = if (confirmEnabled) White else Gray
                 )
             }
         },

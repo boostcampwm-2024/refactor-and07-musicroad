@@ -99,4 +99,5 @@
     <string name="setting_profile_nickname_message_length_fail_min">닉네임을 2글자 이상 입력해주세요.</string>
     <string name="setting_profile_nickname_message_length_fail_max">닉네임은 10글자 이하로 가능합니다.</string>
     <string name="setting_profile_confirm_icon_description">변경사항 적용</string>
+    <string name="setting_profile_update_nickname_success">닉네임이 변경되었습니다.</string>
 </resources>

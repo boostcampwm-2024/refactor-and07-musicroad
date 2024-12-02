@@ -73,6 +73,19 @@ class FirebaseDataSourceImpl @Inject constructor(
         }
     }
 
+    override suspend fun updateUserName(userId: String, newUserName: String): Boolean {
+        return suspendCancellableCoroutine { continuation ->
+            db.collection("users").document(userId)
+                .update("name", newUserName)
+                .addOnSuccessListener {
+                    continuation.resume(true)
+                }
+                .addOnFailureListener { exception ->
+                    continuation.resumeWithException(exception)
+                }
+        }
+    }
+
     /**
      * Fetches a pick by ID from Firestore.
      * @param pickID The ID of the pick to fetch.
