@@ -34,7 +34,7 @@ fun MusicPlayer(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 1.dp, vertical = DEFAULT_PADDING)
+                .padding(horizontal = 8.dp, vertical = DEFAULT_PADDING)
                 .background(
                     color = PlayerBackground,
                     shape = RoundedCornerShape(16.dp)
