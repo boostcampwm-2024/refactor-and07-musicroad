@@ -17,9 +17,9 @@ import com.squirtles.musicroad.map.MapScreen
 import com.squirtles.musicroad.map.MapViewModel
 import com.squirtles.musicroad.pick.DetailPickScreen
 import com.squirtles.musicroad.picklist.PickListScreen
+import com.squirtles.musicroad.profile.ProfileScreen
 import com.squirtles.musicroad.setting.SettingNotificationScreen
 import com.squirtles.musicroad.setting.SettingProfileScreen
-import com.squirtles.musicroad.userinfo.UserInfoScreen
 
 @Composable
 fun MainNavGraph(
@@ -38,7 +38,7 @@ fun MainNavGraph(
                 mapViewModel = mapViewModel,
                 onFavoriteClick = navigationActions.navigateToFavoritePicks,
                 onCenterClick = navigationActions.navigateToSearch,
-                onUserInfoClick = navigationActions.navigateToUserInfo,
+                onUserInfoClick = navigationActions.navigateToProfile,
                 onPickSummaryClick = { pickId ->
                     navigationActions.navigateToPickDetail(pickId)
                 },
@@ -65,8 +65,8 @@ fun MainNavGraph(
             )
         }
 
-        composable(ProfileDestination.USER_INFO_ROUTE) {
-            UserInfoScreen(
+        composable(ProfileDestination.PROFILE_ROUTE) {
+            ProfileScreen(
                 onBackClick = { navController.navigateUp() },
                 onFavoritePicksClick = navigationActions.navigateToFavoritePicks,
                 onMyPicksClick = navigationActions.navigateToMyPicks,

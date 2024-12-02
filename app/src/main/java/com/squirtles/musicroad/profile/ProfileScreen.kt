@@ -1,4 +1,4 @@
-package com.squirtles.musicroad.userinfo
+package com.squirtles.musicroad.profile
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -25,18 +25,20 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.squirtles.musicroad.R
 import com.squirtles.musicroad.common.Constants.COLOR_STOPS
 import com.squirtles.musicroad.common.DefaultTopAppBar
 import com.squirtles.musicroad.common.VerticalSpacer
 
 @Composable
-fun UserInfoScreen(
+fun ProfileScreen(
     onBackClick: () -> Unit,
     onFavoritePicksClick: () -> Unit,
     onMyPicksClick: () -> Unit,
     onSettingProfileClick: () -> Unit,
     onSettingNotificationClick: () -> Unit,
+    profileViewModel: ProfileViewModel = hiltViewModel()
 ) {
     val scrollState = rememberScrollState()
 
@@ -71,7 +73,7 @@ fun UserInfoScreen(
 
                 VerticalSpacer(40)
 
-                UserInfoMenus(
+                ProfileMenus(
                     title = stringResource(R.string.user_info_pick_category_title),
                     menus = listOf(
                         MenuItem(
@@ -89,7 +91,7 @@ fun UserInfoScreen(
                     )
                 )
 
-                UserInfoMenus(
+                ProfileMenus(
                     title = stringResource(R.string.user_info_setting_category_title),
                     menus = listOf(
                         MenuItem(

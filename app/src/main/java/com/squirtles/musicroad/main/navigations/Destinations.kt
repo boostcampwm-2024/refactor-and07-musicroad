@@ -13,7 +13,7 @@ object CreatePickDestinations {
 }
 
 object ProfileDestination {
-    const val USER_INFO_ROUTE = "userinfo"
+    const val PROFILE_ROUTE = "profile"
     const val SETTING_PROFILE_ROUTE = "setting/profile"
     const val SETTING_NOTIFICATION_ROUTE = "setting/notification"
 }
