@@ -42,6 +42,7 @@ import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.lerp
+import androidx.compose.ui.zIndex
 import androidx.core.view.WindowInsetsControllerCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -336,13 +337,15 @@ private fun DetailPick(
             ) {
                 SongInfo(
                     song = pick.song,
-                    dynamicOnBackgroundColor = onDynamicBackgroundColor
+                    dynamicOnBackgroundColor = onDynamicBackgroundColor,
+                    modifier = Modifier.zIndex(1f)
                 )
 
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
                         .align(Alignment.CenterHorizontally)
+                        .zIndex(0f)
                 ) {
                     if (playerState.isReady) {
                         CircleAlbumCover(
