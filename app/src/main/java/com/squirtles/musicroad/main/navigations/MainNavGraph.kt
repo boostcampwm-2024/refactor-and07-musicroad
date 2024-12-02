@@ -80,19 +80,19 @@ fun MainNavGraph(
             ProfileScreen(
                 userId = userId,
                 onBackClick = { navController.navigateUp() },
-                onFavoritePicksClick = { userId -> navigationActions.navigateToFavoritePicks(userId) },
-                onMyPicksClick = { userId -> navigationActions.navigateToMyPicks(userId) },
+                onFavoritePicksClick = { navigationActions.navigateToFavoritePicks(it) },
+                onMyPicksClick = { navigationActions.navigateToMyPicks(it) },
                 onSettingProfileClick = { navController.navigate(ProfileDestination.SETTING_PROFILE_ROUTE) },
                 onSettingNotificationClick = { navController.navigate(ProfileDestination.SETTING_NOTIFICATION_ROUTE) },
             )
         }
 
         composable(ProfileDestination.SETTING_PROFILE_ROUTE) {
-            SettingProfileScreen()
+            SettingProfileScreen(onBackClick = { navController.navigateUp() })
         }
 
         composable(ProfileDestination.SETTING_NOTIFICATION_ROUTE) {
-            SettingNotificationScreen()
+            SettingNotificationScreen(onBackClick = { navController.navigateUp() })
         }
 
         navigation(

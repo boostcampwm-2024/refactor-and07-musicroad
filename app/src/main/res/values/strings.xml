@@ -88,4 +88,8 @@
     <string name="user_info_setting_notification_menu_title">알림</string>
     <string name="user_info_setting_profile_menu_icon_description">프로필 설정 메뉴 아이콘</string>
     <string name="user_info_setting_notification_menu_icon_description">알림 메뉴 아이콘</string>
+
+    <!-- Setting -->
+    <string name="setting_notification_title">알림 설정</string>
+    <string name="setting_notification_description">준비 중인 기능입니다!</string>
 </resources>
