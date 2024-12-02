@@ -17,3 +17,5 @@ val Dark = Color(0xFF151515)
 val DarkGray = Color(0xFF646464)
 val Gray = Color(0xFFAAAAAA)
 val White = Color(0xFFFFFFFF)
+
+val PlayerBackground = Color(0xFF353535)
