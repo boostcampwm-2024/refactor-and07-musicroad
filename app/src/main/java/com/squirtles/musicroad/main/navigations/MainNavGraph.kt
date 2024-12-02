@@ -128,6 +128,9 @@ fun MainNavGraph(
 
             DetailPickScreen(
                 pickId = pickId,
+                onProfileClick = { userId ->
+                    navigationActions.navigateToProfile(userId)
+                },
                 onBackClick = { // 픽  등록에서 정보 화면으로 간 것이라면 뒤로 가기 시 메인으로, 아니라면 이전 화면으로
                     if (navController.previousBackStackEntry?.destination?.route == CreatePickDestinations.CREATE_PICK_ROUTE) {
                         navigationActions.navigateToMain()

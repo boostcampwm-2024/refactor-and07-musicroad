@@ -67,6 +67,7 @@ import kotlin.math.absoluteValue
 @Composable
 fun DetailPickScreen(
     pickId: String,
+    onProfileClick: (String) -> Unit,
     onBackClick: () -> Unit,
     onDeleted: (Context) -> Unit,
     pickViewModel: PickViewModel = hiltViewModel(),
@@ -158,9 +159,11 @@ fun DetailPickScreen(
                             pick = pick,
                             isCreatedBySelf = isCreatedBySelf,
                             isFavorite = isFavorite, // TODO
+                            userId = pick.createdBy.userId,
                             userName = pick.createdBy.userName,
                             isMusicVideoAvailable = isMusicVideoAvailable,
                             playerViewModel = playerViewModel,
+                            onProfileClick = onProfileClick,
                             onBackClick = onBackClick,
                             onActionClick = onActionClick,
                         )
@@ -222,9 +225,11 @@ fun DetailPickScreen(
                 pick = DEFAULT_PICK,
                 isCreatedBySelf = false,
                 isFavorite = false,
+                userId = "",
                 userName = "",
                 isMusicVideoAvailable = false,
                 playerViewModel = playerViewModel,
+                onProfileClick = onProfileClick,
                 onBackClick = onBackClick,
                 onActionClick = { }
             )
@@ -265,9 +270,11 @@ private fun DetailPick(
     pick: Pick,
     isCreatedBySelf: Boolean,
     isFavorite: Boolean,
+    userId: String,
     userName: String,
     isMusicVideoAvailable: Boolean,
     playerViewModel: PlayerViewModel,
+    onProfileClick: (String) -> Unit,
     onBackClick: () -> Unit,
     onActionClick: () -> Unit
 ) {
@@ -304,8 +311,10 @@ private fun DetailPick(
                 modifier = Modifier.statusBarsPadding(),
                 isCreatedBySelf = isCreatedBySelf,
                 isFavorite = isFavorite,
+                userId = userId,
                 userName = userName,
                 onDynamicBackgroundColor = onDynamicBackgroundColor,
+                onProfileClick = onProfileClick,
                 onBackClick = onBackClick,
                 onActionClick = { onActionClick() }
             )
@@ -410,9 +419,11 @@ private fun DetailPickPreview() {
         pick = DEFAULT_PICK,
         isCreatedBySelf = false,
         isFavorite = false,
+        userId = "",
         userName = "짱구",
         isMusicVideoAvailable = true,
         playerViewModel = PlayerViewModel(),
+        onProfileClick = {},
         onBackClick = {},
         onActionClick = {}
     )

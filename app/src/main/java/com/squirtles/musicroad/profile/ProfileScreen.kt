@@ -54,7 +54,7 @@ fun ProfileScreen(
     Scaffold(
         topBar = {
             DefaultTopAppBar(
-                title = user?.userName ?: "",
+                title = user.userName,
                 onBackClick = onBackClick
             )
         }
