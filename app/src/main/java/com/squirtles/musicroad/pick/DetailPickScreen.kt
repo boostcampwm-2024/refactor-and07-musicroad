@@ -324,11 +324,12 @@ private fun DetailPick(
                     )
                 )
                 .padding(innerPadding)
-                .verticalScroll(scrollState)
         ) {
             Column(
                 modifier = Modifier
-                    .fillMaxSize()
+                    .fillMaxWidth()
+                    .weight(1f)
+                    .verticalScroll(scrollState)
                     .padding(top = 10.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(10.dp),
@@ -369,33 +370,30 @@ private fun DetailPick(
 
                 PickInformation(formattedDate = pick.createdAt, favoriteCount = pick.favoriteCount)
 
-                CommentText(
-                    comment = pick.comment,
-                    scrollState = scrollState
-                )
+                CommentText(comment = pick.comment)
 
                 VerticalSpacer(height = 8)
+            }
 
-                if (pick.song.previewUrl.isBlank().not()) {
-                    MusicPlayer(
-                        previewUrl = pick.song.previewUrl,
-                        playerState = playerState,
-                        duration = duration,
-                        bufferPercentage = bufferPercentage,
-                        readyPlayer = { sourceUrl ->
-                            playerViewModel.readyPlayer(context, sourceUrl)
-                        },
-                        onSeekChanged = { timeMs ->
-                            playerViewModel.playerSeekTo(timeMs)
-                        },
-                        onReplayForwardClick = { replaySec ->
-                            playerViewModel.replayForward(replaySec)
-                        },
-                        onPauseToggle = {
-                            playerViewModel.togglePlayPause()
-                        },
-                    )
-                }
+            if (pick.song.previewUrl.isBlank().not()) {
+                MusicPlayer(
+                    previewUrl = pick.song.previewUrl,
+                    playerState = playerState,
+                    duration = duration,
+                    bufferPercentage = bufferPercentage,
+                    readyPlayer = { sourceUrl ->
+                        playerViewModel.readyPlayer(context, sourceUrl)
+                    },
+                    onSeekChanged = { timeMs ->
+                        playerViewModel.playerSeekTo(timeMs)
+                    },
+                    onReplayForwardClick = { replaySec ->
+                        playerViewModel.replayForward(replaySec)
+                    },
+                    onPauseToggle = {
+                        playerViewModel.togglePlayPause()
+                    },
+                )
             }
         }
     }
