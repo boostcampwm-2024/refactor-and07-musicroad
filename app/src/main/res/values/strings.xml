@@ -92,4 +92,11 @@
     <!-- Setting -->
     <string name="setting_notification_title">알림 설정</string>
     <string name="setting_notification_description">준비 중인 기능입니다!</string>
+    <string name="setting_profile_title">프로필 설정</string>
+
+    <string name="setting_profile_nickname">닉네임</string>
+    <string name="setting_profile_nickname_message_format_fail">닉네임에는 한글, 영문, 숫자만 사용할 수 있습니다.</string>
+    <string name="setting_profile_nickname_message_length_fail_min">닉네임을 2글자 이상 입력해주세요.</string>
+    <string name="setting_profile_nickname_message_length_fail_max">닉네임은 10글자 이하로 가능합니다.</string>
+    <string name="setting_profile_confirm_icon_description">변경사항 적용</string>
 </resources>
