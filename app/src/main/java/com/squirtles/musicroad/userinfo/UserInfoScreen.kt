@@ -35,6 +35,8 @@ fun UserInfoScreen(
     onBackClick: () -> Unit,
     onFavoritePicksClick: () -> Unit,
     onMyPicksClick: () -> Unit,
+    onSettingProfileClick: () -> Unit,
+    onSettingNotificationClick: () -> Unit,
 ) {
     val scrollState = rememberScrollState()
 
@@ -94,13 +96,13 @@ fun UserInfoScreen(
                             imageVector = Icons.Outlined.SwitchAccount,
                             contentDescription = stringResource(R.string.user_info_setting_profile_menu_icon_description),
                             menuTitle = stringResource(R.string.user_info_setting_profile_menu_title),
-                            onMenuClick = {}
+                            onMenuClick = onSettingProfileClick
                         ),
                         MenuItem(
                             imageVector = Icons.Outlined.Notifications,
                             contentDescription = stringResource(R.string.user_info_setting_notification_menu_icon_description),
                             menuTitle = stringResource(R.string.user_info_setting_notification_menu_title),
-                            onMenuClick = {}
+                            onMenuClick = onSettingNotificationClick
                         )
                     )
                 )

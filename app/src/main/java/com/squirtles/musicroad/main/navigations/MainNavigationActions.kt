@@ -1,6 +1,5 @@
 package com.squirtles.musicroad.main.navigations
 
-import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 
 class MainNavigationActions(navController: NavHostController) {
@@ -26,18 +25,8 @@ class MainNavigationActions(navController: NavHostController) {
     }
 
     val navigateToUserInfo: () -> Unit = {
-        navController.navigate(MainDestinations.USER_INFO_ROUTE) {
+        navController.navigate(ProfileDestination.USER_INFO_ROUTE) {
             launchSingleTop = true
-        }
-    }
-
-    val navigateToSetting: () -> Unit = {
-        navController.navigate(MainDestinations.SETTING_ROUTE) {
-            popUpTo(navController.graph.findStartDestination().id) {
-                saveState = true
-            }
-            launchSingleTop = true
-            restoreState = true
         }
     }
 

@@ -17,7 +17,8 @@ import com.squirtles.musicroad.map.MapScreen
 import com.squirtles.musicroad.map.MapViewModel
 import com.squirtles.musicroad.pick.DetailPickScreen
 import com.squirtles.musicroad.picklist.PickListScreen
-import com.squirtles.musicroad.setting.SettingScreen
+import com.squirtles.musicroad.setting.SettingNotificationScreen
+import com.squirtles.musicroad.setting.SettingProfileScreen
 import com.squirtles.musicroad.userinfo.UserInfoScreen
 
 @Composable
@@ -64,16 +65,22 @@ fun MainNavGraph(
             )
         }
 
-        composable(MainDestinations.USER_INFO_ROUTE) {
+        composable(ProfileDestination.USER_INFO_ROUTE) {
             UserInfoScreen(
                 onBackClick = { navController.navigateUp() },
                 onFavoritePicksClick = navigationActions.navigateToFavoritePicks,
                 onMyPicksClick = navigationActions.navigateToMyPicks,
+                onSettingProfileClick = { navController.navigate(ProfileDestination.SETTING_PROFILE_ROUTE) },
+                onSettingNotificationClick = { navController.navigate(ProfileDestination.SETTING_NOTIFICATION_ROUTE) },
             )
         }
 
-        composable(MainDestinations.SETTING_ROUTE) {
-            SettingScreen()
+        composable(ProfileDestination.SETTING_PROFILE_ROUTE) {
+            SettingProfileScreen()
+        }
+
+        composable(ProfileDestination.SETTING_NOTIFICATION_ROUTE) {
+            SettingNotificationScreen()
         }
 
         navigation(
