@@ -36,7 +36,7 @@ import com.squirtles.musicroad.musicplayer.PlayerViewModel
 @Composable
 fun MapScreen(
     mapViewModel: MapViewModel,
-    onFavoriteClick: () -> Unit,
+    onFavoriteClick: (String) -> Unit,
     onCenterClick: () -> Unit,
     onUserInfoClick: (String) -> Unit,
     onPickSummaryClick: (String) -> Unit,
@@ -129,7 +129,7 @@ fun MapScreen(
                     lastLocation = lastLocation,
                     onFavoriteClick = {
                         playerViewModel.pause()
-                        onFavoriteClick()
+                        onFavoriteClick(mapViewModel.getUserId())
                     },
                     onCenterClick = {
                         playerViewModel.pause()

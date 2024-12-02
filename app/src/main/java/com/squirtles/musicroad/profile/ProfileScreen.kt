@@ -38,8 +38,8 @@ import com.squirtles.musicroad.common.VerticalSpacer
 fun ProfileScreen(
     userId: String,
     onBackClick: () -> Unit,
-    onFavoritePicksClick: () -> Unit,
-    onMyPicksClick: () -> Unit,
+    onFavoritePicksClick: (String) -> Unit,
+    onMyPicksClick: (String) -> Unit,
     onSettingProfileClick: () -> Unit,
     onSettingNotificationClick: () -> Unit,
     profileViewModel: ProfileViewModel = hiltViewModel()
@@ -89,13 +89,13 @@ fun ProfileScreen(
                             imageVector = Icons.Outlined.Archive,
                             contentDescription = stringResource(R.string.user_info_favorite_menu_icon_description),
                             menuTitle = stringResource(R.string.user_info_favorite_menu_title),
-                            onMenuClick = onFavoritePicksClick
+                            onMenuClick = { onFavoritePicksClick(userId) }
                         ),
                         MenuItem(
                             imageVector = Icons.Default.MusicNote,
                             contentDescription = stringResource(R.string.user_info_created_by_self_menu_icon_description),
                             menuTitle = stringResource(R.string.user_info_created_by_self_menu_title),
-                            onMenuClick = onMyPicksClick
+                            onMenuClick = { onMyPicksClick(userId) }
                         )
                     )
                 )

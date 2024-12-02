@@ -12,14 +12,14 @@ class MainNavigationActions(navController: NavHostController) {
         }
     }
 
-    val navigateToFavoritePicks: () -> Unit = {
-        navController.navigate(MainDestinations.FAVORITE_PICKS_ROUTE) {
+    val navigateToFavoritePicks: (String) -> Unit = { userId ->
+        navController.navigate(ProfileDestination.favoritePicks(userId)) {
             launchSingleTop = true
         }
     }
 
-    val navigateToMyPicks: () -> Unit = {
-        navController.navigate(MainDestinations.MY_PICKS_ROUTE) {
+    val navigateToMyPicks: (String) -> Unit = { userId ->
+        navController.navigate(ProfileDestination.myPicks(userId)) {
             launchSingleTop = true
         }
     }
