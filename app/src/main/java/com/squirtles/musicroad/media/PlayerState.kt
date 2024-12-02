@@ -1,4 +1,4 @@
-package com.squirtles.musicroad.musicplayer
+package com.squirtles.musicroad.media
 
 data class PlayerState(
     val isReady: Boolean = true,

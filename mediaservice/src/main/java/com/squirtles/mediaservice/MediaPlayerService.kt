@@ -10,31 +10,42 @@ import androidx.media3.session.MediaNotification
 import androidx.media3.session.MediaSession
 import androidx.media3.session.MediaSessionService
 import com.google.common.collect.ImmutableList
+import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
+@OptIn(UnstableApi::class)
+@AndroidEntryPoint
 class MediaPlayerService : MediaSessionService() {
     @Inject
     lateinit var notifier: Notifier
 
     @Inject
     lateinit var mediaSession: MediaSession
-    
-    @OptIn(UnstableApi::class)
+
     override fun onCreate() {
         super.onCreate()
+
         setMediaNotificationProvider(object : MediaNotification.Provider {
             override fun createNotification(
                 mediaSession: MediaSession,
                 customLayout: ImmutableList<CommandButton>,
                 actionFactory: MediaNotification.ActionFactory,
                 onNotificationChangedCallback: MediaNotification.Provider.Callback
-            ): MediaNotification {
-                TODO("Not yet implemented")
-            }
+            ): MediaNotification =
+                notifier.createMediaNotification(actionFactory)
 
             override fun handleCustomCommand(session: MediaSession, action: String, extras: Bundle): Boolean = false
         })
     }
+
+//    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+//        if (::mediaSession.isInitialized) {
+//            Log.d("MediaPlayerService", "MediaSession is initialized")
+//        } else {
+//            Log.e("MediaPlayerService", "MediaSession is NOT initialized")
+//        }
+//        return super.onStartCommand(intent, flags, startId)
+//    }
 
     // The user dismissed the app from the recent tasks
     override fun onTaskRemoved(rootIntent: Intent?) {

@@ -382,9 +382,9 @@ class FirebaseDataSourceImpl @Inject constructor(
                 result.onSuccess {
                     Log.d("FirebaseDataSourceImpl", "Success to update favorite count")
                 }
-                .onFailure { exception ->
-                    Log.e("FirebaseDataSourceImpl", "Failed to update favorite count", exception)
-                }
+                    .onFailure { exception ->
+                        Log.e("FirebaseDataSourceImpl", "Failed to update favorite count", exception)
+                    }
             } catch (e: Exception) {
                 Log.e("FirebaseDataSourceImpl", "Exception occurred while updating favorite count", e)
             }

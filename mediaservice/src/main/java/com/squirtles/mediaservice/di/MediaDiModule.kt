@@ -2,6 +2,7 @@ package com.squirtles.mediaservice.di
 
 import android.content.ComponentName
 import android.content.Context
+import android.util.Log
 import androidx.media3.common.AudioAttributes
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.session.MediaController
@@ -9,10 +10,10 @@ import androidx.media3.session.MediaSession
 import androidx.media3.session.SessionToken
 import com.google.common.util.concurrent.ListenableFuture
 import com.squirtles.mediaservice.ConnectedMediaController
+import com.squirtles.mediaservice.CustomMediaSessionCallback
 import com.squirtles.mediaservice.MediaControllerManager
 import com.squirtles.mediaservice.MediaNotificationManager
 import com.squirtles.mediaservice.MediaPlayerService
-import com.squirtles.mediaservice.MediaSessionCallback
 import com.squirtles.mediaservice.Notifier
 import dagger.Binds
 import dagger.Module
@@ -58,7 +59,7 @@ object MediaServiceModule {
         player: ExoPlayer,
     ): MediaSession =
         MediaSession.Builder(context, player)
-            .setCallback(MediaSessionCallback())
+            .setCallback(CustomMediaSessionCallback())
             .build()
 
     @Singleton
@@ -73,8 +74,12 @@ object MediaServiceModule {
     @Provides
     fun providesSessionToken(
         @ApplicationContext context: Context
-    ): SessionToken =
-        SessionToken(context, ComponentName(context, MediaPlayerService::class.java))
+    ): SessionToken {
+        val sessionToken = SessionToken(context, ComponentName(context, MediaPlayerService::class.java))
+        Log.d("MediaServiceModule", "sessionToken: ${sessionToken.hashCode()}")
+        return sessionToken
+    }
+
 
     @Singleton
     @Provides

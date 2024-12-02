@@ -31,7 +31,7 @@ import com.squirtles.musicroad.map.components.ClusterBottomSheet
 import com.squirtles.musicroad.map.components.InfoWindow
 import com.squirtles.musicroad.map.components.LoadingDialog
 import com.squirtles.musicroad.map.components.PickNotificationBanner
-import com.squirtles.musicroad.musicplayer.PlayerViewModel
+import com.squirtles.musicroad.media.PlayerViewModel
 
 @Composable
 fun MapScreen(

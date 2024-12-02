@@ -92,6 +92,7 @@ android {
 dependencies {
     implementation(projects.domain)
     implementation(projects.data)
+    implementation(projects.mediaservice)
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
@@ -142,6 +143,7 @@ dependencies {
     implementation(libs.androidx.media3.exoplayer)
     implementation(libs.androidx.media3.exoplayer.dash)
     implementation(libs.androidx.media3.ui)
+    implementation(libs.androidx.media3.session)
 
     // Paging
     implementation(libs.androidx.paging.runtime)

@@ -1,5 +1,6 @@
 package com.squirtles.domain.usecase
 
+import android.util.Log
 import androidx.media3.common.Player
 import com.squirtles.domain.model.PlayerUiState
 import com.squirtles.mediaservice.MediaControllerManager
@@ -8,6 +9,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -23,16 +25,15 @@ import javax.inject.Inject
 class MediaPlayerListenerUseCase @Inject constructor(
     private val mediaControllerManager: MediaControllerManager
 ) {
-
     private val coroutineScope = CoroutineScope(Dispatchers.Main)
     private var timerJob: Job? = null
 
-    fun playerUiStateFlow(uri: String) = callbackFlow {
+    fun playerUiStateFlow() = callbackFlow {
         val mediaController = mediaControllerManager.mediaControllerFlow.first()
-        val currentMediaItem = mediaController.currentMediaItem
+        Log.d("MediaPlayerListenerUseCase", "$mediaController")
 
         val currentPlayerUiState = MutableStateFlow(
-            if (mediaController.currentMediaItem?.mediaId == uri) {
+            if (mediaController.currentMediaItem != null) {
                 PlayerUiState(
                     isLoading = mediaController.isLoading,
                     isPlaying = mediaController.isPlaying,
@@ -69,6 +70,14 @@ class MediaPlayerListenerUseCase @Inject constructor(
                     }
                 }
             }
+
+            override fun onPlaybackStateChanged(playbackState: Int) {
+                super.onPlaybackStateChanged(playbackState)
+                if (playbackState == Player.STATE_ENDED) {
+                    mediaController.seekTo(0)
+                    mediaController.pause()
+                }
+            }
         }
 
         // Start timer when player is playing
@@ -85,8 +94,12 @@ class MediaPlayerListenerUseCase @Inject constructor(
                             while (isActive && startDuration <= maxDuration) {
                                 // Update time
                                 currentPlayerUiState.update {
-                                    it.copy(currentPosition = mediaController.currentPosition)
+                                    it.copy(
+                                        currentPosition = mediaController.currentPosition,
+                                        bufferPercentage = mediaController.bufferedPercentage
+                                    )
                                 }
+                                delay(1000L)
                             }
                         }
                     } else {

@@ -12,9 +12,10 @@ import com.google.common.util.concurrent.ListenableFuture
 
 const val SEEK_TO_DURATION = 5_000L
 
-internal class MediaSessionCallback : MediaSession.Callback {
+@OptIn(UnstableApi::class)
+internal class CustomMediaSessionCallback : MediaSession.Callback {
 
-    @OptIn(UnstableApi::class)
+    /* MediaSession이 MediaController의 연결 요청을 수락할 때 사용할 수 있는 명령어 집합을 구성하고 반환 */
     override fun onConnect(
         session: MediaSession,
         controller: MediaSession.ControllerInfo
@@ -22,8 +23,7 @@ internal class MediaSessionCallback : MediaSession.Callback {
 
         // 컨트롤러가 미디어 알림과 연관된 컨트롤러인지 확인
         if (session.isMediaNotificationController(controller)) {
-            val sessionCommandBuilder =
-                MediaSession.ConnectionResult.DEFAULT_SESSION_COMMANDS.buildUpon()
+            val sessionCommandBuilder = MediaSession.ConnectionResult.DEFAULT_SESSION_COMMANDS.buildUpon()
 
             NotificationCommand.entries.forEach { commandButton ->
                 commandButton.sessionCommand.apply {

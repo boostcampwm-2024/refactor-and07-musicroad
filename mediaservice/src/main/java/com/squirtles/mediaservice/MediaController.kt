@@ -17,15 +17,21 @@ interface MediaControllerManager {
     val mediaControllerFlow: Flow<MediaController>
 }
 
+/* mediaControllerFuture: MediaController를 비동기적으로 제공하는 ListenableFuture */
 @Singleton
 class ConnectedMediaController @Inject constructor(
-    private val mediaControllerFuture: ListenableFuture<MediaController>
+    mediaControllerFuture: ListenableFuture<MediaController>
 ) : MediaControllerManager {
 
+    /* mediaControllerFlow가 처음 구독될 때 callbackFlow가 실행 */
     override val mediaControllerFlow: Flow<MediaController> = callbackFlow {
+        /* Futures.addCallback을 사용하여 mediaControllerFuture의 결과를 기다림  */
         Futures.addCallback(
             mediaControllerFuture,
             object : FutureCallback<MediaController> {
+
+                /* MediaController 객체가 준비되면 trySend(result)를 통해 Flow로 결과를 전송
+                즉, mediaControllerFlow를 구독하고 있는 곳에 MediaController 객체가 전달 */
                 override fun onSuccess(result: MediaController) {
                     trySend(result)
                 }

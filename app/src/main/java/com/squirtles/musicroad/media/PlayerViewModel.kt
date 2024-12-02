@@ -1,4 +1,4 @@
-package com.squirtles.musicroad.musicplayer
+package com.squirtles.musicroad.media
 
 import android.content.Context
 import android.util.Log
@@ -11,8 +11,8 @@ import androidx.media3.common.PlaybackException
 import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
-import com.squirtles.musicroad.musicplayer.PlayerState.Companion.PLAYER_STATE_INITIAL
-import com.squirtles.musicroad.musicplayer.PlayerState.Companion.PLAYER_STATE_STOP
+import com.squirtles.musicroad.media.PlayerState.Companion.PLAYER_STATE_INITIAL
+import com.squirtles.musicroad.media.PlayerState.Companion.PLAYER_STATE_STOP
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -21,7 +21,8 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class PlayerViewModel @Inject constructor() : ViewModel() {
+class PlayerViewModel @Inject constructor(
+) : ViewModel() {
 
     private var player: ExoPlayer? = null
 

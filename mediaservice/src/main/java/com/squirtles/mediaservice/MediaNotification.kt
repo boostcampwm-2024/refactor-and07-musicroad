@@ -32,7 +32,7 @@ class MediaNotificationManager @Inject constructor(
 
     companion object {
         const val NOTIFICATION_CHANNEL_ID = 100
-        const val TARGET_ACTIVITY = "com.example.jetcaster.ui.MainActivity"
+        const val TARGET_ACTIVITY = "com.squirtles.musicroad.main.MainActivity"
     }
 
     @OptIn(UnstableApi::class)
@@ -54,7 +54,7 @@ class MediaNotificationManager @Inject constructor(
             setSilent(true)
             setSmallIcon(R.drawable.ic_musicroad_foreground)
             setContentTitle(mediaItem?.mediaMetadata?.title)
-            setContentIntent(createNotifyPendingIntent())
+//            setContentIntent(createNotifyPendingIntent())
             setDeleteIntent(
                 actionFactory.createMediaActionPendingIntent(
                     mediaSession,
