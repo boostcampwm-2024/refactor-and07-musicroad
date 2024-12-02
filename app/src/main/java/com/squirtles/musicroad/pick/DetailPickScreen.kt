@@ -100,6 +100,9 @@ fun DetailPickScreen(
         }
 
         is DetailPickUiState.Success -> {
+            val favoriteAction by pickViewModel.favoriteAction.collectAsStateWithLifecycle(
+                FavoriteAction.NONE
+            )
             val pick = (uiState as DetailPickUiState.Success).pick
             val isFavorite = (uiState as DetailPickUiState.Success).isFavorite
             val isCreatedBySelf = pickViewModel.getUserId() == pick.createdBy.userId
@@ -113,27 +116,44 @@ fun DetailPickScreen(
 
                     isFavorite -> {
                         showProcessIndicator = true
-                        pickViewModel.deleteAtFavorite(pickId) {
-                            showProcessIndicator = false
-                            favoriteCount -= 1
-                            context.showShortToast(context.getString(R.string.success_delete_at_favorite))
-                        }
+                        pickViewModel.onActionClick(
+                            pickId = pickId,
+                            isAdding = false
+                        )
                     }
 
                     else -> {
                         showProcessIndicator = true
-                        pickViewModel.addToFavorite(pickId) {
-                            showProcessIndicator = false
-                            favoriteCount += 1
-                            context.showShortToast(context.getString(R.string.success_add_to_favorite))
-                        }
+                        pickViewModel.onActionClick(
+                            pickId = pickId,
+                            isAdding = true
+                        )
                     }
                 }
             }
 
+
             val pagerState = rememberPagerState(
                 pageCount = { if (isMusicVideoAvailable) 2 else 1 }
             )
+
+            LaunchedEffect(favoriteAction) {
+                when (favoriteAction) {
+                    FavoriteAction.ADDED -> {
+                        showProcessIndicator = false
+                        favoriteCount += 1
+                        context.showShortToast(context.getString(R.string.success_add_to_favorite))
+                    }
+
+                    FavoriteAction.DELETED -> {
+                        showProcessIndicator = false
+                        favoriteCount -= 1
+                        context.showShortToast(context.getString(R.string.success_delete_at_favorite))
+                    }
+
+                    FavoriteAction.NONE -> {}
+                }
+            }
 
             // 비디오 플레이어 설정
             LaunchedEffect(pick) {
