@@ -79,22 +79,18 @@ class FirebaseDataSourceImpl @Inject constructor(
      * @return  The fetched pick, or null if the pick does not exist on firestore.
      */
     override suspend fun fetchPick(pickID: String): Pick? {
-        var resultPick: Pick? = null
-
-        db.collection("picks").document(pickID).get()
-            .addOnSuccessListener { document ->
-                val firestorePick = document.toObject<FirebasePick>()?.copy(id = pickID)
-
-                resultPick = firestorePick?.toPick()
-            }
-            .addOnFailureListener { exception ->
-                // TODO: Error handling
-                Log.e("FirebaseDataSourceImpl", "Failed to fetch a pick", exception)
-                throw exception
-            }
-            .await()
-
-        return resultPick
+        return suspendCancellableCoroutine { continuation ->
+            db.collection("picks").document(pickID).get()
+                .addOnSuccessListener { document ->
+                    val firestorePick = document.toObject<FirebasePick>()?.copy(id = pickID)
+                    val resultPick = firestorePick?.toPick()
+                    continuation.resume(resultPick)
+                }
+                .addOnFailureListener { exception ->
+                    Log.e("FirebaseDataSourceImpl", "Failed to fetch a pick", exception)
+                    continuation.resumeWithException(exception)
+                }
+        }
     }
 
     /**
