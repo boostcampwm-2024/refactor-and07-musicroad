@@ -11,9 +11,9 @@ import com.naver.maps.map.clustering.Clusterer
 import com.naver.maps.map.overlay.Marker
 import com.squirtles.domain.model.Pick
 import com.squirtles.domain.usecase.local.FetchLastLocationUseCase
-import com.squirtles.domain.usecase.pick.FetchPickInAreaUseCase
 import com.squirtles.domain.usecase.local.GetCurrentUserUseCase
 import com.squirtles.domain.usecase.local.SaveLastLocationUseCase
+import com.squirtles.domain.usecase.pick.FetchPickInAreaUseCase
 import com.squirtles.musicroad.map.marker.MarkerKey
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -145,6 +145,15 @@ class MapViewModel @Inject constructor(
                 pickList.forEach { pick ->
                     newKeyTagMap[MarkerKey(pick)] = pick.id
                     _picks[pick.id] = pick
+                }
+                _clickedMarkerState.value.clusterPickList?.let { clusterPickList -> // 클러스터 마커가 선택되어 있는 경우
+                    val updatedPickList = mutableListOf<Pick>()
+                    clusterPickList.forEach { pick ->
+                        _picks[pick.id]?.let { updatedPick ->
+                            updatedPickList.add(updatedPick)
+                        }
+                    }
+                    _clickedMarkerState.emit(_clickedMarkerState.value.copy(clusterPickList = updatedPickList.toList())) // 최신 픽 정보로 clusterPickList 업데이트
                 }
                 clusterer?.addAll(newKeyTagMap)
             }
