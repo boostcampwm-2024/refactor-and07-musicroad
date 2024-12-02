@@ -202,7 +202,25 @@ fun DetailPickScreen(
         }
 
         DetailPickUiState.Error -> {
-            // TODO: pick 로딩 실패 or 담기 실패, 두 상태를 나눠야할지 고민
+            LaunchedEffect(Unit) {
+                Toast.makeText(
+                    context,
+                    context.getString(R.string.error_loading_pick_list),
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
+
+            // Show default pick
+            DetailPick(
+                pick = DEFAULT_PICK,
+                isCreatedBySelf = false,
+                isFavorite = false,
+                userName = "",
+                isMusicVideoAvailable = false,
+                playerViewModel = playerViewModel,
+                onBackClick = onBackClick,
+                onActionClick = { }
+            )
         }
     }
 
