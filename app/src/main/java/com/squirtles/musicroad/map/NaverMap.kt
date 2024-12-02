@@ -139,7 +139,7 @@ fun NaverMap(
         modifier = Modifier.fillMaxSize()
     )
 
-    if(isSystemInDarkTheme()) {
+    if (isSystemInDarkTheme()) {
         naverMap.value?.isNightModeEnabled = true
     }
 }

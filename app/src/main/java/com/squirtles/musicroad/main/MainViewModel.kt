@@ -30,6 +30,9 @@ class MainViewModel @Inject constructor(
     private val _loadingState = MutableStateFlow<LoadingState>(LoadingState.Loading)
     val loadingState = _loadingState.asStateFlow()
 
+    private var _canRequestPermission = true
+    val canRequestPermission get() = _canRequestPermission
+
     private val _localUserId = getUserIdFromLocalStorageUseCase()
 
     init {
@@ -42,6 +45,10 @@ class MainViewModel @Inject constructor(
                 }
             }
         }
+    }
+
+    fun setCanRequestPermission(canRequest: Boolean) {
+        _canRequestPermission = canRequest
     }
 
     private suspend fun createUser() {
