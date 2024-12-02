@@ -70,7 +70,7 @@ fun CommentText(
 
 @Composable
 fun TotalCountText(
-    modifier: Modifier,
+    modifier: Modifier = Modifier,
     totalCount: Int,
     defaultColor: Color = MaterialTheme.colorScheme.onSurface,
     pointColor: Color = MaterialTheme.colorScheme.primary,
@@ -80,7 +80,8 @@ fun TotalCountText(
         text = buildAnnotatedString {
             withStyle(
                 SpanStyle(
-                    color = defaultColor
+                    color = defaultColor,
+                    fontWeight = FontWeight.Bold
                 )
             ) {
                 append("전체 ")

@@ -1,8 +1,10 @@
 package com.squirtles.musicroad.picklist
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -81,13 +83,26 @@ fun PickListScreen(
                     Column(
                         modifier = Modifier.fillMaxSize()
                     ) {
-                        TotalCountText(
+                        Row(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(horizontal = DEFAULT_PADDING),
-                            totalCount = pickList.size,
-                            defaultColor = White,
-                        )
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            TotalCountText(
+                                totalCount = pickList.size,
+                                defaultColor = White,
+                            )
+
+                            Text(
+                                text = stringResource(
+                                    if (isFavoritePicks) R.string.latest_favorite_order else R.string.latest_create_order
+                                ),
+                                color = White,
+                                style = MaterialTheme.typography.bodyMedium
+                            )
+                        }
 
                         VerticalSpacer(8)
 
@@ -118,6 +133,7 @@ fun PickListScreen(
                                         createUserName = pick.createdBy.userName,
                                         favoriteCount = pick.favoriteCount,
                                         comment = pick.comment,
+                                        createdAt = pick.createdAt,
                                         onItemClick = { onItemClick(pick.id) }
                                     )
                                 }
