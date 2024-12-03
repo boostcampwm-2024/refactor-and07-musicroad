@@ -5,6 +5,7 @@ import com.firebase.geofire.GeoFireUtils
 import com.firebase.geofire.GeoLocation
 import com.google.android.gms.tasks.Task
 import com.google.android.gms.tasks.Tasks
+import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
@@ -212,20 +213,27 @@ class FirebaseDataSourceImpl @Inject constructor(
                 }
         }
 
-    override suspend fun deletePick(pickId: String): Boolean {
+    override suspend fun deletePick(pickId: String, userId: String): Boolean {
+        val pickDocument = db.collection(COLLECTION_PICKS).document(pickId)
+        val userDocument = db.collection(COLLECTION_USERS).document(userId)
+        val favoriteDocuments = fetchFavoriteDocuments(pickId)
+
         return suspendCancellableCoroutine { continuation ->
-            db.collection("picks").document(pickId)
-                .delete()
-                .addOnSuccessListener {
-                    continuation.resume(true)
+            db.runTransaction { transaction ->
+                transaction.delete(pickDocument)
+
+                favoriteDocuments.forEach { document ->
+                    transaction.delete(document)
                 }
-                .addOnFailureListener { exception ->
-                    Log.e("FirebaseDataSourceImpl", "Failed to delete pick", exception)
-                    continuation.resumeWithException(exception)
-                }
+
+                transaction.update(userDocument, FIELD_MY_PICKS, FieldValue.arrayRemove(pickId))
+            }.addOnSuccessListener { _ ->
+                continuation.resume(true)
+            }.addOnFailureListener { e ->
+                Log.w(TAG_LOG, "Transaction failure.", e)
+                continuation.resumeWithException(e)
+            }
         }
-        // TODO: 유저가 등록한 리스트에서 이 픽 id를 삭제
-        // TODO: favorite에서 이 픽 id 삭제
     }
 
     override suspend fun fetchMyPicks(userId: String): List<Pick> {
@@ -301,8 +309,15 @@ class FirebaseDataSourceImpl @Inject constructor(
             db.collection(COLLECTION_FAVORITES)
                 .add(firebaseFavorite)
                 .addOnSuccessListener {
-                    updateFavoriteCount(pickId) // 클라우드 함수 호출
-                    continuation.resume(true)
+                    // favorites에 문서 생성 후 클라우드 함수가 완료됐을 때 담기 완료
+                    CoroutineScope(Dispatchers.IO).launch {
+                        try {
+                            updateFavoriteCount(pickId) // 클라우드 함수 호출
+                            continuation.resume(true)
+                        } catch (e: Exception) {
+                            continuation.resumeWithException(e)
+                        }
+                    }
                 }
                 .addOnFailureListener { exception ->
                     Log.e("FirebaseDataSourceImpl", "Failed to create favorite", exception)
@@ -318,8 +333,15 @@ class FirebaseDataSourceImpl @Inject constructor(
                 db.collection(COLLECTION_FAVORITES).document(document.id)
                     .delete()
                     .addOnSuccessListener {
-                        updateFavoriteCount(pickId) // 클라우드 함수 호출
-                        continuation.resume(true)
+                        // favorites에 문서 삭제 후 클라우드 함수가 완료됐을 때 담기 해제 완료
+                        CoroutineScope(Dispatchers.IO).launch {
+                            try {
+                                updateFavoriteCount(pickId) // 클라우드 함수 호출
+                                continuation.resume(true)
+                            } catch (e: Exception) {
+                                continuation.resumeWithException(e)
+                            }
+                        }
                     }
                     .addOnFailureListener { exception ->
                         Log.w(
@@ -395,23 +417,44 @@ class FirebaseDataSourceImpl @Inject constructor(
         }
     }
 
-    private fun updateFavoriteCount(pickId: String) {
-        CoroutineScope(Dispatchers.IO).launch {
-            try {
-                val result = cloudFunctionHelper.updateFavoriteCount(pickId)
-                result.onSuccess {
-                    Log.d("FirebaseDataSourceImpl", "Success to update favorite count")
-                }
-                    .onFailure { exception ->
-                        Log.e("FirebaseDataSourceImpl", "Failed to update favorite count", exception)
-                    }
-            } catch (e: Exception) {
-                Log.e("FirebaseDataSourceImpl", "Exception occurred while updating favorite count", e)
+    private suspend fun updateFavoriteCount(pickId: String) {
+        try {
+            val result = cloudFunctionHelper.updateFavoriteCount(pickId)
+            result.onSuccess {
+                Log.d("FirebaseDataSourceImpl", "Success to update favorite count")
+            }.onFailure { exception ->
+                Log.e("FirebaseDataSourceImpl", "Failed to update favorite count", exception)
+                throw exception
             }
+        } catch (e: Exception) {
+            Log.e("FirebaseDataSourceImpl", "Exception occurred while updating favorite count", e)
+            throw e
+        }
+    }
+
+    private suspend fun fetchFavoriteDocuments(pickId: String): List<DocumentReference> {
+        return suspendCancellableCoroutine { continuation ->
+            db.collection(COLLECTION_FAVORITES)
+                .whereEqualTo(FIELD_PICK_ID, pickId)
+                .get()
+                .addOnSuccessListener { querySnapShot ->
+                    val documentIds = querySnapShot.documents.map { it.id }
+                    val documentRefs = mutableListOf<DocumentReference>()
+                    documentIds.forEach { id ->
+                        documentRefs.add(db.collection(COLLECTION_FAVORITES).document(id))
+                    }
+                    continuation.resume(documentRefs)
+                }
+                .addOnFailureListener { e ->
+                    Log.w(TAG_LOG, "Failed to fetch favorite documents id", e)
+                    continuation.resumeWithException(e)
+                }
         }
     }
 
     companion object {
+        private const val TAG_LOG = "FirebaseDataSourceImpl"
+
         private const val COLLECTION_FAVORITES = "favorites"
         private const val COLLECTION_PICKS = "picks"
         private const val COLLECTION_USERS = "users"
@@ -419,5 +462,6 @@ class FirebaseDataSourceImpl @Inject constructor(
         private const val FIELD_PICK_ID = "pickId"
         private const val FIELD_USER_ID = "userId"
         private const val FIELD_ADDED_AT = "addedAt"
+        private const val FIELD_MY_PICKS = "myPicks"
     }
 }

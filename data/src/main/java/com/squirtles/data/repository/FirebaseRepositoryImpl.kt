@@ -54,9 +54,9 @@ class FirebaseRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun deletePick(pickId: String): Result<Boolean> {
+    override suspend fun deletePick(pickId: String, userId: String): Result<Boolean> {
         return handleResult {
-            firebaseRemoteDataSource.deletePick(pickId)
+            firebaseRemoteDataSource.deletePick(pickId, userId)
         }
     }
 

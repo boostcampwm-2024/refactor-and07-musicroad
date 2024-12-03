@@ -13,12 +13,19 @@ import com.squirtles.domain.usecase.local.GetCurrentUserUseCase
 import com.squirtles.domain.usecase.mypick.DeletePickUseCase
 import com.squirtles.domain.usecase.pick.FetchIsFavoriteUseCase
 import com.squirtles.domain.usecase.pick.FetchPickUseCase
+import com.squirtles.musicroad.common.throttleFirst
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.async
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+
+enum class FavoriteAction {
+    ADDED, DELETED
+}
 
 @HiltViewModel
 class PickViewModel @Inject constructor(
@@ -35,6 +42,25 @@ class PickViewModel @Inject constructor(
 
     private var _currentTab = DETAIL_PICK_TAB
     val currentTab get() = _currentTab
+
+    private val _favoriteAction = MutableSharedFlow<FavoriteAction>()
+    val favoriteAction = _favoriteAction.asSharedFlow()
+
+    private val actionClick = MutableSharedFlow<Pair<String, Boolean>>()
+
+    init {
+        viewModelScope.launch {
+            actionClick
+                .throttleFirst(1000)
+                .collect { (pickId, isAdding) ->
+                    if (isAdding) {
+                        addToFavoritePicks(pickId)
+                    } else {
+                        deleteFromFavoritePicks(pickId)
+                    }
+                }
+        }
+    }
 
     fun getUserId() = getCurrentUserUseCase().userId
 
@@ -67,10 +93,16 @@ class PickViewModel @Inject constructor(
         }
     }
 
+    fun toggleFavoritePick(pickId: String, isAdding: Boolean) {
+        viewModelScope.launch {
+            actionClick.emit(pickId to isAdding)
+        }
+    }
+
     fun deletePick(pickId: String) {
         viewModelScope.launch {
             _detailPickUiState.emit(DetailPickUiState.Loading)
-            deletePickUseCase(pickId)
+            deletePickUseCase(pickId, getUserId())
                 .onSuccess {
                     _detailPickUiState.emit(DetailPickUiState.Deleted)
                 }
@@ -80,11 +112,11 @@ class PickViewModel @Inject constructor(
         }
     }
 
-    fun addToFavorite(pickId: String, onAddToFavoriteSuccess: () -> Unit) {
+    private fun addToFavoritePicks(pickId: String) {
         viewModelScope.launch {
             createFavoriteUseCase(pickId, getUserId())
                 .onSuccess {
-                    onAddToFavoriteSuccess()
+                    _favoriteAction.emit(FavoriteAction.ADDED)
                     val currentUiState = _detailPickUiState.value as? DetailPickUiState.Success
                     currentUiState?.let { successState ->
                         _detailPickUiState.emit(successState.copy(isFavorite = true))
@@ -96,11 +128,11 @@ class PickViewModel @Inject constructor(
         }
     }
 
-    fun deleteAtFavorite(pickId: String, onDeleteAtFavoriteSuccess: () -> Unit) {
+    private fun deleteFromFavoritePicks(pickId: String) {
         viewModelScope.launch {
             deleteFavoriteUseCase(pickId, getUserId())
                 .onSuccess {
-                    onDeleteAtFavoriteSuccess()
+                    _favoriteAction.emit(FavoriteAction.DELETED)
                     val currentUiState = _detailPickUiState.value as? DetailPickUiState.Success
                     currentUiState?.let { successState ->
                         _detailPickUiState.emit(successState.copy(isFavorite = false))
