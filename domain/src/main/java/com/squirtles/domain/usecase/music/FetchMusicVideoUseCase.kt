@@ -12,7 +12,7 @@ class FetchMusicVideoUseCase @Inject constructor(
         val keyword = "${song.songName}-${song.artistName}"
         appleMusicRepository.searchMusicVideos(keyword).onSuccess { musicVideos ->
             return musicVideos.find {
-                it.artistName == song.artistName && it.songName in song.songName
+                it.artistName == song.artistName && song.songName in it.songName
             }
         }
         return null
