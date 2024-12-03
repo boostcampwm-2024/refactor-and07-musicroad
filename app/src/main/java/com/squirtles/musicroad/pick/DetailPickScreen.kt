@@ -29,6 +29,7 @@ import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -42,6 +43,7 @@ import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.lerp
+import androidx.compose.ui.zIndex
 import androidx.core.view.WindowInsetsControllerCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -61,6 +63,7 @@ import com.squirtles.musicroad.pick.components.music.MusicPlayer
 import com.squirtles.musicroad.ui.theme.Black
 import com.squirtles.musicroad.ui.theme.White
 import com.squirtles.musicroad.videoplayer.MusicVideoScreen
+import kotlinx.coroutines.launch
 import kotlin.math.absoluteValue
 
 @Composable
@@ -129,6 +132,7 @@ fun DetailPickScreen(
                 }
             }
 
+            val scrollScope = rememberCoroutineScope()
             val pagerState = rememberPagerState(
                 pageCount = { if (isMusicVideoAvailable) 2 else 1 }
             )
@@ -183,7 +187,11 @@ fun DetailPickScreen(
                                         fraction = 1f - pageOffset.coerceIn(0f, 1f)
                                     )
                                 },
-                            onBackClick = onBackClick,
+                            onBackClick = {
+                                scrollScope.launch {
+                                    pagerState.animateScrollToPage(page = DETAIL_PICK_TAB)
+                                }
+                            },
                         )
                     }
                 }
@@ -333,20 +341,24 @@ private fun DetailPick(
         ) {
             Column(
                 modifier = Modifier
-                    .fillMaxSize()
+                    .fillMaxWidth()
+                    .weight(1f)
+                    .verticalScroll(scrollState)
                     .padding(top = 10.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(10.dp),
             ) {
                 SongInfo(
                     song = pick.song,
-                    dynamicOnBackgroundColor = onDynamicBackgroundColor
+                    dynamicOnBackgroundColor = onDynamicBackgroundColor,
+                    modifier = Modifier.zIndex(1f)
                 )
 
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
                         .align(Alignment.CenterHorizontally)
+                        .zIndex(0f)
                 ) {
                     CircleAlbumCover(
                         modifier = Modifier
@@ -372,33 +384,30 @@ private fun DetailPick(
 
                 PickInformation(formattedDate = pick.createdAt, favoriteCount = pick.favoriteCount)
 
-                CommentText(
-                    comment = pick.comment,
-                    scrollState = scrollState
-                )
+                CommentText(comment = pick.comment)
 
                 VerticalSpacer(height = 8)
+            }
 
-                if (pick.song.previewUrl.isBlank().not()) {
-                    MusicPlayer(
-                        song = pick.song,
-                        playerUiState = playerUiState,
-                        onSeekChanged = { timeMs ->
-                            playerServiceViewModel.onSeekingFinished(timeMs)
-                        },
-                        onReplayForwardClick = { isForward ->
-                            if (isForward) {
-                                playerServiceViewModel.onAdvanceBy()
-                            } else {
-                                playerServiceViewModel.onRewindBy()
-                            }
+            if (pick.song.previewUrl.isBlank().not()) {
+                MusicPlayer(
+                    song = pick.song,
+                    playerUiState = playerUiState,
+                    onSeekChanged = { timeMs ->
+                        playerServiceViewModel.onSeekingFinished(timeMs)
+                    },
+                    onReplayForwardClick = { isForward ->
+                        if (isForward) {
+                            playerServiceViewModel.onAdvanceBy()
+                        } else {
+                            playerServiceViewModel.onRewindBy()
+                        }
 //                            playerServiceViewModel.replayForward(replaySec)
-                        },
-                        onPauseToggle = { song ->
-                            playerServiceViewModel.togglePlayPause(song)
-                        },
-                    )
-                }
+                    },
+                    onPauseToggle = { song ->
+                        playerServiceViewModel.togglePlayPause(song)
+                    },
+                )
             }
         }
     }

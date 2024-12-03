@@ -34,6 +34,7 @@ import com.squirtles.musicroad.common.FavoriteCountText
 import com.squirtles.musicroad.common.SongInfoText
 import com.squirtles.musicroad.common.TotalCountText
 import com.squirtles.musicroad.common.HorizontalSpacer
+import com.squirtles.musicroad.common.VerticalSpacer
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -62,6 +63,8 @@ fun ClusterBottomSheet(
                     .padding(start = DEFAULT_PADDING),
                 totalCount = pickList.size
             )
+            
+            VerticalSpacer(height = 8)
 
             LazyColumn {
                 items(

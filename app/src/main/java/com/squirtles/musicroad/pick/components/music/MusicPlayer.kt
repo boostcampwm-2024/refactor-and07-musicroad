@@ -49,6 +49,3 @@ fun MusicPlayer(
         )
     }
 }
-
-private const val DEFAULT_REPLAY_SEC = -5_000L
-private const val DEFAULT_FORWARD_SEC = 5_000L
