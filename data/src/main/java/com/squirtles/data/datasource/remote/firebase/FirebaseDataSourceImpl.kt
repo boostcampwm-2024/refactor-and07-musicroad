@@ -75,14 +75,21 @@ class FirebaseDataSourceImpl @Inject constructor(
 
     override suspend fun updateUserName(userId: String, newUserName: String): Boolean {
         return suspendCancellableCoroutine { continuation ->
-            db.collection("users").document(userId)
-                .update("name", newUserName)
-                .addOnSuccessListener {
-                    continuation.resume(true)
+            db.runTransaction { transaction ->
+                val userRef = db.collection("users").document(userId)
+                val userDocument = transaction.get(userRef)
+                transaction.update(userRef, "name", newUserName)
+
+                val myPicks = userDocument.get("myPicks")?.let { it as List<String> } ?: emptyList()
+                myPicks.forEach { pickId ->
+                    val pickRef = db.collection("picks").document(pickId)
+                    transaction.update(pickRef, "createdBy.userName", newUserName)
                 }
-                .addOnFailureListener { exception ->
-                    continuation.resumeWithException(exception)
-                }
+            }.addOnSuccessListener {
+                continuation.resume(true)
+            }.addOnFailureListener { exception ->
+                continuation.resumeWithException(exception)
+            }
         }
     }
 
@@ -395,9 +402,9 @@ class FirebaseDataSourceImpl @Inject constructor(
                 result.onSuccess {
                     Log.d("FirebaseDataSourceImpl", "Success to update favorite count")
                 }
-                .onFailure { exception ->
-                    Log.e("FirebaseDataSourceImpl", "Failed to update favorite count", exception)
-                }
+                    .onFailure { exception ->
+                        Log.e("FirebaseDataSourceImpl", "Failed to update favorite count", exception)
+                    }
             } catch (e: Exception) {
                 Log.e("FirebaseDataSourceImpl", "Exception occurred while updating favorite count", e)
             }
