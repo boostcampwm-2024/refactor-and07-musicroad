@@ -118,6 +118,7 @@ fun NaverMap(
                     }
 
                     naverMap.value?.run {
+                        mapType = NaverMap.MapType.Navi
                         initMapSettings()
                         initDeviceLocation(
                             context,
@@ -138,6 +139,10 @@ fun NaverMap(
         },
         modifier = Modifier.fillMaxSize()
     )
+
+    if (isSystemInDarkTheme()) {
+        naverMap.value?.isNightModeEnabled = true
+    }
 }
 
 internal fun setCameraToMarker(
