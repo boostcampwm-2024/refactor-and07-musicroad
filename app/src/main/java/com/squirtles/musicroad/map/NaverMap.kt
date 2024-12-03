@@ -27,6 +27,7 @@ import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import com.naver.maps.geometry.LatLng
+import com.naver.maps.geometry.LatLngBounds
 import com.naver.maps.map.CameraAnimation
 import com.naver.maps.map.CameraPosition
 import com.naver.maps.map.CameraUpdate
@@ -209,6 +210,10 @@ private fun NaverMap.setCircleOverlay(circleOverlay: CircleOverlay, location: Lo
 }
 
 private fun NaverMap.initMapSettings() {
+    extent = LatLngBounds(
+        LatLng(35.917791, 126.092845),
+        LatLng(37.330075, 130.389687)
+    )
     setCameraZoomLimit()
     uiSettings.setNaverMapMapUi()
 }
