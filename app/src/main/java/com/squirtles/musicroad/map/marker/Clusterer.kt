@@ -15,6 +15,7 @@ import com.naver.maps.map.overlay.Align
 import com.naver.maps.map.overlay.Marker
 import com.naver.maps.map.overlay.Overlay
 import com.naver.maps.map.overlay.OverlayImage
+import com.squirtles.musicroad.map.DEFAULT_MARKER_Z_INDEX
 import com.squirtles.musicroad.map.MapViewModel
 import com.squirtles.musicroad.map.setCameraToMarker
 import com.squirtles.musicroad.ui.theme.Black
@@ -68,6 +69,7 @@ internal fun <T : ClusteringKey> buildClusterer(
                 }
                 val clusterMarkerIconView = ClusterMarkerIconView(context, densityType)
                 marker.icon = OverlayImage.fromView(clusterMarkerIconView)
+                marker.zIndex = DEFAULT_MARKER_Z_INDEX
                 marker.anchor = PointF(0.5F, 0.5F)
                 marker.captionText = info.size.toString()
                 marker.captionColor = captionColor.toArgb()
@@ -96,6 +98,7 @@ internal fun <T : ClusteringKey> buildClusterer(
         .leafMarkerUpdater(object : DefaultLeafMarkerUpdater() {
             override fun updateLeafMarker(info: LeafMarkerInfo, marker: Marker) {
                 marker.anchor = Marker.DEFAULT_ANCHOR
+                marker.zIndex = DEFAULT_MARKER_Z_INDEX
                 marker.captionText = ""
 
                 val pick = (info.key as MarkerKey).pick

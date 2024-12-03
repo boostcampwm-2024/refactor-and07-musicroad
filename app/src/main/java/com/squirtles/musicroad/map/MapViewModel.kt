@@ -178,6 +178,7 @@ class MapViewModel @Inject constructor(
         val defaultIconWidth = this.icon.getIntrinsicWidth(context)
         val defaultIconHeight = this.icon.getIntrinsicHeight(context)
 
+        zIndex = if (isClicked) CLICKED_MARKER_Z_INDEX else DEFAULT_MARKER_Z_INDEX
         this.width =
             if (isClicked) (defaultIconWidth * MARKER_SCALE).toInt() else defaultIconWidth
         this.height =

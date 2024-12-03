@@ -265,3 +265,5 @@ private val PERMISSIONS = arrayOf(
     Manifest.permission.ACCESS_FINE_LOCATION,
     Manifest.permission.ACCESS_COARSE_LOCATION
 )
+internal const val DEFAULT_MARKER_Z_INDEX = 0
+internal const val CLICKED_MARKER_Z_INDEX = 100
