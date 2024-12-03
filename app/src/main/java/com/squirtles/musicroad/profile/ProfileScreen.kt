@@ -2,6 +2,7 @@ package com.squirtles.musicroad.profile
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -68,17 +69,17 @@ fun ProfileScreen(
             )
         }
     ) { innerPadding ->
-        Column(
+        Box(
             modifier = Modifier
                 .fillMaxSize()
                 .background(Brush.verticalGradient(colorStops = COLOR_STOPS))
                 .padding(innerPadding),
-            horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Column(
                 modifier = Modifier
-                    .weight(1f)
-                    .verticalScroll(scrollState),
+                    .fillMaxSize()
+                    .verticalScroll(scrollState)
+                    .padding(bottom = 96.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 VerticalSpacer(16)
@@ -137,6 +138,7 @@ fun ProfileScreen(
                 onClick = onBackToMapClick,
                 modifier = Modifier
                     .fillMaxWidth(fraction = 0.5F)
+                    .align(Alignment.BottomCenter)
                     .padding(bottom = 48.dp),
                 shape = CircleShape,
                 containerColor = Primary,
