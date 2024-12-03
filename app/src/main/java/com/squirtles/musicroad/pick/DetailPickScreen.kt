@@ -27,6 +27,7 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -46,7 +47,10 @@ import androidx.compose.ui.util.lerp
 import androidx.compose.ui.zIndex
 import androidx.core.view.WindowInsetsControllerCompat
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.flowWithLifecycle
 import com.squirtles.domain.model.Pick
 import com.squirtles.musicroad.R
 import com.squirtles.musicroad.common.VerticalSpacer
@@ -104,9 +108,11 @@ fun DetailPickScreen(
         }
 
         is DetailPickUiState.Success -> {
+            val lifecycleOwner = LocalLifecycleOwner.current
             val pick = (uiState as DetailPickUiState.Success).pick
             val isFavorite = (uiState as DetailPickUiState.Success).isFavorite
             val isCreatedBySelf = pickViewModel.getUserId() == pick.createdBy.userId
+            var favoriteCount by rememberSaveable { mutableIntStateOf(pick.favoriteCount) }
             val onActionClick: () -> Unit = {
                 when {
                     isCreatedBySelf -> {
@@ -116,18 +122,18 @@ fun DetailPickScreen(
 
                     isFavorite -> {
                         showProcessIndicator = true
-                        pickViewModel.deleteAtFavorite(pickId) {
-                            showProcessIndicator = false
-                            context.showShortToast(context.getString(R.string.success_delete_at_favorite))
-                        }
+                        pickViewModel.toggleFavoritePick(
+                            pickId = pickId,
+                            isAdding = false
+                        )
                     }
 
                     else -> {
                         showProcessIndicator = true
-                        pickViewModel.addToFavorite(pickId) {
-                            showProcessIndicator = false
-                            context.showShortToast(context.getString(R.string.success_add_to_favorite))
-                        }
+                        pickViewModel.toggleFavoritePick(
+                            pickId = pickId,
+                            isAdding = true
+                        )
                     }
                 }
             }
@@ -136,6 +142,26 @@ fun DetailPickScreen(
             val pagerState = rememberPagerState(
                 pageCount = { if (isMusicVideoAvailable) 2 else 1 }
             )
+
+            LaunchedEffect(Unit) {
+                pickViewModel.favoriteAction
+                    .flowWithLifecycle(lifecycleOwner.lifecycle, Lifecycle.State.STARTED)
+                    .collect { action ->
+                        when (action) {
+                            FavoriteAction.ADDED -> {
+                                showProcessIndicator = false
+                                favoriteCount += 1
+                                context.showShortToast(context.getString(R.string.success_add_to_favorite))
+                            }
+
+                            FavoriteAction.DELETED -> {
+                                showProcessIndicator = false
+                                favoriteCount -= 1
+                                context.showShortToast(context.getString(R.string.success_delete_at_favorite))
+                            }
+                        }
+                    }
+            }
 
             // 비디오 플레이어 설정
             LaunchedEffect(pick) {
@@ -161,8 +187,9 @@ fun DetailPickScreen(
                         DetailPick(
                             pick = pick,
                             isCreatedBySelf = isCreatedBySelf,
-                            isFavorite = isFavorite, // TODO
+                            isFavorite = isFavorite,
                             userName = pick.createdBy.userName,
+                            favoriteCount = favoriteCount,
                             isMusicVideoAvailable = isMusicVideoAvailable,
 //                            playerViewModel = playerViewModel,
                             playerServiceViewModel = playerServiceViewModel,
@@ -228,6 +255,7 @@ fun DetailPickScreen(
                 isCreatedBySelf = false,
                 isFavorite = false,
                 userName = "",
+                favoriteCount = 0,
                 isMusicVideoAvailable = false,
 //                playerViewModel = playerViewModel,
                 playerServiceViewModel = playerServiceViewModel,
@@ -272,6 +300,7 @@ private fun DetailPick(
     isCreatedBySelf: Boolean,
     isFavorite: Boolean,
     userName: String,
+    favoriteCount: Int,
     isMusicVideoAvailable: Boolean,
 //    playerViewModel: PlayerViewModel,
     playerServiceViewModel: PlayerServiceViewModel,
@@ -382,7 +411,10 @@ private fun DetailPick(
                     }
                 }
 
-                PickInformation(formattedDate = pick.createdAt, favoriteCount = pick.favoriteCount)
+                PickInformation(
+                    formattedDate = pick.createdAt,
+                    favoriteCount = favoriteCount
+                )
 
                 CommentText(comment = pick.comment)
 
@@ -425,6 +457,7 @@ private fun DetailPickPreview() {
         isCreatedBySelf = false,
         isFavorite = false,
         userName = "짱구",
+        favoriteCount = 0,
         isMusicVideoAvailable = true,
 //        playerViewModel = hiltViewModel(),
         playerServiceViewModel = hiltViewModel(),

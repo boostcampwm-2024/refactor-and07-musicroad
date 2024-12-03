@@ -15,16 +15,15 @@ import com.squirtles.domain.usecase.local.GetCurrentUserUseCase
 import com.squirtles.domain.usecase.music.FetchMusicVideoUseCase
 import com.squirtles.domain.usecase.music.SearchSongsUseCase
 import com.squirtles.domain.usecase.mypick.CreatePickUseCase
+import com.squirtles.musicroad.common.throttleFirst
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.debounce
-import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -159,20 +158,6 @@ class CreatePickViewModel @Inject constructor(
                     /* TODO: Firestore 등록 실패처리 */
                     _createPickUiState.emit(CreateUiState.Error)
                     Log.d("CreatePickViewModel", createResult.exceptionOrNull()?.message.toString())
-                }
-            }
-        }
-    }
-
-    private fun <T> Flow<T>.throttleFirst(periodMillis: Long): Flow<T> {
-        require(periodMillis > 0) { "period should be positive" }
-        return flow {
-            var lastTime = 0L
-            collect { value ->
-                val currentTime = System.currentTimeMillis()
-                if (currentTime - lastTime >= periodMillis) {
-                    lastTime = currentTime
-                    emit(value)
                 }
             }
         }

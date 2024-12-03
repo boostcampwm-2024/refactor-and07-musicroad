@@ -281,8 +281,15 @@ class FirebaseDataSourceImpl @Inject constructor(
             db.collection(COLLECTION_FAVORITES)
                 .add(firebaseFavorite)
                 .addOnSuccessListener {
-                    updateFavoriteCount(pickId) // 클라우드 함수 호출
-                    continuation.resume(true)
+                    // favorites에 문서 생성 후 클라우드 함수가 완료됐을 때 담기 완료
+                    CoroutineScope(Dispatchers.IO).launch {
+                        try {
+                            updateFavoriteCount(pickId) // 클라우드 함수 호출
+                            continuation.resume(true)
+                        } catch (e: Exception) {
+                            continuation.resumeWithException(e)
+                        }
+                    }
                 }
                 .addOnFailureListener { exception ->
                     Log.e("FirebaseDataSourceImpl", "Failed to create favorite", exception)
@@ -298,8 +305,15 @@ class FirebaseDataSourceImpl @Inject constructor(
                 db.collection(COLLECTION_FAVORITES).document(document.id)
                     .delete()
                     .addOnSuccessListener {
-                        updateFavoriteCount(pickId) // 클라우드 함수 호출
-                        continuation.resume(true)
+                        // favorites에 문서 삭제 후 클라우드 함수가 완료됐을 때 담기 해제 완료
+                        CoroutineScope(Dispatchers.IO).launch {
+                            try {
+                                updateFavoriteCount(pickId) // 클라우드 함수 호출
+                                continuation.resume(true)
+                            } catch (e: Exception) {
+                                continuation.resumeWithException(e)
+                            }
+                        }
                     }
                     .addOnFailureListener { exception ->
                         Log.w(
@@ -375,19 +389,18 @@ class FirebaseDataSourceImpl @Inject constructor(
         }
     }
 
-    private fun updateFavoriteCount(pickId: String) {
-        CoroutineScope(Dispatchers.IO).launch {
-            try {
-                val result = cloudFunctionHelper.updateFavoriteCount(pickId)
-                result.onSuccess {
-                    Log.d("FirebaseDataSourceImpl", "Success to update favorite count")
-                }
-                    .onFailure { exception ->
-                        Log.e("FirebaseDataSourceImpl", "Failed to update favorite count", exception)
-                    }
-            } catch (e: Exception) {
-                Log.e("FirebaseDataSourceImpl", "Exception occurred while updating favorite count", e)
+    private suspend fun updateFavoriteCount(pickId: String) {
+        try {
+            val result = cloudFunctionHelper.updateFavoriteCount(pickId)
+            result.onSuccess {
+                Log.d("FirebaseDataSourceImpl", "Success to update favorite count")
+            }.onFailure { exception ->
+                Log.e("FirebaseDataSourceImpl", "Failed to update favorite count", exception)
+                throw exception
             }
+        } catch (e: Exception) {
+            Log.e("FirebaseDataSourceImpl", "Exception occurred while updating favorite count", e)
+            throw e
         }
     }
 
