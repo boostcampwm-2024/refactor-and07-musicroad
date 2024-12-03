@@ -3,18 +3,20 @@ package com.squirtles.mediaservice.di
 import android.content.ComponentName
 import android.content.Context
 import android.util.Log
+import androidx.annotation.OptIn
 import androidx.media3.common.AudioAttributes
+import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.session.MediaController
 import androidx.media3.session.MediaSession
 import androidx.media3.session.SessionToken
 import com.google.common.util.concurrent.ListenableFuture
-import com.squirtles.mediaservice.ConnectedMediaController
 import com.squirtles.mediaservice.CustomMediaSessionCallback
-import com.squirtles.mediaservice.MediaControllerManager
-import com.squirtles.mediaservice.MediaNotificationManager
+import com.squirtles.mediaservice.MediaControllerProvider
+import com.squirtles.mediaservice.MediaControllerProviderImpl
+import com.squirtles.mediaservice.MediaNotificationProvider
+import com.squirtles.mediaservice.MediaNotificationProviderImpl
 import com.squirtles.mediaservice.MediaPlayerService
-import com.squirtles.mediaservice.Notifier
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
@@ -30,13 +32,14 @@ abstract class MediaServiceBinds {
 
     @Binds
     abstract fun bindsNotifier(
-        mediaNotification: MediaNotificationManager
-    ): Notifier
+        mediaNotification: MediaNotificationProviderImpl
+    ): MediaNotificationProvider
 
+    @OptIn(UnstableApi::class)
     @Binds
     abstract fun bindsMediaControllerManager(
-        connectedMediaController: ConnectedMediaController
-    ): MediaControllerManager
+        mediaControllerProviderImpl: MediaControllerProviderImpl
+    ): MediaControllerProvider
 }
 
 @Module
@@ -51,6 +54,13 @@ object MediaServiceModule {
         ExoPlayer.Builder(context)
             .setAudioAttributes(AudioAttributes.DEFAULT, true)
             .build()
+
+    @OptIn(UnstableApi::class)
+    @Singleton
+    @Provides
+    fun provideAudioSessionId(
+        exoPlayer: ExoPlayer
+    ): Int = exoPlayer.audioSessionId
 
     @Singleton
     @Provides
@@ -67,8 +77,8 @@ object MediaServiceModule {
     fun providesMediaNotificationManager(
         @ApplicationContext context: Context,
         mediaSession: MediaSession,
-    ): MediaNotificationManager =
-        MediaNotificationManager(context, mediaSession)
+    ): MediaNotificationProviderImpl =
+        MediaNotificationProviderImpl(context, mediaSession)
 
     @Singleton
     @Provides

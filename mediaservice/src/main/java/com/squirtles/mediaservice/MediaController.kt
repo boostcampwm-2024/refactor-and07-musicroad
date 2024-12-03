@@ -1,5 +1,6 @@
 package com.squirtles.mediaservice
 
+import androidx.media3.common.util.UnstableApi
 import androidx.media3.session.MediaController
 import com.google.common.util.concurrent.FutureCallback
 import com.google.common.util.concurrent.Futures
@@ -13,15 +14,18 @@ import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.coroutines.cancellation.CancellationException
 
-interface MediaControllerManager {
+interface MediaControllerProvider {
     val mediaControllerFlow: Flow<MediaController>
+    val audioSessionFlow: Flow<Int>
 }
 
 /* mediaControllerFuture: MediaController를 비동기적으로 제공하는 ListenableFuture */
+@UnstableApi
 @Singleton
-class ConnectedMediaController @Inject constructor(
+class MediaControllerProviderImpl @Inject constructor(
+    private val audioSessionId: Int,
     mediaControllerFuture: ListenableFuture<MediaController>
-) : MediaControllerManager {
+) : MediaControllerProvider {
 
     /* mediaControllerFlow가 처음 구독될 때 callbackFlow가 실행 */
     override val mediaControllerFlow: Flow<MediaController> = callbackFlow {
@@ -43,6 +47,11 @@ class ConnectedMediaController @Inject constructor(
             MoreExecutors.directExecutor()
         )
 
+        awaitClose { }
+    }
+
+    override val audioSessionFlow = callbackFlow {
+        trySend(audioSessionId)
         awaitClose { }
     }
 }

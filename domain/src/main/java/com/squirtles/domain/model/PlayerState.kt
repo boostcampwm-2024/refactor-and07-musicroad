@@ -1,6 +1,7 @@
 package com.squirtles.domain.model
 
-data class PlayerUiState(
+data class PlayerState(
+    val id: String = "",
     val isLoading: Boolean = false,
     val isPlaying: Boolean = false,
     val hasNext: Boolean = false,

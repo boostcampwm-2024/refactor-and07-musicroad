@@ -2,7 +2,6 @@ package com.squirtles.musicroad.pick
 
 import android.app.Activity
 import android.content.Context
-import android.util.Log
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
@@ -76,7 +75,6 @@ fun DetailPickScreen(
     onBackClick: () -> Unit,
     onDeleted: (Context) -> Unit,
     pickViewModel: PickViewModel = hiltViewModel(),
-//    playerViewModel: PlayerViewModel = hiltViewModel(),
     playerServiceViewModel: PlayerServiceViewModel = hiltViewModel(),
 ) {
     val context = LocalContext.current
@@ -165,6 +163,7 @@ fun DetailPickScreen(
 
             // 비디오 플레이어 설정
             LaunchedEffect(pick) {
+                playerServiceViewModel.readyPlayer()
                 playerServiceViewModel.setMediaItem(pick.song)
                 isMusicVideoAvailable = pick.musicVideoUrl.isNotEmpty()
             }
@@ -191,7 +190,6 @@ fun DetailPickScreen(
                             userName = pick.createdBy.userName,
                             favoriteCount = favoriteCount,
                             isMusicVideoAvailable = isMusicVideoAvailable,
-//                            playerViewModel = playerViewModel,
                             playerServiceViewModel = playerServiceViewModel,
                             onBackClick = onBackClick,
                             onActionClick = onActionClick,
@@ -257,7 +255,6 @@ fun DetailPickScreen(
                 userName = "",
                 favoriteCount = 0,
                 isMusicVideoAvailable = false,
-//                playerViewModel = playerViewModel,
                 playerServiceViewModel = playerServiceViewModel,
                 onBackClick = onBackClick,
                 onActionClick = { }
@@ -302,7 +299,6 @@ private fun DetailPick(
     userName: String,
     favoriteCount: Int,
     isMusicVideoAvailable: Boolean,
-//    playerViewModel: PlayerViewModel,
     playerServiceViewModel: PlayerServiceViewModel,
     onBackClick: () -> Unit,
     onActionClick: () -> Unit
@@ -319,16 +315,8 @@ private fun DetailPick(
         blue = (dynamicBackgroundColor.blue + 0.2f).coerceAtMost(1.0f),
     )
 
-    // PlayerViewModel Collect
-//    val playerState by playerViewModel.playerState.collectAsStateWithLifecycle()
-//    val bufferPercentage by playerViewModel.bufferPercentage.collectAsStateWithLifecycle()
-//    val duration by playerViewModel.duration.collectAsStateWithLifecycle()
-
     val playerUiState by playerServiceViewModel.playerState.collectAsStateWithLifecycle()
-
-    LaunchedEffect(playerUiState) {
-        Log.d("DetailPickScreen", "playerUiState: $playerUiState")
-    }
+    val audioSessionId by playerServiceViewModel.audioSessionId.collectAsStateWithLifecycle(0)
 
     if (!view.isInEditMode) {
         SideEffect {
@@ -389,19 +377,21 @@ private fun DetailPick(
                         .align(Alignment.CenterHorizontally)
                         .zIndex(0f)
                 ) {
-                    CircleAlbumCover(
-                        modifier = Modifier
-                            .size(320.dp)
-                            .align(Alignment.Center),
-                        song = pick.song,
-                        currentPosition = { playerUiState.currentPosition },
-                        duration = { playerUiState.duration },
-                        audioEffectColor = audioEffectColor,
-                        audioSessionId = { playerServiceViewModel.audioSessionId },
-                        onSeekChanged = { timeMs ->
-                            playerServiceViewModel.onSeekingFinished(timeMs)
-                        },
-                    )
+                    if (audioSessionId != 0) {
+                        CircleAlbumCover(
+                            modifier = Modifier
+                                .size(320.dp)
+                                .align(Alignment.Center),
+                            song = pick.song,
+                            currentPosition = { playerUiState.currentPosition },
+                            duration = { playerUiState.duration },
+                            audioEffectColor = audioEffectColor,
+                            audioSessionId = audioSessionId,
+                            onSeekChanged = { timeMs ->
+                                playerServiceViewModel.onSeekingFinished(timeMs)
+                            },
+                        )
+                    }
 
                     if (isMusicVideoAvailable) {
                         MusicVideoKnob(
@@ -424,7 +414,7 @@ private fun DetailPick(
             if (pick.song.previewUrl.isBlank().not()) {
                 MusicPlayer(
                     song = pick.song,
-                    playerUiState = playerUiState,
+                    playerState = playerUiState,
                     onSeekChanged = { timeMs ->
                         playerServiceViewModel.onSeekingFinished(timeMs)
                     },
@@ -459,7 +449,6 @@ private fun DetailPickPreview() {
         userName = "짱구",
         favoriteCount = 0,
         isMusicVideoAvailable = true,
-//        playerViewModel = hiltViewModel(),
         playerServiceViewModel = hiltViewModel(),
         onBackClick = {},
         onActionClick = {},

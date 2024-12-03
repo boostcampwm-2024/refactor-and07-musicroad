@@ -17,7 +17,7 @@ import javax.inject.Inject
 @AndroidEntryPoint
 class MediaPlayerService : MediaSessionService() {
     @Inject
-    lateinit var notifier: Notifier
+    lateinit var mediaNotificationProvider: MediaNotificationProvider
 
     @Inject
     lateinit var mediaSession: MediaSession
@@ -32,20 +32,11 @@ class MediaPlayerService : MediaSessionService() {
                 actionFactory: MediaNotification.ActionFactory,
                 onNotificationChangedCallback: MediaNotification.Provider.Callback
             ): MediaNotification =
-                notifier.createMediaNotification(actionFactory)
+                mediaNotificationProvider.createMediaNotification(actionFactory)
 
             override fun handleCustomCommand(session: MediaSession, action: String, extras: Bundle): Boolean = false
         })
     }
-
-//    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-//        if (::mediaSession.isInitialized) {
-//            Log.d("MediaPlayerService", "MediaSession is initialized")
-//        } else {
-//            Log.e("MediaPlayerService", "MediaSession is NOT initialized")
-//        }
-//        return super.onStartCommand(intent, flags, startId)
-//    }
 
     // The user dismissed the app from the recent tasks
     override fun onTaskRemoved(rootIntent: Intent?) {

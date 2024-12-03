@@ -3,10 +3,11 @@ package com.squirtles.musicroad.media
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.squirtles.domain.model.PlayerUiState
+import com.squirtles.domain.model.PlayerState
 import com.squirtles.domain.model.Song
 import com.squirtles.domain.usecase.MediaPlayerUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.stateIn
@@ -18,14 +19,14 @@ class PlayerServiceViewModel @Inject constructor(
     private val mediaPlayerUseCase: MediaPlayerUseCase,
 ) : ViewModel() {
 
-    private var _playerUiState: StateFlow<PlayerUiState> = mediaPlayerUseCase.playerUiStateFlow()
+    private var _playerState: StateFlow<PlayerState> = mediaPlayerUseCase.playerUiStateFlow()
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5_000),
-            initialValue = PlayerUiState()
+            initialValue = PlayerState()
         )
-    val playerState get() = _playerUiState
 
+    val playerState get() = _playerState
     val audioSessionId get() = mediaPlayerUseCase.audioSessionId
 
     init {
@@ -36,14 +37,33 @@ class PlayerServiceViewModel @Inject constructor(
         }
     }
 
+    suspend fun readyPlayer() {
+        val job = viewModelScope.async {
+            mediaPlayerUseCase.readyPlayer()
+        }
+        job.await()
+    }
+
     fun setMediaItem(song: Song) {
+        if (_playerState.value.id == song.id) {
+            return
+        }
         viewModelScope.launch {
             mediaPlayerUseCase.setMediaItem(song)
         }
     }
 
-    private fun onPlay(song: Song) {
-        mediaPlayerUseCase.play(song)
+    fun setMediaItems(songs: List<Song>) {
+        if (songs.any { it.id == _playerState.value.id }) {
+            return
+        }
+        viewModelScope.launch {
+            mediaPlayerUseCase.setMediaItems(songs)
+        }
+    }
+
+    private fun onPlay() {
+        mediaPlayerUseCase.play()
     }
 
     fun onPause() {
@@ -66,11 +86,20 @@ class PlayerServiceViewModel @Inject constructor(
         mediaPlayerUseCase.advanceBy()
     }
 
-    fun togglePlayPause(song: Song) {
-        if (_playerUiState.value.isPlaying) {
+    fun shuffleNext() {
+        if (_playerState.value.isPlaying) {
             onPause()
         } else {
-            onPlay(song)
+            onNext()
+            onPlay()
+        }
+    }
+
+    fun togglePlayPause(song: Song) {
+        if (_playerState.value.isPlaying) {
+            onPause()
+        } else {
+            onPlay()
         }
     }
 
@@ -86,11 +115,11 @@ class PlayerServiceViewModel @Inject constructor(
         mediaPlayerUseCase.onSeekingFinished(time)
     }
 
-    fun onAddToQueue(url: String) {
-        mediaPlayerUseCase.addMediaItem(url)
-    }
+//    fun onAddToQueue(url: String) {
+//        mediaPlayerUseCase.addMediaItem(url)
+//    }
 
-    fun onAddToQueue(urls: List<String>) {
-        mediaPlayerUseCase.addMediaItems(urls)
-    }
+//    fun onAddToQueue(urls: List<String>) {
+//        mediaPlayerUseCase.setMediaItems(urls)
+//    }
 }

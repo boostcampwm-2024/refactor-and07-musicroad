@@ -18,17 +18,16 @@ import androidx.media3.session.MediaSession
 import androidx.media3.session.MediaStyleNotificationHelper
 import javax.inject.Inject
 
-interface Notifier {
+interface MediaNotificationProvider {
+
     @OptIn(UnstableApi::class)
-    fun createMediaNotification(
-        actionFactory: MediaNotification.ActionFactory,
-    ): MediaNotification
+    fun createMediaNotification(actionFactory: MediaNotification.ActionFactory): MediaNotification
 }
 
-class MediaNotificationManager @Inject constructor(
+class MediaNotificationProviderImpl @Inject constructor(
     private val context: Context,
     private val mediaSession: MediaSession
-) : Notifier {
+) : MediaNotificationProvider {
 
     companion object {
         const val NOTIFICATION_CHANNEL_ID = 100
@@ -36,9 +35,7 @@ class MediaNotificationManager @Inject constructor(
     }
 
     @OptIn(UnstableApi::class)
-    override fun createMediaNotification(
-        actionFactory: MediaNotification.ActionFactory
-    ): MediaNotification {
+    override fun createMediaNotification(actionFactory: MediaNotification.ActionFactory): MediaNotification {
         val notificationManager: NotificationManager =
             context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 

@@ -2,8 +2,9 @@ package com.squirtles.domain.usecase
 
 import android.util.Log
 import androidx.media3.common.Player
-import com.squirtles.domain.model.PlayerUiState
-import com.squirtles.mediaservice.MediaControllerManager
+import androidx.media3.common.Tracks
+import com.squirtles.domain.model.PlayerState
+import com.squirtles.mediaservice.MediaControllerProvider
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -23,18 +24,19 @@ import javax.inject.Inject
 
 /* 현재 플레이어에 이벤트 리스너 등록 -> 로딩,재생,seekbar 탐색, 재생시간 등 데이터를 UI데이터로 변환  */
 class MediaPlayerListenerUseCase @Inject constructor(
-    private val mediaControllerManager: MediaControllerManager
+    private val mediaControllerProvider: MediaControllerProvider
 ) {
     private val coroutineScope = CoroutineScope(Dispatchers.Main)
     private var timerJob: Job? = null
 
-    fun playerUiStateFlow() = callbackFlow {
-        val mediaController = mediaControllerManager.mediaControllerFlow.first()
+    fun playerStateFlow() = callbackFlow {
+        val mediaController = mediaControllerProvider.mediaControllerFlow.first()
         Log.d("MediaPlayerListenerUseCase", "$mediaController")
 
-        val currentPlayerUiState = MutableStateFlow(
+        val currentPlayerState = MutableStateFlow(
             if (mediaController.currentMediaItem != null) {
-                PlayerUiState(
+                PlayerState(
+                    id = mediaController.currentMediaItem!!.mediaId,
                     isLoading = mediaController.isLoading,
                     isPlaying = mediaController.isPlaying,
                     hasNext = mediaController.hasNextMediaItem(),
@@ -43,19 +45,23 @@ class MediaPlayerListenerUseCase @Inject constructor(
                     bufferPercentage = mediaController.bufferedPercentage
                 )
             } else {
-                PlayerUiState()
+                PlayerState()
             }
         )
 
         val playerListener = object : Player.Listener {
             override fun onIsPlayingChanged(isPlaying: Boolean) {
                 super.onIsPlayingChanged(isPlaying)
-                currentPlayerUiState.update { it.copy(isPlaying = isPlaying) }
+                currentPlayerState.update {
+                    it.copy(isPlaying = isPlaying)
+                }
             }
 
             override fun onIsLoadingChanged(isLoading: Boolean) {
                 super.onIsLoadingChanged(isLoading)
-                currentPlayerUiState.update { it.copy(isLoading = isLoading) }
+                currentPlayerState.update {
+                    it.copy(id = mediaController.currentMediaItem?.mediaId ?: "", isLoading = isLoading)
+                }
             }
 
             override fun onPositionDiscontinuity(
@@ -65,7 +71,7 @@ class MediaPlayerListenerUseCase @Inject constructor(
             ) {
                 super.onPositionDiscontinuity(oldPosition, newPosition, reason)
                 if (reason == Player.DISCONTINUITY_REASON_SEEK) {
-                    currentPlayerUiState.update {
+                    currentPlayerState.update {
                         it.copy(currentPosition = mediaController.currentPosition)
                     }
                 }
@@ -78,11 +84,15 @@ class MediaPlayerListenerUseCase @Inject constructor(
                     mediaController.pause()
                 }
             }
+
+            override fun onTracksChanged(tracks: Tracks) {
+                super.onTracksChanged(tracks)
+                currentPlayerState.value = PlayerState()
+            }
         }
 
-        // Start timer when player is playing
         coroutineScope.launch {
-            currentPlayerUiState
+            currentPlayerState
                 .map { it.isLoading.not() && it.isPlaying }
                 .distinctUntilChanged()
                 .collect { isPlaying ->
@@ -92,8 +102,7 @@ class MediaPlayerListenerUseCase @Inject constructor(
                             val maxDuration = mediaController.contentDuration
 
                             while (isActive && startDuration <= maxDuration) {
-                                // Update time
-                                currentPlayerUiState.update {
+                                currentPlayerState.update {
                                     it.copy(
                                         currentPosition = mediaController.currentPosition,
                                         bufferPercentage = mediaController.bufferedPercentage
@@ -109,13 +118,10 @@ class MediaPlayerListenerUseCase @Inject constructor(
                 }
         }
 
-        // Update when player state changes
         coroutineScope.launch {
-            currentPlayerUiState
+            currentPlayerState
                 .onEach { send(it) }
-                .collect {
-
-                }
+                .collect { }
         }
 
         mediaController.addListener(playerListener)

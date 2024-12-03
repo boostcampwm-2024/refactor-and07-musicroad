@@ -1,78 +1,64 @@
 package com.squirtles.domain.usecase
 
-import android.util.Log
 import androidx.media3.common.MediaItem
 import androidx.media3.common.MediaMetadata
+import androidx.media3.common.Player
 import androidx.media3.session.MediaController
-import com.squirtles.domain.model.PlayerUiState
+import com.squirtles.domain.model.PlayerState
 import com.squirtles.domain.model.Song
-import com.squirtles.mediaservice.MediaControllerManager
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.async
+import com.squirtles.mediaservice.MediaControllerProvider
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flow
 import javax.inject.Inject
 
 /*  */
 class MediaPlayerUseCase @Inject constructor(
     private val mediaPlayerListenerUseCase: MediaPlayerListenerUseCase,
-    private val mediaControllerManager: MediaControllerManager,
+    private val mediaControllerProvider: MediaControllerProvider,
 ) {
     private var mediaController: MediaController? = null
 
-    private var _audioSessionId: Int = 0
-    val audioSessionId get() = _audioSessionId
-
-//    init {
-//        collectMediaController()
-//    }
-//
-//    private fun collectMediaController() {
-//        // CoroutineScope를 통해 mediaControllerFlow를 수집
-//        CoroutineScope(Dispatchers.Main).launch {
-//            mediaController = mediaControllerManager.mediaControllerFlow.first()
-//            Log.d("MediaPlayerUseCase", "mediaController: $mediaController")
-//        }
-//    }
-
-    fun playerUiStateFlow(): Flow<PlayerUiState> =
-        mediaPlayerListenerUseCase.playerUiStateFlow()
-
-    fun addMediaItem(sourceUrl: String) {
-        val mediaItem = MediaItem.fromUri(sourceUrl)
-        mediaController?.addMediaItem(mediaItem)
+    val audioSessionId = flow {
+        emit(mediaControllerProvider.audioSessionFlow.first())
     }
 
-    fun addMediaItems(urls: List<String>) {
-        mediaController?.addMediaItems(urls.map {
-            MediaItem.fromUri(it)
-        })
-    }
+    fun playerUiStateFlow(): Flow<PlayerState> =
+        mediaPlayerListenerUseCase.playerStateFlow()
 
-    suspend fun setMediaItem(song: Song) {
-        val job = CoroutineScope(Dispatchers.Main).async {
-            mediaController = mediaControllerManager.mediaControllerFlow.first()
-            Log.d("MediaPlayerUseCase", "mediaController: $mediaController")
+//    fun addMediaItem(sourceUrl: String) {
+//        val mediaItem = MediaItem.fromUri(sourceUrl)
+//        mediaController?.addMediaItem(mediaItem)
+//    }
+
+    fun setMediaItems(songs: List<Song>) {
+        mediaController?.run {
+            setMediaItems(songs.map {
+                it.toMediaItem()
+            })
+            prepare()
+            playWhenReady = false
+            repeatMode = Player.REPEAT_MODE_ALL
         }
-        job.await()
+    }
 
+    fun seekToNextMediaItem() {
+        mediaController?.run {
+            seekToNextMediaItem()
+        }
+    }
+
+    suspend fun readyPlayer() {
+        mediaController = mediaControllerProvider.mediaControllerFlow.first()
+    }
+
+    fun setMediaItem(song: Song) {
+        mediaController?.pause()
         mediaController?.setMediaItem(song.toMediaItem())
         mediaController?.prepare()
-        Log.d("MediaPlayerUseCase", "setMediaItem:${mediaController?.currentMediaItem}")
-        Log.d("MediaPlayerUseCase", "mediaController:${mediaController}")
     }
 
-    fun play(song: Song) {
-//        val mediaItem = song.toMediaItem()
-//
-//        if (mediaController?.currentMediaItem?.mediaId != mediaItem.mediaId) {
-//            mediaController?.setMediaItem(mediaItem)
-//            mediaController?.prepare()
-//        }
-        Log.d("MediaPlayerUseCase", "currentMediaItem:${mediaController?.currentMediaItem}")
-        Log.d("MediaPlayerUseCase", "mediaController:${mediaController}")
-
+    fun play() {
         mediaController?.play()
     }
 
@@ -129,8 +115,7 @@ class MediaPlayerUseCase @Inject constructor(
                     .setAlbumTitle(albumName)
                     .build()
             )
-            .setUri(previewUrl)  // previewUrl을 setUri로 설정
+            .setUri(previewUrl)
             .build()
     }
-
 }
