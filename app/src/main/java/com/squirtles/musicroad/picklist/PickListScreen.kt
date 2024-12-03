@@ -36,6 +36,7 @@ import com.squirtles.musicroad.ui.theme.White
 
 @Composable
 fun PickListScreen(
+    userId: String,
     isFavoritePicks: Boolean,
     onBackClick: () -> Unit,
     onItemClick: (String) -> Unit,
@@ -45,9 +46,9 @@ fun PickListScreen(
 
     LaunchedEffect(Unit) {
         if (isFavoritePicks) {
-            pickListViewModel.fetchFavoritePicks()
+            pickListViewModel.fetchFavoritePicks(userId)
         } else {
-            pickListViewModel.fetchMyPicks()
+            pickListViewModel.fetchMyPicks(userId)
         }
     }
 

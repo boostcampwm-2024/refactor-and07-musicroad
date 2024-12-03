@@ -74,6 +74,26 @@ class FirebaseDataSourceImpl @Inject constructor(
         }
     }
 
+    override suspend fun updateUserName(userId: String, newUserName: String): Boolean {
+        return suspendCancellableCoroutine { continuation ->
+            db.runTransaction { transaction ->
+                val userRef = db.collection("users").document(userId)
+                val userDocument = transaction.get(userRef)
+                transaction.update(userRef, "name", newUserName)
+
+                val myPicks = userDocument.get("myPicks")?.let { it as List<String> } ?: emptyList()
+                myPicks.forEach { pickId ->
+                    val pickRef = db.collection("picks").document(pickId)
+                    transaction.update(pickRef, "createdBy.userName", newUserName)
+                }
+            }.addOnSuccessListener {
+                continuation.resume(true)
+            }.addOnFailureListener { exception ->
+                continuation.resumeWithException(exception)
+            }
+        }
+    }
+
     /**
      * Fetches a pick by ID from Firestore.
      * @param pickID The ID of the pick to fetch.

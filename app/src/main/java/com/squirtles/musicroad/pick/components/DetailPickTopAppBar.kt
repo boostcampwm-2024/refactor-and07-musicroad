@@ -1,5 +1,7 @@
 package com.squirtles.musicroad.pick.components
 
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Row
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -10,6 +12,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -26,18 +29,26 @@ fun DetailPickTopAppBar(
     modifier: Modifier = Modifier,
     isCreatedBySelf: Boolean,
     isFavorite: Boolean,
+    userId: String,
     userName: String,
     onDynamicBackgroundColor: Color,
+    onProfileClick: (String) -> Unit,
     onBackClick: () -> Unit,
     onActionClick: () -> Unit,
 ) {
     CenterAlignedTopAppBar(
         title = {
             Row(
+                modifier = Modifier.clickable(
+                    interactionSource = remember { MutableInteractionSource() },
+                    indication = null,
+                    onClick = { onProfileClick(userId) }
+                ),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 if (isCreatedBySelf) {
                     CreatedBySelfText(
+                        showUnderline = true,
                         color = onDynamicBackgroundColor,
                         style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold)
                     )
@@ -45,6 +56,7 @@ fun DetailPickTopAppBar(
                     CreatedByOtherUserText(
                         userName = userName,
                         modifier = Modifier.weight(weight = 1f, fill = false),
+                        showUnderline = true,
                         color = onDynamicBackgroundColor,
                         style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold)
                     )
