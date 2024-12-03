@@ -9,6 +9,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
 import androidx.media3.exoplayer.ExoPlayer
+import com.squirtles.domain.model.Pick
 import com.squirtles.musicroad.R
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -66,15 +67,15 @@ class VideoPlayerViewModel @Inject constructor() : ViewModel() {
         setPlayerSource(url)
     }
 
-    fun play() {
+    fun play(){
         player?.play()
     }
 
-    fun pause() {
+    fun pause(){
         player?.pause()
     }
 
-    private fun setPlayerSource(url: String) {
+    private fun setPlayerSource(url: String){
         player?.run {
             val mediaItem = MediaItem.fromUri(url)
             setMediaItem(mediaItem)
@@ -115,10 +116,6 @@ class VideoPlayerViewModel @Inject constructor() : ViewModel() {
                 }
             }
         }
-    }
-
-    fun release() {
-        releasePlayer()
     }
 
     override fun onCleared() {
