@@ -119,7 +119,7 @@ fun DetailPickScreen(
 
                     isFavorite -> {
                         showProcessIndicator = true
-                        pickViewModel.onActionClick(
+                        pickViewModel.toggleFavoritePick(
                             pickId = pickId,
                             isAdding = false
                         )
@@ -127,7 +127,7 @@ fun DetailPickScreen(
 
                     else -> {
                         showProcessIndicator = true
-                        pickViewModel.onActionClick(
+                        pickViewModel.toggleFavoritePick(
                             pickId = pickId,
                             isAdding = true
                         )

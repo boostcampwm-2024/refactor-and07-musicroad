@@ -93,7 +93,7 @@ class PickViewModel @Inject constructor(
         }
     }
 
-    fun onActionClick(pickId: String, isAdding: Boolean) {
+    fun toggleFavoritePick(pickId: String, isAdding: Boolean) {
         viewModelScope.launch {
             actionClick.emit(pickId to isAdding)
         }
