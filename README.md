@@ -58,7 +58,7 @@
 <table>
   <tr>
     <td><img src="https://github.com/user-attachments/assets/b32d2613-c1e4-4cc5-b3a6-e3fe1fc82db4" width="200"></td>
-    <td><img src="https://github.com/user-attachments/assets/172d0b36-50db-4dc3-8950-94c16ddfdf07" height="448"></td>
+    <td><img src="https://github.com/user-attachments/assets/172d0b36-50db-4dc3-8950-94c16ddfdf07" width="250" height="448"></td>
     <td>
       <ul>
         <li>뮤직비디오가 존재하는 노래는 썸네일 미리보기 애니메이션이 나타납니다.<br>옆으로 스와이프하여 뮤직비디오를 볼 수 있습니다.</li>
