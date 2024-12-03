@@ -64,6 +64,7 @@ import com.squirtles.musicroad.pick.components.MusicVideoKnob
 import com.squirtles.musicroad.pick.components.PickInformation
 import com.squirtles.musicroad.pick.components.SongInfo
 import com.squirtles.musicroad.pick.components.music.MusicPlayer
+import com.squirtles.musicroad.pick.components.music.visualizer.BaseVisualizer
 import com.squirtles.musicroad.ui.theme.Black
 import com.squirtles.musicroad.ui.theme.White
 import com.squirtles.musicroad.videoplayer.MusicVideoScreen
@@ -320,6 +321,8 @@ private fun DetailPick(
     val view = LocalView.current
     val context = LocalContext.current
 
+    val visualizer = remember { BaseVisualizer() }
+
     val audioEffectColor = dynamicBackgroundColor.copy(
         red = (dynamicBackgroundColor.red + 0.2f).coerceAtMost(1.0f),
         green = (dynamicBackgroundColor.green + 0.2f).coerceAtMost(1.0f),
@@ -402,6 +405,7 @@ private fun DetailPick(
                             currentPosition = { playerUiState.currentPosition },
                             duration = { playerUiState.duration },
                             audioEffectColor = audioEffectColor,
+                            baseVisualizer = visualizer,
                             audioSessionId = audioSessionId,
                             onSeekChanged = { timeMs ->
                                 playerServiceViewModel.onSeekingFinished(timeMs)

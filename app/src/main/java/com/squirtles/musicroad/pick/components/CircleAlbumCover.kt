@@ -18,6 +18,7 @@ import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import com.squirtles.domain.model.Song
 import com.squirtles.musicroad.R
+import com.squirtles.musicroad.pick.components.music.visualizer.BaseVisualizer
 import com.squirtles.musicroad.pick.components.music.visualizer.CircleVisualizer
 
 @Composable
@@ -26,6 +27,7 @@ internal fun CircleAlbumCover(
     currentPosition: () -> Long,
     duration: () -> Long,
     audioEffectColor: Color,
+    baseVisualizer: BaseVisualizer,
     audioSessionId: Int,
     onSeekChanged: (Long) -> Unit,
     modifier: Modifier = Modifier,
@@ -34,6 +36,7 @@ internal fun CircleAlbumCover(
         modifier = modifier
     ) {
         CircleVisualizer(
+            baseVisualizer = baseVisualizer,
             audioSessionId = audioSessionId,
             color = audioEffectColor,
             sizeRatio = 0.5f,

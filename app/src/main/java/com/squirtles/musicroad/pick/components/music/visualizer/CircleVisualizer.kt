@@ -11,19 +11,22 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import com.squirtles.musicroad.ui.theme.White
 import kotlinx.coroutines.launch
 
 @Composable
 fun CircleVisualizer(
+    baseVisualizer: BaseVisualizer,
     audioSessionId: Int,
-    color: Color = Color.White,
+    color: Color = White,
     sizeRatio: Float,
     modifier: Modifier = Modifier
 ) {
-    val baseVisualizer = remember { BaseVisualizer(audioSessionId) }
     val magnitudes = remember { mutableStateOf<List<Animatable<Float, AnimationVector1D>>>(emptyList()) }
 
     LaunchedEffect(baseVisualizer) {
+        baseVisualizer.setVisualizer(audioSessionId)
+        baseVisualizer.setVisualizerListener()
         baseVisualizer.fftFlow.collect { fftArray ->
             val normalizedData = processAudioData(fftArray)
 
