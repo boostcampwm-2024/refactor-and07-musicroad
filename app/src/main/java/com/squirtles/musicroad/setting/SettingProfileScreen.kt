@@ -39,6 +39,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
@@ -53,6 +54,7 @@ import com.squirtles.musicroad.ui.theme.Black
 import com.squirtles.musicroad.ui.theme.Gray
 import com.squirtles.musicroad.ui.theme.MusicRoadTheme
 import com.squirtles.musicroad.ui.theme.White
+import kotlinx.coroutines.delay
 import java.util.regex.Pattern
 
 @Composable
@@ -61,6 +63,7 @@ internal fun SettingProfileScreen(
     profileViewModel: ProfileViewModel = hiltViewModel()
 ) {
     val context = LocalContext.current
+    val focusManager = LocalFocusManager.current
     val userName = remember { mutableStateOf(profileViewModel.currentUser.userName) }
     val nickNameErrorMessage = remember { mutableStateOf("") }
     val updateSuccess by profileViewModel.updateSuccess.collectAsStateWithLifecycle(false)
@@ -69,11 +72,13 @@ internal fun SettingProfileScreen(
     BackHandler(enabled = showCreateIndicator) { }
 
     LaunchedEffect(updateSuccess) {
+        focusManager.clearFocus()
+        delay(100)
         if (updateSuccess) {
             Toast.makeText(
                 context,
                 context.getString(R.string.setting_profile_update_nickname_success),
-                Toast.LENGTH_LONG
+                Toast.LENGTH_SHORT
             ).show()
             onBackClick()
         }
