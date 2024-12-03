@@ -80,6 +80,7 @@ fun MainNavGraph(
             ProfileScreen(
                 userId = userId,
                 onBackClick = { navController.navigateUp() },
+                onBackToMapClick = navigationActions.navigateToMain,
                 onFavoritePicksClick = { navigationActions.navigateToFavoritePicks(it) },
                 onMyPicksClick = { navigationActions.navigateToMyPicks(it) },
                 onSettingProfileClick = { navController.navigate(ProfileDestination.SETTING_PROFILE_ROUTE) },
