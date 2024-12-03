@@ -20,7 +20,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.squirtles.musicroad.R
 import com.squirtles.musicroad.common.Constants.DEFAULT_PADDING
@@ -63,7 +62,6 @@ fun PermissionBar(
                             .weight(1f)
                             .padding(start = DEFAULT_PADDING),
                         color = MaterialTheme.colorScheme.onPrimaryContainer,
-                        overflow = TextOverflow.Ellipsis,
                         style = MaterialTheme.typography.bodyMedium
                     )
 
