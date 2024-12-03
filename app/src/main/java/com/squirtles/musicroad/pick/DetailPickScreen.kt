@@ -45,7 +45,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.lerp
 import androidx.core.view.WindowInsetsControllerCompat
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.flowWithLifecycle
 import com.squirtles.domain.model.Pick
 import com.squirtles.musicroad.R
 import com.squirtles.musicroad.common.VerticalSpacer
@@ -102,9 +105,7 @@ fun DetailPickScreen(
         }
 
         is DetailPickUiState.Success -> {
-            val favoriteAction by pickViewModel.favoriteAction.collectAsStateWithLifecycle(
-                FavoriteAction.NONE
-            )
+            val lifecycleOwner = LocalLifecycleOwner.current
             val pick = (uiState as DetailPickUiState.Success).pick
             val isFavorite = (uiState as DetailPickUiState.Success).isFavorite
             val isCreatedBySelf = pickViewModel.getUserId() == pick.createdBy.userId
@@ -139,22 +140,24 @@ fun DetailPickScreen(
                 pageCount = { if (isMusicVideoAvailable) 2 else 1 }
             )
 
-            LaunchedEffect(favoriteAction) {
-                when (favoriteAction) {
-                    FavoriteAction.ADDED -> {
-                        showProcessIndicator = false
-                        favoriteCount += 1
-                        context.showShortToast(context.getString(R.string.success_add_to_favorite))
-                    }
+            LaunchedEffect(Unit) {
+                pickViewModel.favoriteAction
+                    .flowWithLifecycle(lifecycleOwner.lifecycle, Lifecycle.State.STARTED)
+                    .collect { action ->
+                        when (action) {
+                            FavoriteAction.ADDED -> {
+                                showProcessIndicator = false
+                                favoriteCount += 1
+                                context.showShortToast(context.getString(R.string.success_add_to_favorite))
+                            }
 
-                    FavoriteAction.DELETED -> {
-                        showProcessIndicator = false
-                        favoriteCount -= 1
-                        context.showShortToast(context.getString(R.string.success_delete_at_favorite))
+                            FavoriteAction.DELETED -> {
+                                showProcessIndicator = false
+                                favoriteCount -= 1
+                                context.showShortToast(context.getString(R.string.success_delete_at_favorite))
+                            }
+                        }
                     }
-
-                    FavoriteAction.NONE -> {}
-                }
             }
 
             // 비디오 플레이어 설정

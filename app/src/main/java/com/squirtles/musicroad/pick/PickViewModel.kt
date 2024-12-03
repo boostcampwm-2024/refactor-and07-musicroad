@@ -24,7 +24,7 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 enum class FavoriteAction {
-    ADDED, DELETED, NONE
+    ADDED, DELETED
 }
 
 @HiltViewModel
