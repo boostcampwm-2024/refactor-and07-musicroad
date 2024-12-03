@@ -123,6 +123,7 @@ fun SearchMusicScreen(
                         searchResult = searchResult,
                         onItemClick = { song ->
                             createPickViewModel.onSongItemClick(song)
+                            focusManager.clearFocus()
                             onItemClick()
                         }
                     )
