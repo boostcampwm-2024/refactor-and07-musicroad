@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.displayCutoutPadding
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.navigationBarsPadding
@@ -80,6 +81,7 @@ fun VideoPlayerOverlay(
             .fillMaxSize()
             .graphicsLayer { this.alpha = alpha.value }
             .background(Black.copy(alpha = alpha.value.coerceAtMost(0.5f)))
+            .displayCutoutPadding()
             .pointerInput(Unit) {
                 detectTapGestures(
                     onTap = {
