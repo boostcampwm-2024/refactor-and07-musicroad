@@ -107,7 +107,7 @@ fun MapScreen(
                                 pick = pick,
                                 userId = mapViewModel.getUserId(),
                                 navigateToPick = { pickId ->
-                                    playerServiceViewModel.onPause()
+                                    playerServiceViewModel.onStop()
                                     onPickSummaryClick(pickId)
                                 },
                                 calculateDistance = { lat, lng ->

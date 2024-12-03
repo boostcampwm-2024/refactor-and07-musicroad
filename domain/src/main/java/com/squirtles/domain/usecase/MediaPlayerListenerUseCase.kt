@@ -79,9 +79,15 @@ class MediaPlayerListenerUseCase @Inject constructor(
 
             override fun onPlaybackStateChanged(playbackState: Int) {
                 super.onPlaybackStateChanged(playbackState)
-                if (playbackState == Player.STATE_ENDED) {
-                    mediaController.seekTo(0)
-                    mediaController.pause()
+                when (playbackState) {
+                    Player.STATE_ENDED -> {
+                        mediaController.seekTo(0)
+                        mediaController.pause()
+                    }
+
+                    Player.STATE_IDLE -> {
+                        currentPlayerState.value = PlayerState()
+                    }
                 }
             }
 

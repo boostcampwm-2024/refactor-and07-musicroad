@@ -57,12 +57,15 @@ class PlayerServiceViewModel @Inject constructor(
 
     fun setMediaItems(picks: List<Pick>) {
         viewModelScope.launch {
-            val find = picks.find { it.id == _playerState.value.id }
-            if (find != null) {
-//                mediaPlayerUseCase.setMediaItem(find)
-                mediaPlayerUseCase.addMediaItems(picks.minus(find))
-                onPlay()
-            } else {
+//            val find = picks.find { it.id == _playerState.value.id }
+//            if (find != null) {
+////                mediaPlayerUseCase.setMediaItem(find)
+//                mediaPlayerUseCase.addMediaItems(picks.minus(find))
+//                onPlay()
+//            } else {
+//                mediaPlayerUseCase.setMediaItems(picks)
+//            }
+            if (!picks.any { it.id == _playerState.value.id }) {
                 mediaPlayerUseCase.setMediaItems(picks)
             }
         }

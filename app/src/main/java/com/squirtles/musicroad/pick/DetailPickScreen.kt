@@ -194,7 +194,10 @@ fun DetailPickScreen(
                             isMusicVideoAvailable = isMusicVideoAvailable,
                             onProfileClick = onProfileClick,
                             playerServiceViewModel = playerServiceViewModel,
-                            onBackClick = onBackClick,
+                            onBackClick = {
+                                playerServiceViewModel.onStop()
+                                onBackClick()
+                            },
                             onActionClick = onActionClick,
                         )
                     }
