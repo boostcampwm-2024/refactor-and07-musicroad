@@ -61,7 +61,7 @@ class MediaNotificationProviderImpl @Inject constructor(
             setStyle(
                 MediaStyleNotificationHelper
                     .MediaStyle(mediaSession)
-                    .setShowActionsInCompactView(0, 2, 4)
+                    .setShowActionsInCompactView(0, 1, 2)
             )
             setOngoing(false)
 
