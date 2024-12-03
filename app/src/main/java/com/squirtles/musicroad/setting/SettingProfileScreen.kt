@@ -46,7 +46,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.lifecycle.flowWithLifecycle
 import com.squirtles.musicroad.R
 import com.squirtles.musicroad.common.Constants.COLOR_STOPS
 import com.squirtles.musicroad.profile.ProfileViewModel
@@ -63,25 +65,36 @@ internal fun SettingProfileScreen(
     profileViewModel: ProfileViewModel = hiltViewModel()
 ) {
     val context = LocalContext.current
+    val lifecycleOwner = LocalLifecycleOwner.current
     val focusManager = LocalFocusManager.current
     val userName = remember { mutableStateOf(profileViewModel.currentUser.userName) }
     val nickNameErrorMessage = remember { mutableStateOf("") }
-    val updateSuccess by profileViewModel.updateSuccess.collectAsStateWithLifecycle(false)
     var showCreateIndicator by rememberSaveable { mutableStateOf(false) }
 
     BackHandler(enabled = showCreateIndicator) { }
 
-    LaunchedEffect(updateSuccess) {
-        focusManager.clearFocus()
-        delay(100)
-        if (updateSuccess) {
-            Toast.makeText(
-                context,
-                context.getString(R.string.setting_profile_update_nickname_success),
-                Toast.LENGTH_SHORT
-            ).show()
-            onBackClick()
-        }
+    LaunchedEffect(Unit) {
+        profileViewModel.updateSuccess
+            .flowWithLifecycle(lifecycleOwner.lifecycle, Lifecycle.State.STARTED)
+            .collect { isSuccess ->
+                focusManager.clearFocus()
+                delay(100)
+                if (isSuccess) {
+                    Toast.makeText(
+                        context,
+                        context.getString(R.string.setting_profile_update_nickname_success),
+                        Toast.LENGTH_SHORT
+                    ).show()
+                    onBackClick()
+                } else {
+                    showCreateIndicator = false
+                    Toast.makeText(
+                        context,
+                        context.getString(R.string.setting_profile_update_nickname_failure),
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+            }
     }
 
     Scaffold(

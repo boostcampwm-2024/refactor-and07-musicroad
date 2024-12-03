@@ -48,7 +48,6 @@ class ProfileViewModel @Inject constructor(
                 updateUserNameUserCase(currentUser.userId, newUserName).getOrThrow()
                 fetchUserUseCase(currentUser.userId).getOrThrow()
             }
-
             _updateSuccess.emit(result.isSuccess)
         }
     }
