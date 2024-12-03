@@ -341,8 +341,10 @@ private fun DetailPick(
                 modifier = Modifier.statusBarsPadding(),
                 isCreatedBySelf = isCreatedBySelf,
                 isFavorite = isFavorite,
+                userId = userId,
                 userName = userName,
                 onDynamicBackgroundColor = onDynamicBackgroundColor,
+                onProfileClick = onProfileClick,
                 onBackClick = onBackClick,
                 onActionClick = { onActionClick() }
             )
