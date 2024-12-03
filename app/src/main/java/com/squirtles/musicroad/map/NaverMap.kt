@@ -118,7 +118,6 @@ fun NaverMap(
                     }
 
                     naverMap.value?.run {
-                        mapType = NaverMap.MapType.Navi
                         initMapSettings()
                         initDeviceLocation(
                             context,
@@ -139,10 +138,6 @@ fun NaverMap(
         },
         modifier = Modifier.fillMaxSize()
     )
-
-    if (isSystemInDarkTheme()) {
-        naverMap.value?.isNightModeEnabled = true
-    }
 }
 
 internal fun setCameraToMarker(
@@ -210,10 +205,7 @@ private fun NaverMap.setCircleOverlay(circleOverlay: CircleOverlay, location: Lo
 }
 
 private fun NaverMap.initMapSettings() {
-    extent = LatLngBounds(
-        LatLng(35.917791, 126.092845),
-        LatLng(37.330075, 130.389687)
-    )
+    extent = LatLngBounds(SOUTHWEST, NORTHEAST)
     setCameraZoomLimit()
     uiSettings.setNaverMapMapUi()
 }
@@ -257,6 +249,8 @@ private fun checkSelfPermission(context: Context): Boolean {
             PermissionChecker.PERMISSION_GRANTED
 }
 
+private val SOUTHWEST = LatLng(33.011268, 124.344361)
+private val NORTHEAST = LatLng(39.346507, 130.826372)
 private const val LOCATION_PERMISSION_REQUEST_CODE = 1000
 private const val CIRCLE_RADIUS_METER = 100.0
 private const val INITIAL_CAMERA_ZOOM = 16.5
