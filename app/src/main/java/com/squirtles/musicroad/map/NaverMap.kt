@@ -27,6 +27,7 @@ import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import com.naver.maps.geometry.LatLng
+import com.naver.maps.geometry.LatLngBounds
 import com.naver.maps.map.CameraAnimation
 import com.naver.maps.map.CameraPosition
 import com.naver.maps.map.CameraUpdate
@@ -209,6 +210,7 @@ private fun NaverMap.setCircleOverlay(circleOverlay: CircleOverlay, location: Lo
 }
 
 private fun NaverMap.initMapSettings() {
+    extent = LatLngBounds(SOUTHWEST, NORTHEAST)
     setCameraZoomLimit()
     uiSettings.setNaverMapMapUi()
 }
@@ -252,6 +254,8 @@ private fun checkSelfPermission(context: Context): Boolean {
             PermissionChecker.PERMISSION_GRANTED
 }
 
+private val SOUTHWEST = LatLng(33.011268, 124.344361)
+private val NORTHEAST = LatLng(39.346507, 130.826372)
 private const val LOCATION_PERMISSION_REQUEST_CODE = 1000
 private const val CIRCLE_RADIUS_METER = 100.0
 private const val INITIAL_CAMERA_ZOOM = 16.5
@@ -261,3 +265,5 @@ private val PERMISSIONS = arrayOf(
     Manifest.permission.ACCESS_FINE_LOCATION,
     Manifest.permission.ACCESS_COARSE_LOCATION
 )
+internal const val DEFAULT_MARKER_Z_INDEX = 0
+internal const val CLICKED_MARKER_Z_INDEX = 100

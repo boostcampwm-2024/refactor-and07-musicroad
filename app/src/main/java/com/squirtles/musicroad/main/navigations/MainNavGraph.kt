@@ -17,8 +17,9 @@ import com.squirtles.musicroad.map.MapScreen
 import com.squirtles.musicroad.map.MapViewModel
 import com.squirtles.musicroad.pick.DetailPickScreen
 import com.squirtles.musicroad.picklist.PickListScreen
-import com.squirtles.musicroad.setting.SettingScreen
-import com.squirtles.musicroad.userinfo.UserInfoScreen
+import com.squirtles.musicroad.profile.ProfileScreen
+import com.squirtles.musicroad.setting.SettingNotificationScreen
+import com.squirtles.musicroad.setting.SettingProfileScreen
 
 @Composable
 fun MainNavGraph(
@@ -35,45 +36,64 @@ fun MainNavGraph(
         composable(MainDestinations.MAIN_ROUTE) {
             MapScreen(
                 mapViewModel = mapViewModel,
-                onFavoriteClick = navigationActions.navigateToFavoritePicks,
+                onFavoriteClick = { userId -> navigationActions.navigateToFavoritePicks(userId) },
                 onCenterClick = navigationActions.navigateToSearch,
-                onUserInfoClick = navigationActions.navigateToUserInfo,
-                onPickSummaryClick = { pickId ->
-                    navigationActions.navigateToPickDetail(pickId)
-                },
+                onUserInfoClick = { userId -> navigationActions.navigateToProfile(userId) },
+                onPickSummaryClick = { pickId -> navigationActions.navigateToPickDetail(pickId) },
             )
         }
 
-        composable(MainDestinations.FAVORITE_PICKS_ROUTE) {
+        composable(
+            route = ProfileDestination.favoritePicks("{userId}"),
+            arguments = listOf(navArgument("userId") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val userId = backStackEntry.arguments?.getString("userId") ?: ""
+
             PickListScreen(
+                userId = userId,
                 isFavoritePicks = true,
                 onBackClick = { navController.navigateUp() },
-                onItemClick = { pickId ->
-                    navigationActions.navigateToPickDetail(pickId)
-                }
+                onItemClick = { pickId -> navigationActions.navigateToPickDetail(pickId) }
             )
         }
 
-        composable(MainDestinations.MY_PICKS_ROUTE) {
+        composable(
+            route = ProfileDestination.myPicks("{userId}"),
+            arguments = listOf(navArgument("userId") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val userId = backStackEntry.arguments?.getString("userId") ?: ""
+
             PickListScreen(
+                userId = userId,
                 isFavoritePicks = false,
                 onBackClick = { navController.navigateUp() },
-                onItemClick = { pickId ->
-                    navigationActions.navigateToPickDetail(pickId)
-                }
+                onItemClick = { pickId -> navigationActions.navigateToPickDetail(pickId) }
             )
         }
 
-        composable(MainDestinations.USER_INFO_ROUTE) {
-            UserInfoScreen(
+        composable(
+            route = ProfileDestination.profile("{userId}"),
+            arguments = listOf(navArgument("userId") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val userId = backStackEntry.arguments?.getString("userId") ?: ""
+
+            ProfileScreen(
+                userId = userId,
                 onBackClick = { navController.navigateUp() },
-                onFavoritePicksClick = navigationActions.navigateToFavoritePicks,
-                onMyPicksClick = navigationActions.navigateToMyPicks,
+                onBackToMapClick = navigationActions.navigateToMain,
+                onFavoritePicksClick = { navigationActions.navigateToFavoritePicks(it) },
+                onMyPicksClick = { navigationActions.navigateToMyPicks(it) },
+                onSettingProfileClick = { navController.navigate(ProfileDestination.SETTING_PROFILE_ROUTE) },
+                onSettingNotificationClick = { navController.navigate(ProfileDestination.SETTING_NOTIFICATION_ROUTE) },
             )
         }
 
-        composable(MainDestinations.SETTING_ROUTE) {
-            SettingScreen()
+        composable(ProfileDestination.SETTING_PROFILE_ROUTE) {
+            SettingProfileScreen(onBackClick = { navController.navigateUp() })
+        }
+
+        composable(ProfileDestination.SETTING_NOTIFICATION_ROUTE) {
+            SettingNotificationScreen(onBackClick = { navController.navigateUp() })
         }
 
         navigation(
@@ -98,9 +118,7 @@ fun MainNavGraph(
                 CreatePickScreen(
                     createPickViewModel = hiltViewModel<CreatePickViewModel>(parentEntry),
                     onBackClick = { navController.navigateUp() },
-                    onCreateClick = { pickId ->
-                        navigationActions.navigateToPickDetail(pickId)
-                    }
+                    onCreateClick = { pickId -> navigationActions.navigateToPickDetail(pickId) }
                 )
             }
         }
@@ -113,6 +131,7 @@ fun MainNavGraph(
 
             DetailPickScreen(
                 pickId = pickId,
+                onProfileClick = { userId -> navigationActions.navigateToProfile(userId) },
                 onBackClick = { // 픽  등록에서 정보 화면으로 간 것이라면 뒤로 가기 시 메인으로, 아니라면 이전 화면으로
                     if (navController.previousBackStackEntry?.destination?.route == CreatePickDestinations.CREATE_PICK_ROUTE) {
                         navigationActions.navigateToMain()

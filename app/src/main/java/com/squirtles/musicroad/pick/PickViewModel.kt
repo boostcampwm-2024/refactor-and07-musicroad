@@ -102,7 +102,7 @@ class PickViewModel @Inject constructor(
     fun deletePick(pickId: String) {
         viewModelScope.launch {
             _detailPickUiState.emit(DetailPickUiState.Loading)
-            deletePickUseCase(pickId)
+            deletePickUseCase(pickId, getUserId())
                 .onSuccess {
                     _detailPickUiState.emit(DetailPickUiState.Deleted)
                 }

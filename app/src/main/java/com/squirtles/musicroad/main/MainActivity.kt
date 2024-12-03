@@ -79,7 +79,7 @@ class MainActivity : AppCompatActivity() {
                     }
                 } else { // 권한 2번 거절 시
                     mainViewModel.setCanRequestPermission(false)
-                    showPermissionSnackbar()
+                    showPermissionBar()
                 }
             }
         }
@@ -91,7 +91,7 @@ class MainActivity : AppCompatActivity() {
         if (checkSelfPermission()) {
             setMusicRoadContent()
         } else if (mainViewModel.canRequestPermission.not()) {
-            showPermissionSnackbar()
+            showPermissionBar()
         }
     }
 
@@ -182,21 +182,17 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun showPermissionSnackbar() {
+    private fun showPermissionBar() {
         setContent {
             MusicRoadTheme {
-                PermissionSnackbar(
-                    onActionPerformed = {
+                PermissionBar(
+                    onClick = {
                         val intent =
                             Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
                         val uri = Uri.fromParts("package", packageName, null)
                         intent.data = uri
                         startActivity(intent)
                     },
-                    onDismissed = {
-                        showToast(getString(R.string.main_need_permissions))
-                        finish()
-                    }
                 )
             }
         }

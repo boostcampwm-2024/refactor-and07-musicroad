@@ -24,7 +24,7 @@ fun Data.toMusicVideo(): MusicVideo = MusicVideo(
     songName = this.attributes.songName,
     artistName = this.attributes.artistName,
     albumName = this.attributes.albumName.toString(),
-    releaseDate = this.attributes.releaseDate.toLocalDate(),
+    releaseDate = this.attributes.releaseDate?.toLocalDate() ?: DEFAULT_DATE,
     previewUrl = this.attributes.previews[0].url.toString(),
     thumbnailUrl = this.attributes.previews[0].artwork?.url.toString()
 )
@@ -33,3 +33,5 @@ private fun String.toLocalDate(): LocalDate {
     val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
     return LocalDate.parse(this, formatter)
 }
+
+private val DEFAULT_DATE = LocalDate.of(2000, 1, 1)

@@ -22,7 +22,8 @@
     <string name="map_album_image_description">앨범 이미지</string>
     <string name="map_info_window_pick_user">님의 픽</string>
     <string name="map_info_window_favorite_count_icon_description">픽을 담은 개수</string>
-    <string name="pick_created_by_self">내가 등록한 픽</string>
+    <string name="pick_created_by_self_1">내가</string>
+    <string name="pick_created_by_self_2">등록한 픽</string>
 
     <!-- Pick -->
     <string name="pick_app_bar_title">픽 등록</string>
@@ -87,4 +88,19 @@
     <string name="user_info_setting_notification_menu_title">알림</string>
     <string name="user_info_setting_profile_menu_icon_description">프로필 설정 메뉴 아이콘</string>
     <string name="user_info_setting_notification_menu_icon_description">알림 메뉴 아이콘</string>
+    <string name="user_info_icon_map_description">지도 아이콘</string>
+    <string name="user_info_back_to_map_button_text">지도로 돌아가기</string>
+
+    <!-- Setting -->
+    <string name="setting_notification_title">알림 설정</string>
+    <string name="setting_notification_description">준비 중인 기능입니다!</string>
+    <string name="setting_profile_title">프로필 설정</string>
+
+    <string name="setting_profile_nickname">닉네임</string>
+    <string name="setting_profile_nickname_message_format_fail">닉네임에는 한글, 영문, 숫자만 사용할 수 있습니다.</string>
+    <string name="setting_profile_nickname_message_length_fail_min">닉네임을 2글자 이상 입력해주세요.</string>
+    <string name="setting_profile_nickname_message_length_fail_max">닉네임은 10글자 이하로 가능합니다.</string>
+    <string name="setting_profile_confirm_icon_description">변경 사항 적용</string>
+    <string name="setting_profile_update_nickname_success">변경 사항이 적용되었습니다.</string>
+    <string name="setting_profile_update_nickname_failure">일시적인 오류가 발생했습니다.</string>
 </resources>
