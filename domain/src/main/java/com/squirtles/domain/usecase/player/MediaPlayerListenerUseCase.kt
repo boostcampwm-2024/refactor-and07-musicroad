@@ -13,6 +13,7 @@ import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
@@ -127,7 +128,7 @@ class MediaPlayerListenerUseCase @Inject constructor(
         coroutineScope.launch {
             currentPlayerState
                 .onEach { send(it) }
-                .collect { }
+                .collect()
         }
 
         mediaController.addListener(playerListener)

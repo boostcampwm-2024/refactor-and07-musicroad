@@ -20,14 +20,13 @@ class PlayerServiceViewModel @Inject constructor(
     private val mediaPlayerUseCase: MediaPlayerUseCase,
 ) : ViewModel() {
 
-    private var _playerState: StateFlow<PlayerState> = mediaPlayerUseCase.playerUiStateFlow()
+    val playerState: StateFlow<PlayerState> = mediaPlayerUseCase.playerUiStateFlow()
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5_000),
             initialValue = PlayerState()
         )
 
-    val playerState get() = _playerState
     val audioSessionId get() = mediaPlayerUseCase.audioSessionId
 
     init {
@@ -47,7 +46,7 @@ class PlayerServiceViewModel @Inject constructor(
 
     fun setMediaItem(pick: Pick) {
         viewModelScope.launch {
-            if (_playerState.value.id == pick.id) {
+            if (playerState.value.id == pick.id) {
                 mediaPlayerUseCase.changeRepeatMode(false)
             } else {
                 mediaPlayerUseCase.setMediaItem(pick)
@@ -65,7 +64,7 @@ class PlayerServiceViewModel @Inject constructor(
 //            } else {
 //                mediaPlayerUseCase.setMediaItems(picks)
 //            }
-            if (!picks.any { it.id == _playerState.value.id }) {
+            if (!picks.any { it.id == playerState.value.id }) {
                 mediaPlayerUseCase.setMediaItems(picks)
             }
         }
@@ -100,7 +99,7 @@ class PlayerServiceViewModel @Inject constructor(
     }
 
     fun shuffleNext() {
-        if (_playerState.value.isPlaying) {
+        if (playerState.value.isPlaying) {
             onPause()
         } else {
             onNext()
@@ -109,7 +108,7 @@ class PlayerServiceViewModel @Inject constructor(
     }
 
     fun togglePlayPause(song: Song) {
-        if (_playerState.value.isPlaying) {
+        if (playerState.value.isPlaying) {
             onPause()
         } else {
             onPlay()
@@ -131,8 +130,4 @@ class PlayerServiceViewModel @Inject constructor(
     fun onAddToQueue(pick: Pick) {
         mediaPlayerUseCase.addMediaItem(pick)
     }
-
-//    fun onAddToQueue(urls: List<String>) {
-//        mediaPlayerUseCase.setMediaItems(urls)
-//    }
 }
