@@ -100,7 +100,8 @@ internal fun SettingProfileScreen(
     Scaffold(
         topBar = {
             SettingProfileAppBar(
-                confirmEnabled = nickNameErrorMessage.value.isEmpty(),
+                confirmEnabled = nickNameErrorMessage.value.isEmpty() &&
+                        profileViewModel.currentUser.userName != userName.value,
                 onConfirmClick = {
                     showCreateIndicator = true
                     profileViewModel.updateUsername(userName.value)
