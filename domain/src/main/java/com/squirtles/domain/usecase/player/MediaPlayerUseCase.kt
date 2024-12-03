@@ -1,4 +1,4 @@
-package com.squirtles.domain.usecase
+package com.squirtles.domain.usecase.player
 
 import androidx.media3.common.MediaItem
 import androidx.media3.common.MediaMetadata
