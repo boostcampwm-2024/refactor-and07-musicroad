@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
@@ -136,7 +137,8 @@ fun ProfileScreen(
             ExtendedFloatingActionButton(
                 onClick = onBackToMapClick,
                 modifier = Modifier
-                    .fillMaxWidth(fraction = 0.5F)
+                    .wrapContentWidth()
+                    .padding(horizontal = 8.dp)
                     .padding(bottom = 48.dp),
                 shape = CircleShape,
                 containerColor = Primary,
