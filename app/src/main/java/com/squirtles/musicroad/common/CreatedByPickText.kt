@@ -25,7 +25,7 @@ fun CreatedBySelfText(
         withStyle(style = SpanStyle(textDecoration = if (showUnderline) TextDecoration.Underline else null)) {
             append(stringResource(R.string.pick_created_by_self_1))
         }
-        append(stringResource(R.string.pick_created_by_self_2))
+        append(" ${stringResource(R.string.pick_created_by_self_2)}")
     }
 
     Text(
