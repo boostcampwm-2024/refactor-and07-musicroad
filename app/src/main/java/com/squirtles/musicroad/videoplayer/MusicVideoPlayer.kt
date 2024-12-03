@@ -31,7 +31,8 @@ fun MusicVideoPlayer(
 
     DisposableEffect(Unit) {
         onDispose {
-            videoPlayerViewModel.pause()
+            videoPlayerViewModel.release()
+//            videoPlayerViewModel.pause()
             videoPlayerViewModel.setLastPosition()
             textureView.surfaceTexture?.release()
             textureView.surfaceTextureListener = null
