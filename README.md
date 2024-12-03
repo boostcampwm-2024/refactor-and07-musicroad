@@ -5,6 +5,8 @@
   길 위에서 만나는 모두의 노래, MusicRoad는 위치 기반 노래 공유 및 플레이어 서비스입니다.
 </div>
 
+<br>
+<br>
 
 ## 🔮 핵심 기능
 ### 픽 탐색
@@ -81,6 +83,8 @@
   </tr>
 </table>
 
+<br>
+<br>
 
 ## 📚 기술 스택
 | 분류 |<div align="center">기술 스택</div>| <div align="center">관련 문서</div> |
@@ -94,6 +98,10 @@
 | Media | <img src="https://img.shields.io/badge/ExoPlayer-34A853?style=for-the-badge"> <img src="https://img.shields.io/badge/Apple Music API-FA243C?style=for-the-badge&logo=applemusic&logoColor=white"> <img src="https://img.shields.io/badge/Visualizer-34A853?style=for-the-badge"> | [[음원 재생] 기술 검토 및 기획 ](https://www.notion.so/139ea5e5fc17805d86ccd288f434be9a?pvs=21) <br> [[영상 처리] 기술 검토 및 기획](https://www.notion.so/138ea5e5fc1780b2817ad722558936b4?pvs=21)  |
 | Backend | <img src="https://img.shields.io/badge/Cloud Functions-DD2C00?style=for-the-badge&logo=firebase&logoColor=white"> |  |
 | Data Storage | <img src="https://img.shields.io/badge/Cloud Firestore-DD2C00?style=for-the-badge&logo=firebase&logoColor=white"> <img src="https://img.shields.io/badge/DataStore-34A853?style=for-the-badge"> | [Firebase Firestore vs RealtimeDB](https://www.notion.so/Firebase-Firestore-vs-RealtimeDB-134ea5e5fc1780cb858dd2def297f16f?pvs=21)  |
+
+
+<br>
+<br>
 
 
 ## 🎯 기술적 도전
@@ -114,11 +122,15 @@
 - ExoPlayer를 사용하여 영상 재생 및 일시중지, 재시작 기능을 구현했으며 화면을 회전하여도 상태가 유지됩니다.
 
 
+<br>
+<br>
+
 ## 👨‍👩‍👧‍👦 팀원 소개
 |K002 강민주|K009 김승규|K050 주윤겸|
 |:---:|:---:|:---:|
 |<img src="https://avatars.githubusercontent.com/u/88606886?v=4" width="150">|<img src="https://avatars.githubusercontent.com/u/31722615?v=4" width="150">|<img src="https://avatars.githubusercontent.com/u/30407907?v=4" width="150">|
 |[@meanjoo](https://github.com/meanjoo)|[@miler198](https://github.com/miller198)|[@yuni-ju](https://github.com/yuni-ju)|
 
+<br>
 
 ## 더 많은 정보는 [WIKI](https://github.com/boostcampwm-2024/and06-musicroad/wiki)를 방문해주세요!
