@@ -24,5 +24,5 @@ rootProject.name = "MusicRoad"
 include(":app")
 include(":domain")
 include(":data")
-enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
 include(":mediaservice")
+enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
