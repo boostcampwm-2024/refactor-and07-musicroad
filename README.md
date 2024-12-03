@@ -25,11 +25,7 @@
 </table>
 
 ### 픽 등록
-<table style="width:100%;">
-  <colgroup>
-    <col style="width:50%;">
-    <col style="width:auto;">
-  </colgroup>
+<table>
   <tr>
     <td><img src="https://github.com/user-attachments/assets/5605eb90-5c38-4b58-9c1e-f747d44dc7c6" width="200"></td>   
     <td>
