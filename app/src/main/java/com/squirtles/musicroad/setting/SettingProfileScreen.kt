@@ -167,11 +167,11 @@ private fun SettingProfileAppBar(
     )
 }
 
-private fun validateUserName(userName: String, context: Context): String {
-    return if (userName.length < 2) context.getString(R.string.setting_profile_nickname_message_length_fail_min)
-    else if (userName.length > 10) context.getString(R.string.setting_profile_nickname_message_length_fail_max)
-    else if (Pattern.matches("^[ㄱ-ㅎ|ㅏ-ㅣ가-힣a-zA-Z0-9]+$", userName).not()) context.getString(R.string.setting_profile_nickname_message_format_fail)
-    else ""
+private fun validateUserName(userName: String, context: Context) = when {
+    userName.length < 2 -> context.getString(R.string.setting_profile_nickname_message_length_fail_min)
+    userName.length > 10 -> context.getString(R.string.setting_profile_nickname_message_length_fail_max)
+    Pattern.matches(USERNAME_PATTERN, userName).not() -> context.getString(R.string.setting_profile_nickname_message_format_fail)
+    else -> ""
 }
 
 @Composable
@@ -217,6 +217,8 @@ private fun SettingProfileContent(
         )
     }
 }
+
+private const val USERNAME_PATTERN = "^[ㄱ-ㅎ|ㅏ-ㅣ가-힣a-zA-Z0-9]+$"
 
 @Preview
 @Composable
