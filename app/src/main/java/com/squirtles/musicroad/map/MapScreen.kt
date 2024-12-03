@@ -169,7 +169,7 @@ fun MapScreen(
 
                     },
                     onClickItem = { pickId ->
-                        playerServiceViewModel.onPause()
+                        playerServiceViewModel.onStop()
                         onPickSummaryClick(pickId)
                     }
                 )
