@@ -59,7 +59,7 @@ fun MapScreen(
 
     LaunchedEffect(nearPicks) {
         if (nearPicks.isNotEmpty()) {
-            playerServiceViewModel.setMediaItems(nearPicks.map { it.song })
+            playerServiceViewModel.setMediaItems(nearPicks)
         }
     }
 

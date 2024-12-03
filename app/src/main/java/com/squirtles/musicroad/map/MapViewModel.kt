@@ -2,7 +2,6 @@ package com.squirtles.musicroad.map
 
 import android.content.Context
 import android.location.Location
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.naver.maps.geometry.LatLng
@@ -141,7 +140,6 @@ class MapViewModel @Inject constructor(
 
             fetchPicks.onSuccess { pickList ->
                 val newKeyTagMap: MutableMap<MarkerKey, String> = mutableMapOf()
-                Log.d("MapViewModel", "$pickList")
                 pickList.forEach { pick ->
                     newKeyTagMap[MarkerKey(pick)] = pick.id
                     _picks[pick.id] = pick

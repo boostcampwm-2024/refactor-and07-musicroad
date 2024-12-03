@@ -4,8 +4,8 @@ import androidx.media3.common.MediaItem
 import androidx.media3.common.MediaMetadata
 import androidx.media3.common.Player
 import androidx.media3.session.MediaController
+import com.squirtles.domain.model.Pick
 import com.squirtles.domain.model.PlayerState
-import com.squirtles.domain.model.Song
 import com.squirtles.mediaservice.MediaControllerProvider
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
@@ -26,25 +26,28 @@ class MediaPlayerUseCase @Inject constructor(
     fun playerUiStateFlow(): Flow<PlayerState> =
         mediaPlayerListenerUseCase.playerStateFlow()
 
-//    fun addMediaItem(sourceUrl: String) {
-//        val mediaItem = MediaItem.fromUri(sourceUrl)
-//        mediaController?.addMediaItem(mediaItem)
-//    }
+    fun addMediaItem(pick: Pick) {
+        val mediaItem = pick.toMediaItem()
+        mediaController?.addMediaItem(mediaItem)
+    }
 
-    fun setMediaItems(songs: List<Song>) {
+    fun addMediaItems(picks: List<Pick>) {
         mediaController?.run {
-            setMediaItems(songs.map {
-                it.toMediaItem()
-            })
-            prepare()
+            addMediaItems(picks.map { it.toMediaItem() })
             playWhenReady = false
             repeatMode = Player.REPEAT_MODE_ALL
         }
     }
 
-    fun seekToNextMediaItem() {
+    fun setMediaItems(picks: List<Pick>) {
         mediaController?.run {
-            seekToNextMediaItem()
+            setMediaItems(picks.map {
+                it.toMediaItem()
+            })
+            prepare()
+            playWhenReady = false
+            repeatMode = Player.REPEAT_MODE_ALL
+            volume = 0.5f
         }
     }
 
@@ -52,10 +55,22 @@ class MediaPlayerUseCase @Inject constructor(
         mediaController = mediaControllerProvider.mediaControllerFlow.first()
     }
 
-    fun setMediaItem(song: Song) {
-        mediaController?.pause()
-        mediaController?.setMediaItem(song.toMediaItem())
-        mediaController?.prepare()
+    fun setMediaItem(pick: Pick) {
+        mediaController?.run {
+            pause()
+            setMediaItem(pick.toMediaItem())
+            prepare()
+            repeatMode = Player.REPEAT_MODE_OFF
+            volume = 0.5f
+        }
+    }
+
+    fun changeRepeatMode(repeatable: Boolean) {
+        mediaController?.repeatMode = if (repeatable) {
+            Player.REPEAT_MODE_ALL
+        } else {
+            Player.REPEAT_MODE_OFF
+        }
     }
 
     fun play() {
@@ -68,6 +83,9 @@ class MediaPlayerUseCase @Inject constructor(
 
     fun stop() {
         mediaController?.stop()
+    }
+
+    fun release() {
         mediaController?.release()
     }
 
@@ -105,17 +123,17 @@ class MediaPlayerUseCase @Inject constructor(
         mediaController?.seekTo(time)
     }
 
-    private fun Song.toMediaItem(): MediaItem {
+    private fun Pick.toMediaItem(): MediaItem {
         return MediaItem.Builder()
             .setMediaId(this.id)
             .setMediaMetadata(
                 MediaMetadata.Builder()
-                    .setTitle(songName)
-                    .setArtist(artistName)
-                    .setAlbumTitle(albumName)
+                    .setTitle(song.songName)
+                    .setArtist(song.artistName)
+                    .setAlbumTitle(song.albumName)
                     .build()
             )
-            .setUri(previewUrl)
+            .setUri(song.previewUrl)
             .build()
     }
 }

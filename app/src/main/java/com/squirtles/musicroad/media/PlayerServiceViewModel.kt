@@ -3,6 +3,7 @@ package com.squirtles.musicroad.media
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.squirtles.domain.model.Pick
 import com.squirtles.domain.model.PlayerState
 import com.squirtles.domain.model.Song
 import com.squirtles.domain.usecase.MediaPlayerUseCase
@@ -44,21 +45,26 @@ class PlayerServiceViewModel @Inject constructor(
         job.await()
     }
 
-    fun setMediaItem(song: Song) {
-        if (_playerState.value.id == song.id) {
-            return
-        }
+    fun setMediaItem(pick: Pick) {
         viewModelScope.launch {
-            mediaPlayerUseCase.setMediaItem(song)
+            if (_playerState.value.id == pick.id) {
+                mediaPlayerUseCase.changeRepeatMode(false)
+            } else {
+                mediaPlayerUseCase.setMediaItem(pick)
+            }
         }
     }
 
-    fun setMediaItems(songs: List<Song>) {
-        if (songs.any { it.id == _playerState.value.id }) {
-            return
-        }
+    fun setMediaItems(picks: List<Pick>) {
         viewModelScope.launch {
-            mediaPlayerUseCase.setMediaItems(songs)
+            val find = picks.find { it.id == _playerState.value.id }
+            if (find != null) {
+//                mediaPlayerUseCase.setMediaItem(find)
+                mediaPlayerUseCase.addMediaItems(picks.minus(find))
+                onPlay()
+            } else {
+                mediaPlayerUseCase.setMediaItems(picks)
+            }
         }
     }
 
@@ -72,6 +78,10 @@ class PlayerServiceViewModel @Inject constructor(
 
     fun onStop() {
         mediaPlayerUseCase.stop()
+    }
+
+    fun onRelease() {
+        mediaPlayerUseCase.release()
     }
 
     fun onPrevious() {
@@ -115,9 +125,9 @@ class PlayerServiceViewModel @Inject constructor(
         mediaPlayerUseCase.onSeekingFinished(time)
     }
 
-//    fun onAddToQueue(url: String) {
-//        mediaPlayerUseCase.addMediaItem(url)
-//    }
+    fun onAddToQueue(pick: Pick) {
+        mediaPlayerUseCase.addMediaItem(pick)
+    }
 
 //    fun onAddToQueue(urls: List<String>) {
 //        mediaPlayerUseCase.setMediaItems(urls)

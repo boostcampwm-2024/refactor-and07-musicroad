@@ -1,7 +1,6 @@
 package com.squirtles.musicroad.create
 
 import android.app.Activity
-import android.util.Log
 import android.util.Size
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
@@ -88,8 +87,6 @@ fun CreatePickScreen(
             windowInsetsController.isAppearanceLightStatusBars = isLightStatusBar
         }
     }
-
-    Log.d("CreatePickScreen", song.toString())
 
     // 생성 중 인디케이터가 표시되고 있을 때는 시스템의 뒤로 가기 버튼 클릭을 무시
     BackHandler(enabled = showCreateIndicator) { }

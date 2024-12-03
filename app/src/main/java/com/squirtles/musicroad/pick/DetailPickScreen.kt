@@ -165,7 +165,7 @@ fun DetailPickScreen(
             // 비디오 플레이어 설정
             LaunchedEffect(pick) {
                 playerServiceViewModel.readyPlayer()
-                playerServiceViewModel.setMediaItem(pick.song)
+                playerServiceViewModel.setMediaItem(pick)
                 isMusicVideoAvailable = pick.musicVideoUrl.isNotEmpty()
             }
 
@@ -345,7 +345,10 @@ private fun DetailPick(
                 userName = userName,
                 onDynamicBackgroundColor = onDynamicBackgroundColor,
                 onProfileClick = onProfileClick,
-                onBackClick = onBackClick,
+                onBackClick = {
+//                    playerServiceViewModel.onStop()
+                    onBackClick()
+                },
                 onActionClick = { onActionClick() }
             )
         }
