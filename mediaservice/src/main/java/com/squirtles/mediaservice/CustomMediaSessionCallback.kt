@@ -1,5 +1,6 @@
 package com.squirtles.mediaservice
 
+import android.os.Build
 import android.os.Bundle
 import androidx.annotation.OptIn
 import androidx.media3.common.util.UnstableApi
@@ -24,8 +25,14 @@ internal class CustomMediaSessionCallback : MediaSession.Callback {
         // 컨트롤러가 미디어 알림과 연관된 컨트롤러인지 확인
         if (session.isMediaNotificationController(controller)) {
             val sessionCommandBuilder = MediaSession.ConnectionResult.DEFAULT_SESSION_COMMANDS.buildUpon()
+            var customCommands = NotificationCommand.entries.toList()
 
-            NotificationCommand.entries.forEach { commandButton ->
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+                // 안드로이드 14 (API 34) 이상
+                customCommands = customCommands.reversed()
+            }
+
+            customCommands.forEach { commandButton ->
                 commandButton.sessionCommand.apply {
                     sessionCommandBuilder.add(this)
                 }
@@ -34,7 +41,7 @@ internal class CustomMediaSessionCallback : MediaSession.Callback {
             MediaSession.ConnectionResult.AcceptedResultBuilder(session)
                 .setAvailableSessionCommands(sessionCommandBuilder.build())
                 .setCustomLayout(
-                    NotificationCommand.entries
+                    customCommands
                         .filter {
                             it.customAction == NotificationCommand.SEEK_REWIND.customAction
                                     || it.customAction == NotificationCommand.SEEK_FORWARD.customAction
