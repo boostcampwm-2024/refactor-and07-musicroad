@@ -89,7 +89,7 @@ Music Road는 주변 사람들이 어떤 노래를 듣고 있는지, 더 나아�
 ### 픽 모음
 <table>
   <tr>
-    <td><img src="https://github.com/user-attachments/assets/ed81dd69-f82d-40bc-b70a-d2fdaf2b9eb7" width="200"></td>
+    <td><img src="https://github.com/user-attachments/assets/a671d424-6cd3-4af0-9a44-17693eded369" width="200"></td>
     <td>
       <ul>
         <li>나와 다른 사람들이 담은 Pick과 등록한 Pick을 한눈에 모아볼 수 있습니다.</li>
