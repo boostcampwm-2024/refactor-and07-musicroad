@@ -29,10 +29,9 @@ class PlayerServiceViewModel @Inject constructor(
     val audioSessionId get() = mediaPlayerUseCase.audioSessionId
 
     suspend fun readyPlayer() {
-        val job = viewModelScope.async {
+        viewModelScope.async {
             mediaPlayerUseCase.readyPlayer()
-        }
-        job.await()
+        }.await()
     }
 
     fun setMediaItem(pick: Pick) {
@@ -46,9 +45,7 @@ class PlayerServiceViewModel @Inject constructor(
     }
 
     fun setMediaItems(picks: List<Pick>) {
-        viewModelScope.launch {
-            mediaPlayerUseCase.setMediaItems(picks)
-        }
+        mediaPlayerUseCase.setMediaItems(picks)
     }
 
     private fun onPlay() {
