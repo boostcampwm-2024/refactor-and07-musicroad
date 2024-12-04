@@ -15,6 +15,7 @@ import com.squirtles.musicroad.create.CreatePickViewModel
 import com.squirtles.musicroad.create.SearchMusicScreen
 import com.squirtles.musicroad.map.MapScreen
 import com.squirtles.musicroad.map.MapViewModel
+import com.squirtles.musicroad.media.PlayerServiceViewModel
 import com.squirtles.musicroad.pick.DetailPickScreen
 import com.squirtles.musicroad.picklist.PickListScreen
 import com.squirtles.musicroad.profile.ProfileScreen
@@ -25,6 +26,7 @@ import com.squirtles.musicroad.setting.SettingProfileScreen
 fun MainNavGraph(
     modifier: Modifier = Modifier,
     mapViewModel: MapViewModel = hiltViewModel(),
+    playerServiceViewModel: PlayerServiceViewModel = hiltViewModel(),
     navController: NavHostController,
     navigationActions: MainNavigationActions,
 ) {
@@ -36,6 +38,7 @@ fun MainNavGraph(
         composable(MainDestinations.MAIN_ROUTE) {
             MapScreen(
                 mapViewModel = mapViewModel,
+                playerServiceViewModel = playerServiceViewModel,
                 onFavoriteClick = { userId -> navigationActions.navigateToFavoritePicks(userId) },
                 onCenterClick = navigationActions.navigateToSearch,
                 onUserInfoClick = { userId -> navigationActions.navigateToProfile(userId) },
@@ -131,6 +134,7 @@ fun MainNavGraph(
 
             DetailPickScreen(
                 pickId = pickId,
+                playerServiceViewModel = playerServiceViewModel,
                 onProfileClick = { userId -> navigationActions.navigateToProfile(userId) },
                 onBackClick = { // 픽  등록에서 정보 화면으로 간 것이라면 뒤로 가기 시 메인으로, 아니라면 이전 화면으로
                     if (navController.previousBackStackEntry?.destination?.route == CreatePickDestinations.CREATE_PICK_ROUTE) {

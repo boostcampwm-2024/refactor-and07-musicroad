@@ -22,7 +22,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.squirtles.musicroad.common.VerticalSpacer
 import com.squirtles.musicroad.main.MainActivity
@@ -36,11 +35,11 @@ import com.squirtles.musicroad.media.PlayerServiceViewModel
 @Composable
 fun MapScreen(
     mapViewModel: MapViewModel,
+    playerServiceViewModel: PlayerServiceViewModel,
     onFavoriteClick: (String) -> Unit,
     onCenterClick: () -> Unit,
     onUserInfoClick: (String) -> Unit,
     onPickSummaryClick: (String) -> Unit,
-    playerServiceViewModel: PlayerServiceViewModel = hiltViewModel(),
 ) {
     val nearPicks by mapViewModel.nearPicks.collectAsStateWithLifecycle()
     val lastLocation by mapViewModel.lastLocation.collectAsStateWithLifecycle()
@@ -55,12 +54,6 @@ fun MapScreen(
 
     LaunchedEffect(Unit) {
         playerServiceViewModel.readyPlayer()
-    }
-
-    LaunchedEffect(nearPicks) {
-        if (nearPicks.isNotEmpty()) {
-            playerServiceViewModel.setMediaItems(nearPicks)
-        }
     }
 
     LaunchedEffect(playerState) {
@@ -89,7 +82,10 @@ fun MapScreen(
                     nearPicks = nearPicks,
                     isPlaying = isPlaying,
                     onClick = {
-                        playerServiceViewModel.shuffleNext()
+                        playerServiceViewModel.shuffleNext(
+                            if (nearPicks.size == 1) nearPicks.first()
+                            else nearPicks.filter { it.id != playerState.id }.random()
+                        )
                     }
                 )
             }
@@ -107,7 +103,7 @@ fun MapScreen(
                                 pick = pick,
                                 userId = mapViewModel.getUserId(),
                                 navigateToPick = { pickId ->
-                                    playerServiceViewModel.onStop()
+//                                    playerServiceViewModel.onStop()
                                     onPickSummaryClick(pickId)
                                 },
                                 calculateDistance = { lat, lng ->
@@ -132,16 +128,16 @@ fun MapScreen(
                     modifier = Modifier.padding(bottom = 16.dp),
                     lastLocation = lastLocation,
                     onFavoriteClick = {
-                        playerServiceViewModel.onPause()
+//                        playerServiceViewModel.onPause()
                         onFavoriteClick(mapViewModel.getUserId())
                     },
                     onCenterClick = {
-                        playerServiceViewModel.onPause()
+//                        playerServiceViewModel.onPause()
                         onCenterClick()
                         mapViewModel.saveCurLocationForced()
                     },
                     onUserInfoClick = {
-                        playerServiceViewModel.onPause()
+//                        playerServiceViewModel.onPause()
                         onUserInfoClick(mapViewModel.getUserId())
                     }
                 )
@@ -169,7 +165,7 @@ fun MapScreen(
 
                     },
                     onClickItem = { pickId ->
-                        playerServiceViewModel.onStop()
+//                        playerServiceViewModel.onStop()
                         onPickSummaryClick(pickId)
                     }
                 )

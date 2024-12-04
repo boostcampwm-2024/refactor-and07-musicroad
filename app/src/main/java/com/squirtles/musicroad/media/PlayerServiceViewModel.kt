@@ -1,6 +1,5 @@
 package com.squirtles.musicroad.media
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.squirtles.domain.model.Pick
@@ -29,14 +28,6 @@ class PlayerServiceViewModel @Inject constructor(
 
     val audioSessionId get() = mediaPlayerUseCase.audioSessionId
 
-    init {
-        viewModelScope.launch {
-            playerState.collect { state ->
-                Log.d("PlayerServiceViewModel", "$state")
-            }
-        }
-    }
-
     suspend fun readyPlayer() {
         val job = viewModelScope.async {
             mediaPlayerUseCase.readyPlayer()
@@ -56,17 +47,7 @@ class PlayerServiceViewModel @Inject constructor(
 
     fun setMediaItems(picks: List<Pick>) {
         viewModelScope.launch {
-//            val find = picks.find { it.id == _playerState.value.id }
-//            if (find != null) {
-////                mediaPlayerUseCase.setMediaItem(find)
-//                mediaPlayerUseCase.addMediaItems(picks.minus(find))
-//                onPlay()
-//            } else {
-//                mediaPlayerUseCase.setMediaItems(picks)
-//            }
-            if (!picks.any { it.id == playerState.value.id }) {
-                mediaPlayerUseCase.setMediaItems(picks)
-            }
+            mediaPlayerUseCase.setMediaItems(picks)
         }
     }
 
@@ -98,11 +79,11 @@ class PlayerServiceViewModel @Inject constructor(
         mediaPlayerUseCase.advanceBy()
     }
 
-    fun shuffleNext() {
+    fun shuffleNext(pick: Pick) {
         if (playerState.value.isPlaying) {
             onPause()
         } else {
-            onNext()
+            setMediaItem(pick)
             onPlay()
         }
     }

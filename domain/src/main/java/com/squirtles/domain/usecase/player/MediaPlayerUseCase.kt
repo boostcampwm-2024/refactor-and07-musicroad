@@ -23,6 +23,10 @@ class MediaPlayerUseCase @Inject constructor(
         emit(mediaControllerProvider.audioSessionFlow.first())
     }
 
+    suspend fun readyPlayer() {
+        mediaController = mediaControllerProvider.mediaControllerFlow.first()
+    }
+
     fun playerUiStateFlow(): Flow<PlayerState> =
         mediaPlayerListenerUseCase.playerStateFlow()
 
@@ -34,8 +38,17 @@ class MediaPlayerUseCase @Inject constructor(
     fun addMediaItems(picks: List<Pick>) {
         mediaController?.run {
             addMediaItems(picks.map { it.toMediaItem() })
-            playWhenReady = false
-            repeatMode = Player.REPEAT_MODE_ALL
+        }
+    }
+
+    fun setMediaItem(pick: Pick) {
+        mediaController?.run {
+            clearMediaItems()
+            pause()
+            setMediaItem(pick.toMediaItem())
+            prepare()
+            repeatMode = Player.REPEAT_MODE_OFF
+            volume = 0.5f
         }
     }
 
@@ -47,20 +60,6 @@ class MediaPlayerUseCase @Inject constructor(
             prepare()
             playWhenReady = false
             repeatMode = Player.REPEAT_MODE_ALL
-            volume = 0.5f
-        }
-    }
-
-    suspend fun readyPlayer() {
-        mediaController = mediaControllerProvider.mediaControllerFlow.first()
-    }
-
-    fun setMediaItem(pick: Pick) {
-        mediaController?.run {
-            pause()
-            setMediaItem(pick.toMediaItem())
-            prepare()
-            repeatMode = Player.REPEAT_MODE_OFF
             volume = 0.5f
         }
     }

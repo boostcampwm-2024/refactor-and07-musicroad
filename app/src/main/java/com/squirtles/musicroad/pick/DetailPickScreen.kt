@@ -74,11 +74,11 @@ import kotlin.math.absoluteValue
 @Composable
 fun DetailPickScreen(
     pickId: String,
+    pickViewModel: PickViewModel = hiltViewModel(),
+    playerServiceViewModel: PlayerServiceViewModel,
     onProfileClick: (String) -> Unit,
     onBackClick: () -> Unit,
     onDeleted: (Context) -> Unit,
-    pickViewModel: PickViewModel = hiltViewModel(),
-    playerServiceViewModel: PlayerServiceViewModel = hiltViewModel(),
 ) {
     val context = LocalContext.current
     val uiState by pickViewModel.detailPickUiState.collectAsStateWithLifecycle()
@@ -197,7 +197,6 @@ fun DetailPickScreen(
                             onProfileClick = onProfileClick,
                             playerServiceViewModel = playerServiceViewModel,
                             onBackClick = {
-                                playerServiceViewModel.onStop()
                                 onBackClick()
                             },
                             onActionClick = onActionClick,
@@ -321,7 +320,7 @@ private fun DetailPick(
     val view = LocalView.current
     val context = LocalContext.current
 
-    val visualizer = remember { BaseVisualizer() }
+    val baseVisualizer = remember { BaseVisualizer() }
 
     val audioEffectColor = dynamicBackgroundColor.copy(
         red = (dynamicBackgroundColor.red + 0.2f).coerceAtMost(1.0f),
@@ -353,7 +352,6 @@ private fun DetailPick(
                 onDynamicBackgroundColor = onDynamicBackgroundColor,
                 onProfileClick = onProfileClick,
                 onBackClick = {
-//                    playerServiceViewModel.onStop()
                     onBackClick()
                 },
                 onActionClick = { onActionClick() }
@@ -405,7 +403,7 @@ private fun DetailPick(
                             currentPosition = { playerUiState.currentPosition },
                             duration = { playerUiState.duration },
                             audioEffectColor = audioEffectColor,
-                            baseVisualizer = visualizer,
+                            baseVisualizer = { baseVisualizer },
                             audioSessionId = audioSessionId,
                             onSeekChanged = { timeMs ->
                                 playerServiceViewModel.onSeekingFinished(timeMs)
@@ -444,7 +442,6 @@ private fun DetailPick(
                         } else {
                             playerServiceViewModel.onRewindBy()
                         }
-//                            playerServiceViewModel.replayForward(replaySec)
                     },
                     onPauseToggle = { song ->
                         playerServiceViewModel.togglePlayPause(song)

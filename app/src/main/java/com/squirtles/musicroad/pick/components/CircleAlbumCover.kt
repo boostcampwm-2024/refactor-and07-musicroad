@@ -27,7 +27,7 @@ internal fun CircleAlbumCover(
     currentPosition: () -> Long,
     duration: () -> Long,
     audioEffectColor: Color,
-    baseVisualizer: BaseVisualizer,
+    baseVisualizer: () -> BaseVisualizer,
     audioSessionId: Int,
     onSeekChanged: (Long) -> Unit,
     modifier: Modifier = Modifier,

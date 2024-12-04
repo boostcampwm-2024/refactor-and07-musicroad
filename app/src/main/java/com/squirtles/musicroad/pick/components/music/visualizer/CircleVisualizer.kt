@@ -16,18 +16,19 @@ import kotlinx.coroutines.launch
 
 @Composable
 fun CircleVisualizer(
-    baseVisualizer: BaseVisualizer,
+    baseVisualizer: () -> BaseVisualizer,
     audioSessionId: Int,
     color: Color = White,
     sizeRatio: Float,
     modifier: Modifier = Modifier
 ) {
     val magnitudes = remember { mutableStateOf<List<Animatable<Float, AnimationVector1D>>>(emptyList()) }
+    val visualizer = baseVisualizer()
 
-    LaunchedEffect(baseVisualizer) {
-        baseVisualizer.setVisualizer(audioSessionId)
-        baseVisualizer.setVisualizerListener()
-        baseVisualizer.fftFlow.collect { fftArray ->
+    LaunchedEffect(Unit) {
+        visualizer.setVisualizer(audioSessionId)
+        visualizer.setVisualizerListener()
+        visualizer.fftFlow.collect { fftArray ->
             val normalizedData = processAudioData(fftArray)
 
             if (magnitudes.value.isEmpty()) {
@@ -50,7 +51,7 @@ fun CircleVisualizer(
 
     DisposableEffect(Unit) {
         onDispose {
-            baseVisualizer.release()
+            visualizer.release()
         }
     }
 

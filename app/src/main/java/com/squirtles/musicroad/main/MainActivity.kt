@@ -24,7 +24,6 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.compose.rememberNavController
-import com.squirtles.mediaservice.MediaPlayerService
 import com.squirtles.musicroad.R
 import com.squirtles.musicroad.main.navigations.MainNavGraph
 import com.squirtles.musicroad.main.navigations.MainNavigationActions
@@ -39,13 +38,9 @@ import kotlinx.coroutines.withTimeout
 class MainActivity : AppCompatActivity() {
     private val mainViewModel by viewModels<MainViewModel>()
 
-
     override fun onCreate(savedInstanceState: Bundle?) {
         val splashScreen = installSplashScreen()
         super.onCreate(savedInstanceState)
-
-        val intent = Intent(applicationContext, MediaPlayerService::class.java)
-        applicationContext.startService(intent)
 
         setKeepOnScreenCondition(splashScreen)
         enableEdgeToEdge()

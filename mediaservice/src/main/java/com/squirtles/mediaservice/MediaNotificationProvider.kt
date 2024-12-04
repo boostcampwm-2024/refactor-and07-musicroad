@@ -51,7 +51,7 @@ class MediaNotificationProviderImpl @Inject constructor(
             setSilent(true)
             setSmallIcon(R.drawable.ic_musicroad_foreground)
             setContentTitle(mediaItem?.mediaMetadata?.title)
-//            setContentIntent(createNotifyPendingIntent())
+            setContentIntent(createNotifyPendingIntent())
             setDeleteIntent(
                 actionFactory.createMediaActionPendingIntent(
                     mediaSession,
@@ -61,9 +61,8 @@ class MediaNotificationProviderImpl @Inject constructor(
             setStyle(
                 MediaStyleNotificationHelper
                     .MediaStyle(mediaSession)
-                    .setShowActionsInCompactView(0, 1, 2)
             )
-            setOngoing(false)
+            setOngoing(true)
 
             NotificationCommand.entries.forEach { commandButton ->
                 addAction(
@@ -87,6 +86,7 @@ class MediaNotificationProviderImpl @Inject constructor(
         )
     }
 
+    /* 알림 누르면 이동할 intent 설정 */
     private fun createNotifyPendingIntent(): PendingIntent =
         PendingIntent.getActivity(
             context,
@@ -99,8 +99,10 @@ class MediaNotificationProviderImpl @Inject constructor(
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
 
+    /* Notification Channel 생성 */
     @SuppressLint("ObsoleteSdkInt")
     private fun ensureNotificationChannel(notificationManager: NotificationManager) {
+        // 안드 8.0 아래는 앱 당 단일 Noti 채널 가짐
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O ||
             notificationManager.getNotificationChannel(NOTIFICATION_CHANNEL_ID.toString()) != null
         ) {
