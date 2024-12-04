@@ -2,7 +2,6 @@ package com.squirtles.mediaservice.di
 
 import android.content.ComponentName
 import android.content.Context
-import android.util.Log
 import androidx.annotation.OptIn
 import androidx.media3.common.AudioAttributes
 import androidx.media3.common.util.UnstableApi
@@ -31,14 +30,14 @@ import javax.inject.Singleton
 abstract class MediaServiceBinds {
 
     @Binds
-    abstract fun bindsNotifier(
+    abstract fun bindsMediaNotificationProvider(
         mediaNotification: MediaNotificationProviderImpl
     ): MediaNotificationProvider
 
     @OptIn(UnstableApi::class)
     @Binds
-    abstract fun bindsMediaControllerManager(
-        mediaControllerProviderImpl: MediaControllerProviderImpl
+    abstract fun bindsMediaControllerProvider(
+        mediaControllerProvider: MediaControllerProviderImpl
     ): MediaControllerProvider
 }
 
@@ -86,7 +85,6 @@ object MediaServiceModule {
         @ApplicationContext context: Context
     ): SessionToken {
         val sessionToken = SessionToken(context, ComponentName(context, MediaPlayerService::class.java))
-        Log.d("MediaServiceModule", "sessionToken: ${sessionToken.hashCode()}")
         return sessionToken
     }
 

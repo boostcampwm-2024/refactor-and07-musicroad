@@ -29,17 +29,12 @@ class MediaNotificationProviderImpl @Inject constructor(
     private val mediaSession: MediaSession
 ) : MediaNotificationProvider {
 
-    companion object {
-        const val NOTIFICATION_CHANNEL_ID = 100
-        const val TARGET_ACTIVITY = "com.squirtles.musicroad.main.MainActivity"
-    }
-
     @OptIn(UnstableApi::class)
     override fun createMediaNotification(actionFactory: MediaNotification.ActionFactory): MediaNotification {
         val notificationManager: NotificationManager =
             context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
-        ensureNotificationChannel(notificationManager)
+        makeNotificationChannel(notificationManager)
 
         val mediaItem = mediaSession.player.currentMediaItem
 
@@ -101,7 +96,7 @@ class MediaNotificationProviderImpl @Inject constructor(
 
     /* Notification Channel 생성 */
     @SuppressLint("ObsoleteSdkInt")
-    private fun ensureNotificationChannel(notificationManager: NotificationManager) {
+    private fun makeNotificationChannel(notificationManager: NotificationManager) {
         // Android 8.0 미만 버전에서는 Notification Channel을 생성할 필요가 없음 -> 앱 단일 Channel 가짐
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O ||
             notificationManager.getNotificationChannel(NOTIFICATION_CHANNEL_ID.toString()) != null
@@ -116,5 +111,10 @@ class MediaNotificationProviderImpl @Inject constructor(
         )
 
         notificationManager.createNotificationChannel(channel)
+    }
+
+    companion object {
+        const val NOTIFICATION_CHANNEL_ID = 100
+        const val TARGET_ACTIVITY = "com.squirtles.musicroad.main.MainActivity"
     }
 }
