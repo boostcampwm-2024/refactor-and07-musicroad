@@ -103,7 +103,6 @@ fun MapScreen(
                                 pick = pick,
                                 userId = mapViewModel.getUserId(),
                                 navigateToPick = { pickId ->
-//                                    playerServiceViewModel.onStop()
                                     onPickSummaryClick(pickId)
                                 },
                                 calculateDistance = { lat, lng ->
@@ -128,16 +127,13 @@ fun MapScreen(
                     modifier = Modifier.padding(bottom = 16.dp),
                     lastLocation = lastLocation,
                     onFavoriteClick = {
-//                        playerServiceViewModel.onPause()
                         onFavoriteClick(mapViewModel.getUserId())
                     },
                     onCenterClick = {
-//                        playerServiceViewModel.onPause()
                         onCenterClick()
                         mapViewModel.saveCurLocationForced()
                     },
                     onUserInfoClick = {
-//                        playerServiceViewModel.onPause()
                         onUserInfoClick(mapViewModel.getUserId())
                     }
                 )
@@ -165,7 +161,6 @@ fun MapScreen(
 
                     },
                     onClickItem = { pickId ->
-//                        playerServiceViewModel.onStop()
                         onPickSummaryClick(pickId)
                     }
                 )

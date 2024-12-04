@@ -4,7 +4,6 @@ import android.content.Intent
 import android.os.Bundle
 import androidx.annotation.OptIn
 import androidx.media3.common.Player
-import androidx.media3.common.util.Log
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.session.CommandButton
 import androidx.media3.session.MediaNotification
@@ -37,8 +36,6 @@ class MediaPlayerService : MediaSessionService() {
 
             override fun handleCustomCommand(session: MediaSession, action: String, extras: Bundle): Boolean = false
         })
-
-        Log.d("MediaPlayerService", "onCreate")
     }
 
     // The user dismissed the app from the recent tasks
