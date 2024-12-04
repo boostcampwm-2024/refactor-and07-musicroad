@@ -102,7 +102,7 @@ class MediaNotificationProviderImpl @Inject constructor(
     /* Notification Channel 생성 */
     @SuppressLint("ObsoleteSdkInt")
     private fun ensureNotificationChannel(notificationManager: NotificationManager) {
-        // 안드 8.0 아래는 앱 당 단일 Noti 채널 가짐
+        // Android 8.0 미만 버전에서는 Notification Channel을 생성할 필요가 없음 -> 앱 단일 Channel 가짐
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O ||
             notificationManager.getNotificationChannel(NOTIFICATION_CHANNEL_ID.toString()) != null
         ) {
