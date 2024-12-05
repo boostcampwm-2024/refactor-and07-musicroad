@@ -6,6 +6,21 @@
 </div>
 
 <br>
+
+### 🔔 서비스 배경
+> “지금 무슨 노래 듣고 계세요? 뉴진스의 하입보이요”
+
+길거리에서 지나치는 수많은 사람들이 어떤 노래를 듣고 있는지 궁금한 적 있으신가요?
+
+Music Road는 주변 사람들이 어떤 노래를 듣고 있는지, 더 나아가 내가 어떤 노래를 듣고 있는지 손쉽게 공유할 수 있으면 어떨까 라는 생각에서 출발했습니다.
+
+내가 Pick한 음악을 길거리에 남기고, 지도의 Pick을 통해 다른 사람들은 이 장소에서 어떤 음악을 들었는지 둘러보세요.
+
+### 🙆‍♂️ 서비스 대상
+- 음악 취향을 공유하고 싶은 사람
+- 다른 사람들은 지금 이 장소에서 어떤 노래를 들었는지 궁금한 사람
+- 새로운 노래를 찾고 싶은 사람
+
 <br>
 
 ## 🔮 핵심 기능
@@ -74,7 +89,7 @@
 ### 픽 모음
 <table>
   <tr>
-    <td><img src="https://github.com/user-attachments/assets/ed81dd69-f82d-40bc-b70a-d2fdaf2b9eb7" width="200"></td>
+    <td><img src="https://github.com/user-attachments/assets/a671d424-6cd3-4af0-9a44-17693eded369" width="200"></td>
     <td>
       <ul>
         <li>나와 다른 사람들이 담은 Pick과 등록한 Pick을 한눈에 모아볼 수 있습니다.</li>
@@ -92,7 +107,7 @@
 | Architecture | <img src="https://img.shields.io/badge/Clean Architecture-FFFF7F?style=for-the-badge"> | |
 | UI | <img src="https://img.shields.io/badge/Jetpack Compose-4285F4?style=for-the-badge&logo=jetpackcompose&logoColor=white"> |  |
 | DI | <img src="https://img.shields.io/badge/Hilt-34A853?style=for-the-badge"> |  |
-| Map | <img src="https://img.shields.io/badge/Naver Map SDK-03C75A?style=for-the-badge"> |  |
+| Map | <img src="https://img.shields.io/badge/Naver Map SDK-03C75A?style=for-the-badge"> | [지도 API 비교](https://vaulted-system-3ae.notion.site/Android-API-153f85098cd58065b54fe8a98f4569ec) |
 | Network | <img src="https://img.shields.io/badge/OkHttp-000000?style=for-the-badge"> <img src="https://img.shields.io/badge/Retrofit-000000?style=for-the-badge"> <img src="https://img.shields.io/badge/Kotlinx.Serialization-7F52FF?style=for-the-badge&logo=kotlin&logoColor=white"> <img src="https://img.shields.io/badge/Paging3-34A853?style=for-the-badge"> |  |
 | Image | <img src="https://img.shields.io/badge/Coil-3B6BB4?style=for-the-badge"> | [Coil vs Glide](https://www.notion.so/Coil-vs-Glide-136ea5e5fc1780b8a2efec5d56448f30?pvs=21)  |
 | Media | <img src="https://img.shields.io/badge/ExoPlayer-34A853?style=for-the-badge"> <img src="https://img.shields.io/badge/Apple Music API-FA243C?style=for-the-badge&logo=applemusic&logoColor=white"> <img src="https://img.shields.io/badge/Visualizer-34A853?style=for-the-badge"> | [[음원 재생] 기술 검토 및 기획 ](https://www.notion.so/139ea5e5fc17805d86ccd288f434be9a?pvs=21) <br> [[영상 처리] 기술 검토 및 기획](https://www.notion.so/138ea5e5fc1780b2817ad722558936b4?pvs=21)  |

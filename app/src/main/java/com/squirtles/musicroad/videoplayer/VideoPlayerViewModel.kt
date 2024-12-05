@@ -1,6 +1,7 @@
 package com.squirtles.musicroad.videoplayer
 
 import android.content.Context
+import android.util.Size
 import android.view.Surface
 import android.widget.Toast
 import androidx.core.content.ContextCompat.getString
@@ -8,8 +9,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
+import androidx.media3.common.VideoSize
 import androidx.media3.exoplayer.ExoPlayer
-import com.squirtles.domain.model.Pick
 import com.squirtles.musicroad.R
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -26,6 +27,9 @@ class VideoPlayerViewModel @Inject constructor() : ViewModel() {
     private var _playerState = MutableStateFlow(VideoPlayerState.Playing) // 현재 플레이어의 상태
     val playerState = _playerState.asStateFlow()
 
+    private var _videoSize = MutableStateFlow(Size(0, 0)) // 영상 크기
+    val videoSize = _videoSize.asStateFlow()
+
     private val _isLoading = MutableStateFlow(true)
     val isLoading = _isLoading.asStateFlow()
 
@@ -40,6 +44,12 @@ class VideoPlayerViewModel @Inject constructor() : ViewModel() {
         val exoPlayer = ExoPlayer.Builder(context).build().apply {
             playWhenReady = false
             addListener(object : Player.Listener {
+                override fun onVideoSizeChanged(videoSize: VideoSize) {
+                    viewModelScope.launch {
+                        _videoSize.emit(Size(videoSize.width, videoSize.height))
+                    }
+                }
+
                 override fun onPlaybackStateChanged(state: Int) {
                     viewModelScope.launch {
                         when (state) {
@@ -67,15 +77,15 @@ class VideoPlayerViewModel @Inject constructor() : ViewModel() {
         setPlayerSource(url)
     }
 
-    fun play(){
+    fun play() {
         player?.play()
     }
 
-    fun pause(){
+    fun pause() {
         player?.pause()
     }
 
-    private fun setPlayerSource(url: String){
+    private fun setPlayerSource(url: String) {
         player?.run {
             val mediaItem = MediaItem.fromUri(url)
             setMediaItem(mediaItem)
