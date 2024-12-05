@@ -1,6 +1,5 @@
 package com.squirtles.domain.usecase.player
 
-import android.util.Log
 import androidx.media3.common.Player
 import androidx.media3.common.Tracks
 import com.squirtles.domain.model.PlayerState
@@ -32,7 +31,6 @@ class MediaPlayerListenerUseCase @Inject constructor(
 
     fun playerStateFlow() = callbackFlow {
         val mediaController = mediaControllerProvider.mediaControllerFlow.first()
-        Log.d("MediaPlayerListenerUseCase", "$mediaController")
 
         val currentPlayerState = MutableStateFlow(
             if (mediaController.currentMediaItem != null) {
