@@ -30,10 +30,19 @@ internal fun <T : ClusteringKey> buildClusterer(
     return Clusterer.ComplexBuilder<T>()
         .thresholdStrategy { zoom ->
             when {
-                zoom >= 16 -> 10.0
-                zoom >= 13 -> 20.0
-                zoom >= 11 -> 40.0
-                else -> 70.0
+                zoom >= 17.0 -> 15.0
+                zoom >= 16.0 -> 16.0
+                zoom >= 15.0 -> 17.0
+                zoom >= 14.0 -> 20.0
+                zoom >= 13.5 -> 25.0
+                zoom >= 13.0 -> 30.0
+                zoom >= 12.5 -> 35.0
+                zoom >= 12.0 -> 40.0
+                zoom >= 11.0 -> 45.0
+                zoom >= 9.0 -> 40.0
+                zoom >= 7.5 -> 21.0
+                zoom >= 7.0 -> 18.0
+                else -> 15.0
             }
         }
         .tagMergeStrategy { cluster ->
