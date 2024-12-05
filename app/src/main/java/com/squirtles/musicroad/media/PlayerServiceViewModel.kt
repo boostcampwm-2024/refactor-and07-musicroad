@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.squirtles.domain.model.Pick
 import com.squirtles.domain.model.PlayerState
 import com.squirtles.domain.model.Song
+import com.squirtles.domain.usecase.player.MediaPlayerListenerUseCase
 import com.squirtles.domain.usecase.player.MediaPlayerUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.async
@@ -17,9 +18,10 @@ import javax.inject.Inject
 @HiltViewModel
 class PlayerServiceViewModel @Inject constructor(
     private val mediaPlayerUseCase: MediaPlayerUseCase,
+    private val mediaPlayerListenerUseCase: MediaPlayerListenerUseCase,
 ) : ViewModel() {
 
-    val playerState: StateFlow<PlayerState> = mediaPlayerUseCase.playerUiStateFlow()
+    val playerState: StateFlow<PlayerState> = mediaPlayerListenerUseCase.playerStateFlow()
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5_000),

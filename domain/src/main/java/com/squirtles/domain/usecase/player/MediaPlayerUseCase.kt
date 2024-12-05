@@ -5,16 +5,13 @@ import androidx.media3.common.MediaMetadata
 import androidx.media3.common.Player
 import androidx.media3.session.MediaController
 import com.squirtles.domain.model.Pick
-import com.squirtles.domain.model.PlayerState
 import com.squirtles.mediaservice.MediaControllerProvider
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
 import javax.inject.Inject
 
 /*  */
 class MediaPlayerUseCase @Inject constructor(
-    private val mediaPlayerListenerUseCase: MediaPlayerListenerUseCase,
     private val mediaControllerProvider: MediaControllerProvider,
 ) {
     private var mediaController: MediaController? = null
@@ -26,9 +23,6 @@ class MediaPlayerUseCase @Inject constructor(
     suspend fun readyPlayer() {
         mediaController = mediaControllerProvider.mediaControllerFlow.first()
     }
-
-    fun playerUiStateFlow(): Flow<PlayerState> =
-        mediaPlayerListenerUseCase.playerStateFlow()
 
     fun addMediaItem(pick: Pick) {
         val mediaItem = pick.toMediaItem()

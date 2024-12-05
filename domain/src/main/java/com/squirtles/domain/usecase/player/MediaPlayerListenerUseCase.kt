@@ -58,9 +58,9 @@ class MediaPlayerListenerUseCase @Inject constructor(
 
             override fun onIsLoadingChanged(isLoading: Boolean) {
                 super.onIsLoadingChanged(isLoading)
-                currentPlayerState.update {
-                    it.copy(id = mediaController.currentMediaItem?.mediaId ?: "", isLoading = isLoading)
-                }
+//                currentPlayerState.update {
+//                    it.copy(id = mediaController.currentMediaItem?.mediaId ?: "", isLoading = isLoading)
+//                }
             }
 
             override fun onPositionDiscontinuity(
@@ -84,8 +84,10 @@ class MediaPlayerListenerUseCase @Inject constructor(
                         mediaController.pause()
                     }
 
-                    Player.STATE_IDLE -> {
-                        currentPlayerState.value = PlayerState()
+                    Player.STATE_READY -> {
+                        currentPlayerState.update {
+                            it.copy(id = mediaController.currentMediaItem?.mediaId ?: "")
+                        }
                     }
                 }
             }
