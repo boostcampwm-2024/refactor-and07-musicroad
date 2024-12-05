@@ -28,8 +28,8 @@ internal class CustomMediaSessionCallback : MediaSession.Callback {
             val availableSessionCommands = connectionResult.availableSessionCommands.buildUpon()
             var customCommands = PlayerCommands.entries.toList()
 
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                // 안드로이드 13 (API 34) 이상
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+                // 안드로이드 14 (API 34) 이상
                 customCommands = customCommands.reversed()
             }
 
