@@ -14,10 +14,6 @@ class BaseVisualizer {
 
     private val validRange = getSignificantFftIndexRange()
 
-//    init {
-//        setPlayer()
-//    }
-
     fun setVisualizer(audioSessionId: Int) {
         val visualizer = Visualizer(audioSessionId)
         this.visualizer = visualizer
