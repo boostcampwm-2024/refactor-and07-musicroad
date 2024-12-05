@@ -71,7 +71,7 @@ class BaseVisualizer {
 
     companion object {
         const val CAPTURE_SIZE = 1024
-        const val SAMPLING_RATE = 48000
+        const val SAMPLING_RATE = 44000
         const val MIN_FREQ = 20
         const val MAX_FREQ = 4000
     }
