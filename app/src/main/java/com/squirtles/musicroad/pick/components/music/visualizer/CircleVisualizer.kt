@@ -39,7 +39,7 @@ fun CircleVisualizer(
                         magnitudes.value[i].animateTo(
                             targetValue = magnitude,
                             animationSpec = tween(
-                                durationMillis = 180,
+                                durationMillis = 120,
                                 easing = FastOutSlowInEasing
                             )
                         )

@@ -37,6 +37,7 @@ class MediaControllerProviderImpl @Inject constructor(
                 /* MediaController 객체가 준비되면 trySend(result)를 통해 Flow로 결과를 전송
                 즉, mediaControllerFlow를 구독하고 있는 곳에 MediaController 객체가 전달 */
                 override fun onSuccess(result: MediaController) {
+                    result.setPlaybackSpeed(1.0f)
                     trySend(result)
                 }
 
