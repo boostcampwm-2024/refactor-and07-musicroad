@@ -107,7 +107,7 @@ Music Road는 주변 사람들이 어떤 노래를 듣고 있는지, 더 나아�
 | Architecture | <img src="https://img.shields.io/badge/Clean Architecture-FFFF7F?style=for-the-badge"> | |
 | UI | <img src="https://img.shields.io/badge/Jetpack Compose-4285F4?style=for-the-badge&logo=jetpackcompose&logoColor=white"> |  |
 | DI | <img src="https://img.shields.io/badge/Hilt-34A853?style=for-the-badge"> |  |
-| Map | <img src="https://img.shields.io/badge/Naver Map SDK-03C75A?style=for-the-badge"> |  |
+| Map | <img src="https://img.shields.io/badge/Naver Map SDK-03C75A?style=for-the-badge"> | [지도 API 비교](https://vaulted-system-3ae.notion.site/Android-API-153f85098cd58065b54fe8a98f4569ec) |
 | Network | <img src="https://img.shields.io/badge/OkHttp-000000?style=for-the-badge"> <img src="https://img.shields.io/badge/Retrofit-000000?style=for-the-badge"> <img src="https://img.shields.io/badge/Kotlinx.Serialization-7F52FF?style=for-the-badge&logo=kotlin&logoColor=white"> <img src="https://img.shields.io/badge/Paging3-34A853?style=for-the-badge"> |  |
 | Image | <img src="https://img.shields.io/badge/Coil-3B6BB4?style=for-the-badge"> | [Coil vs Glide](https://www.notion.so/Coil-vs-Glide-136ea5e5fc1780b8a2efec5d56448f30?pvs=21)  |
 | Media | <img src="https://img.shields.io/badge/ExoPlayer-34A853?style=for-the-badge"> <img src="https://img.shields.io/badge/Apple Music API-FA243C?style=for-the-badge&logo=applemusic&logoColor=white"> <img src="https://img.shields.io/badge/Visualizer-34A853?style=for-the-badge"> | [[음원 재생] 기술 검토 및 기획 ](https://www.notion.so/139ea5e5fc17805d86ccd288f434be9a?pvs=21) <br> [[영상 처리] 기술 검토 및 기획](https://www.notion.so/138ea5e5fc1780b2817ad722558936b4?pvs=21)  |
