@@ -35,12 +35,12 @@ fun MusicPlayer(
     ) {
         PlayBar(
             duration = playerState.duration,
-            currentTime = { playerState.currentPosition },
-            bufferPercentage = { playerState.bufferPercentage },
+            currentTime = playerState.currentPosition,
+            bufferPercentage = playerState.bufferPercentage,
+            isPlaying = playerState.isPlaying,
             onSeekChanged = { timeMs ->
                 onSeekChanged(timeMs.toLong())
             },
-            isPlaying = { playerState.isPlaying },
             onReplayClick = {
                 onReplayForwardClick(false)
             },
