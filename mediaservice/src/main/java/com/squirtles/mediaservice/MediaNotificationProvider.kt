@@ -59,7 +59,7 @@ class MediaNotificationProviderImpl @Inject constructor(
             )
             setOngoing(true)
 
-            NotificationCommand.entries.forEach { commandButton ->
+            PlayerCommands.entries.forEach { commandButton ->
                 addAction(
                     actionFactory.createCustomAction(
                         mediaSession,

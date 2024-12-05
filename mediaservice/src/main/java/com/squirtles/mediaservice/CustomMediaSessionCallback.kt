@@ -25,10 +25,10 @@ internal class CustomMediaSessionCallback : MediaSession.Callback {
         // 컨트롤러가 미디어 알림과 연관된 컨트롤러인지 확인
         if (session.isMediaNotificationController(controller)) {
             val sessionCommandBuilder = MediaSession.ConnectionResult.DEFAULT_SESSION_COMMANDS.buildUpon()
-            var customCommands = NotificationCommand.entries.toList()
+            var customCommands = PlayerCommands.entries.toList()
 
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
-                // 안드로이드 14 (API 34) 이상
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                // 안드로이드 13 (API 34) 이상
                 customCommands = customCommands.reversed()
             }
 
@@ -43,8 +43,8 @@ internal class CustomMediaSessionCallback : MediaSession.Callback {
                 .setCustomLayout(
                     customCommands
                         .filter {
-                            it.customAction == NotificationCommand.SEEK_REWIND.customAction
-                                    || it.customAction == NotificationCommand.SEEK_FORWARD.customAction
+                            it.customAction == PlayerCommands.SEEK_REWIND.customAction
+                                    || it.customAction == PlayerCommands.SEEK_FORWARD.customAction
                         }.map {
                             CommandButton.Builder()
                                 .setDisplayName(it.displayName)
@@ -67,18 +67,18 @@ internal class CustomMediaSessionCallback : MediaSession.Callback {
     ): ListenableFuture<SessionResult> {
 
         when (customCommand.customAction) {
-            NotificationCommand.SEEK_REWIND.customAction -> {
+            PlayerCommands.SEEK_REWIND.customAction -> {
                 session.player.run {
                     seekTo(currentPosition - SEEK_TO_DURATION)
                 }
             }
 
-            NotificationCommand.PLAY_AND_PAUSE.customAction -> {
+            PlayerCommands.PLAY_AND_PAUSE.customAction -> {
                 if (!session.player.isPlaying) session.player.play()
                 else session.player.pause()
             }
 
-            NotificationCommand.SEEK_FORWARD.customAction -> {
+            PlayerCommands.SEEK_FORWARD.customAction -> {
                 session.player.run {
                     seekTo(currentPosition + SEEK_TO_DURATION)
                 }

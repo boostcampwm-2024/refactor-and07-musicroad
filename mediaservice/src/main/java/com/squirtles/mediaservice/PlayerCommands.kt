@@ -7,7 +7,7 @@ private const val ACTION_SEEK_FORWARD = "action_seek_forward"
 private const val ACTION_SEEK_REWIND = "action_seek_rewind"
 private const val ACTION_PLAY_AND_PAUSE = "action_play_and_pause"
 
-enum class NotificationCommand(
+enum class PlayerCommands(
     val customAction: String,
     val displayName: String,
     val iconResId: (Boolean) -> Int,
