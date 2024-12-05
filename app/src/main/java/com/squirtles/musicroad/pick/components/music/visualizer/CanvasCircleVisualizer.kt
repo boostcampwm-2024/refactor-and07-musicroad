@@ -118,3 +118,5 @@ internal fun CanvasSoundEffectWave(
         )
     }
 }
+
+private const val STROKE_WIDTH = 18f
