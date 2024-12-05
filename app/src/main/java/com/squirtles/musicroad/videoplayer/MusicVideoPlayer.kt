@@ -11,12 +11,18 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.flowWithLifecycle
 import androidx.media3.common.util.UnstableApi
 import com.squirtles.domain.model.Pick
+import kotlinx.coroutines.launch
 
 @OptIn(UnstableApi::class)
 @Composable
@@ -25,9 +31,12 @@ fun MusicVideoPlayer(
     videoPlayerViewModel: VideoPlayerViewModel = hiltViewModel()
 ) {
     val context = LocalContext.current
+    val lifecycleOwner = LocalLifecycleOwner.current
+    val coroutineScope = rememberCoroutineScope()
 
     val textureView = remember { TextureView(context) }
     var currentSurfaceTexture by remember { mutableStateOf<SurfaceTexture?>(null) }
+    val videoSize by videoPlayerViewModel.videoSize.collectAsStateWithLifecycle()
 
     DisposableEffect(Unit) {
         onDispose {
@@ -52,11 +61,17 @@ fun MusicVideoPlayer(
                 surfaceTextureListener = object : TextureView.SurfaceTextureListener {
                     override fun onSurfaceTextureAvailable(surfaceTexture: SurfaceTexture, width: Int, height: Int) {
                         currentSurfaceTexture = surfaceTexture
-                        setVideoSize(width, height, textureView)
+                        coroutineScope.launch {
+                            videoPlayerViewModel.videoSize
+                                .flowWithLifecycle(lifecycleOwner.lifecycle, Lifecycle.State.STARTED)
+                                .collect {
+                                    setVideoSize(textureView, it.width, it.height)
+                                }
+                        }
                     }
 
                     override fun onSurfaceTextureSizeChanged(surfaceTexture: SurfaceTexture, width: Int, height: Int) {
-                        setVideoSize(width, height, textureView)
+
                     }
 
                     override fun onSurfaceTextureDestroyed(surfaceTexture: SurfaceTexture): Boolean {
@@ -73,16 +88,26 @@ fun MusicVideoPlayer(
     )
 }
 
-private fun setVideoSize(width: Int, height: Int, textureView: TextureView) {
-    // 세로가 더 긴 경우 영상을 화면 크기에 맞게 확대
-    if (height > width) {
-        val matrix = Matrix()
-        val scaleFactor = height.toFloat() / width.toFloat()
-        matrix.setScale(scaleFactor, 1f)
+private fun setVideoSize(textureView: TextureView, videoWidth: Int, videoHeight: Int) {
+    // 비율 조정
+    val viewWidth = textureView.width.toFloat()
+    val viewHeight = textureView.height.toFloat()
+    val videoAspect = videoWidth.toFloat() / videoHeight
+    val viewAspect = viewWidth / viewHeight
+    val scaleX: Float
+    val scaleY: Float
 
-        // 영상 중앙 정렬
-        val translateX = (width - width * scaleFactor) / 2f
-        matrix.postTranslate(translateX, 0f)
-        textureView.setTransform(matrix)
+    if (videoAspect > viewAspect) {
+        scaleX = videoAspect / viewAspect
+        scaleY = 1f
+    } else {
+        scaleX = 1f
+        scaleY = viewAspect / videoAspect
     }
+
+    // 중앙 정렬
+    val matrix = Matrix()
+    matrix.setScale(scaleX, scaleY, viewWidth / 2, viewHeight / 2)
+
+    textureView.setTransform(matrix)
 }
