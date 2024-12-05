@@ -24,7 +24,8 @@ internal class CustomMediaSessionCallback : MediaSession.Callback {
 
         // 컨트롤러가 미디어 알림과 연관된 컨트롤러인지 확인
         if (session.isMediaNotificationController(controller)) {
-            val sessionCommandBuilder = MediaSession.ConnectionResult.DEFAULT_SESSION_COMMANDS.buildUpon()
+            val connectionResult = super.onConnect(session, controller)
+            val availableSessionCommands = connectionResult.availableSessionCommands.buildUpon()
             var customCommands = PlayerCommands.entries.toList()
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
@@ -33,13 +34,14 @@ internal class CustomMediaSessionCallback : MediaSession.Callback {
             }
 
             customCommands.forEach { commandButton ->
-                commandButton.sessionCommand.apply {
-                    sessionCommandBuilder.add(this)
+                commandButton.sessionCommand.let {
+                    it
+                    availableSessionCommands.add(it)
                 }
             }
 
             MediaSession.ConnectionResult.AcceptedResultBuilder(session)
-                .setAvailableSessionCommands(sessionCommandBuilder.build())
+                .setAvailableSessionCommands(availableSessionCommands.build())
                 .setCustomLayout(
                     customCommands
                         .filter {
