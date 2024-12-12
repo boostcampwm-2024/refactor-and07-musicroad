@@ -22,7 +22,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.squirtles.musicroad.common.VerticalSpacer
 import com.squirtles.musicroad.main.MainActivity
@@ -31,32 +30,30 @@ import com.squirtles.musicroad.map.components.ClusterBottomSheet
 import com.squirtles.musicroad.map.components.InfoWindow
 import com.squirtles.musicroad.map.components.LoadingDialog
 import com.squirtles.musicroad.map.components.PickNotificationBanner
-import com.squirtles.musicroad.musicplayer.PlayerViewModel
+import com.squirtles.musicroad.media.PlayerServiceViewModel
 
 @Composable
 fun MapScreen(
     mapViewModel: MapViewModel,
+    playerServiceViewModel: PlayerServiceViewModel,
     onFavoriteClick: (String) -> Unit,
     onCenterClick: () -> Unit,
     onUserInfoClick: (String) -> Unit,
     onPickSummaryClick: (String) -> Unit,
-    playerViewModel: PlayerViewModel = hiltViewModel()
 ) {
     val nearPicks by mapViewModel.nearPicks.collectAsStateWithLifecycle()
     val lastLocation by mapViewModel.lastLocation.collectAsStateWithLifecycle()
 
     val clickedMarkerState by mapViewModel.clickedMarkerState.collectAsStateWithLifecycle()
-    val playerState by playerViewModel.playerState.collectAsStateWithLifecycle()
+    val playerState by playerServiceViewModel.playerState.collectAsStateWithLifecycle()
 
     val context = LocalContext.current
     var showBottomSheet by remember { mutableStateOf(false) }
     var showLocationLoading by rememberSaveable { mutableStateOf(true) }
     var isPlaying: Boolean by remember { mutableStateOf(false) }
 
-    LaunchedEffect(nearPicks) {
-        if (nearPicks.isNotEmpty()) {
-            playerViewModel.readyPlayerSetList(context, nearPicks.map { it.song.previewUrl })
-        }
+    LaunchedEffect(Unit) {
+        playerServiceViewModel.readyPlayer()
     }
 
     LaunchedEffect(playerState) {
@@ -85,7 +82,10 @@ fun MapScreen(
                     nearPicks = nearPicks,
                     isPlaying = isPlaying,
                     onClick = {
-                        playerViewModel.shuffleNextItem()
+                        playerServiceViewModel.shuffleNext(
+                            if (nearPicks.size == 1) nearPicks.first()
+                            else nearPicks.filter { it.id != playerState.id }.random()
+                        )
                     }
                 )
             }
@@ -103,7 +103,6 @@ fun MapScreen(
                                 pick = pick,
                                 userId = mapViewModel.getUserId(),
                                 navigateToPick = { pickId ->
-                                    playerViewModel.pause()
                                     onPickSummaryClick(pickId)
                                 },
                                 calculateDistance = { lat, lng ->
@@ -128,16 +127,13 @@ fun MapScreen(
                     modifier = Modifier.padding(bottom = 16.dp),
                     lastLocation = lastLocation,
                     onFavoriteClick = {
-                        playerViewModel.pause()
                         onFavoriteClick(mapViewModel.getUserId())
                     },
                     onCenterClick = {
-                        playerViewModel.pause()
                         onCenterClick()
                         mapViewModel.saveCurLocationForced()
                     },
                     onUserInfoClick = {
-                        playerViewModel.pause()
                         onUserInfoClick(mapViewModel.getUserId())
                     }
                 )
@@ -165,7 +161,6 @@ fun MapScreen(
 
                     },
                     onClickItem = { pickId ->
-                        playerViewModel.pause()
                         onPickSummaryClick(pickId)
                     }
                 )

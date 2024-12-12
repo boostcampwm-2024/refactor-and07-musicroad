@@ -11,7 +11,6 @@ import androidx.compose.material.icons.filled.Replay5
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -23,13 +22,12 @@ import com.squirtles.musicroad.ui.theme.White
 
 @Composable
 internal fun PlayerControls(
-    isPlaying: () -> Boolean,
+    isPlaying: Boolean,
     onReplayClick: () -> Unit,
     onPauseToggle: () -> Unit,
     onForwardClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val isMusicPlaying = remember(isPlaying()) { isPlaying() }
 
     Row(
         modifier = modifier,
@@ -59,7 +57,7 @@ internal fun PlayerControls(
                 onClick = onPauseToggle
             ) {
                 Icon(
-                    imageVector = if (isMusicPlaying) {
+                    imageVector = if (isPlaying) {
                         Icons.Default.Pause
                     } else {
                         Icons.Default.PlayArrow
@@ -95,7 +93,7 @@ internal fun PlayerControls(
 private fun PlayerControlsPreview() {
     MusicRoadTheme {
         PlayerControls(
-            isPlaying = { true },
+            isPlaying = true,
             onReplayClick = {},
             onPauseToggle = {},
             onForwardClick = {})

@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
@@ -53,7 +54,7 @@ import androidx.lifecycle.flowWithLifecycle
 import com.squirtles.domain.model.Pick
 import com.squirtles.musicroad.R
 import com.squirtles.musicroad.common.VerticalSpacer
-import com.squirtles.musicroad.musicplayer.PlayerViewModel
+import com.squirtles.musicroad.media.PlayerServiceViewModel
 import com.squirtles.musicroad.pick.PickViewModel.Companion.DEFAULT_PICK
 import com.squirtles.musicroad.pick.components.CircleAlbumCover
 import com.squirtles.musicroad.pick.components.CommentText
@@ -63,6 +64,7 @@ import com.squirtles.musicroad.pick.components.MusicVideoKnob
 import com.squirtles.musicroad.pick.components.PickInformation
 import com.squirtles.musicroad.pick.components.SongInfo
 import com.squirtles.musicroad.pick.components.music.MusicPlayer
+import com.squirtles.musicroad.pick.components.music.visualizer.BaseVisualizer
 import com.squirtles.musicroad.ui.theme.Black
 import com.squirtles.musicroad.ui.theme.White
 import com.squirtles.musicroad.videoplayer.MusicVideoScreen
@@ -72,11 +74,11 @@ import kotlin.math.absoluteValue
 @Composable
 fun DetailPickScreen(
     pickId: String,
+    pickViewModel: PickViewModel = hiltViewModel(),
+    playerServiceViewModel: PlayerServiceViewModel,
     onProfileClick: (String) -> Unit,
     onBackClick: () -> Unit,
     onDeleted: (Context) -> Unit,
-    pickViewModel: PickViewModel = hiltViewModel(),
-    playerViewModel: PlayerViewModel = hiltViewModel()
 ) {
     val context = LocalContext.current
     val uiState by pickViewModel.detailPickUiState.collectAsStateWithLifecycle()
@@ -115,7 +117,7 @@ fun DetailPickScreen(
             val onActionClick: () -> Unit = {
                 when {
                     isCreatedBySelf -> {
-                        playerViewModel.pause()
+                        playerServiceViewModel.onPause()
                         showDeletePickDialog = true
                     }
 
@@ -164,6 +166,8 @@ fun DetailPickScreen(
 
             // 비디오 플레이어 설정
             LaunchedEffect(pick) {
+                playerServiceViewModel.readyPlayer()
+                playerServiceViewModel.setMediaItem(pick)
                 isMusicVideoAvailable = pick.musicVideoUrl.isNotEmpty()
             }
 
@@ -190,9 +194,11 @@ fun DetailPickScreen(
                             userName = pick.createdBy.userName,
                             favoriteCount = favoriteCount,
                             isMusicVideoAvailable = isMusicVideoAvailable,
-                            playerViewModel = playerViewModel,
                             onProfileClick = onProfileClick,
-                            onBackClick = onBackClick,
+                            playerServiceViewModel = playerServiceViewModel,
+                            onBackClick = {
+                                onBackClick()
+                            },
                             onActionClick = onActionClick,
                         )
                     }
@@ -223,7 +229,7 @@ fun DetailPickScreen(
                 }
 
                 // 페이지 전환에 따른 음원과 뮤비 재생 상태
-                if (page != DETAIL_PICK_TAB) playerViewModel.pause()
+                if (page != DETAIL_PICK_TAB) playerServiceViewModel.onPause()
             }
         }
 
@@ -257,7 +263,7 @@ fun DetailPickScreen(
                 userName = "",
                 favoriteCount = 0,
                 isMusicVideoAvailable = false,
-                playerViewModel = playerViewModel,
+                playerServiceViewModel = playerServiceViewModel,
                 onProfileClick = onProfileClick,
                 onBackClick = onBackClick,
                 onActionClick = { }
@@ -303,7 +309,7 @@ private fun DetailPick(
     userName: String,
     favoriteCount: Int,
     isMusicVideoAvailable: Boolean,
-    playerViewModel: PlayerViewModel,
+    playerServiceViewModel: PlayerServiceViewModel,
     onProfileClick: (String) -> Unit,
     onBackClick: () -> Unit,
     onActionClick: () -> Unit
@@ -314,16 +320,16 @@ private fun DetailPick(
     val view = LocalView.current
     val context = LocalContext.current
 
+    val baseVisualizer = remember { BaseVisualizer() }
+
     val audioEffectColor = dynamicBackgroundColor.copy(
         red = (dynamicBackgroundColor.red + 0.2f).coerceAtMost(1.0f),
         green = (dynamicBackgroundColor.green + 0.2f).coerceAtMost(1.0f),
         blue = (dynamicBackgroundColor.blue + 0.2f).coerceAtMost(1.0f),
     )
 
-    // PlayerViewModel Collect
-    val playerState by playerViewModel.playerState.collectAsStateWithLifecycle()
-    val bufferPercentage by playerViewModel.bufferPercentage.collectAsStateWithLifecycle()
-    val duration by playerViewModel.duration.collectAsStateWithLifecycle()
+    val playerUiState by playerServiceViewModel.playerState.collectAsStateWithLifecycle()
+    val audioSessionId by playerServiceViewModel.audioSessionId.collectAsStateWithLifecycle(0)
 
     if (!view.isInEditMode) {
         SideEffect {
@@ -345,7 +351,9 @@ private fun DetailPick(
                 userName = userName,
                 onDynamicBackgroundColor = onDynamicBackgroundColor,
                 onProfileClick = onProfileClick,
-                onBackClick = onBackClick,
+                onBackClick = {
+                    onBackClick()
+                },
                 onActionClick = { onActionClick() }
             )
         }
@@ -382,21 +390,23 @@ private fun DetailPick(
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
+                        .height(320.dp)
                         .align(Alignment.CenterHorizontally)
                         .zIndex(0f)
                 ) {
-                    if (playerState.isReady) {
+                    if (audioSessionId != 0) {
                         CircleAlbumCover(
                             modifier = Modifier
                                 .size(320.dp)
                                 .align(Alignment.Center),
                             song = pick.song,
-                            playerState = playerState,
-                            duration = duration,
+                            currentPosition = { playerUiState.currentPosition },
+                            duration = { playerUiState.duration },
                             audioEffectColor = audioEffectColor,
-                            audioSessionId = { playerViewModel.audioSessionId },
+                            baseVisualizer = { baseVisualizer },
+                            audioSessionId = audioSessionId,
                             onSeekChanged = { timeMs ->
-                                playerViewModel.playerSeekTo(timeMs)
+                                playerServiceViewModel.onSeekingFinished(timeMs)
                             },
                         )
                     }
@@ -421,21 +431,20 @@ private fun DetailPick(
 
             if (pick.song.previewUrl.isBlank().not()) {
                 MusicPlayer(
-                    previewUrl = pick.song.previewUrl,
-                    playerState = playerState,
-                    duration = duration,
-                    bufferPercentage = bufferPercentage,
-                    readyPlayer = { sourceUrl ->
-                        playerViewModel.readyPlayer(context, sourceUrl)
-                    },
+                    song = pick.song,
+                    playerState = playerUiState,
                     onSeekChanged = { timeMs ->
-                        playerViewModel.playerSeekTo(timeMs)
+                        playerServiceViewModel.onSeekingFinished(timeMs)
                     },
-                    onReplayForwardClick = { replaySec ->
-                        playerViewModel.replayForward(replaySec)
+                    onReplayForwardClick = { isForward ->
+                        if (isForward) {
+                            playerServiceViewModel.onAdvanceBy()
+                        } else {
+                            playerServiceViewModel.onRewindBy()
+                        }
                     },
-                    onPauseToggle = {
-                        playerViewModel.togglePlayPause()
+                    onPauseToggle = { song ->
+                        playerServiceViewModel.togglePlayPause(song)
                     },
                 )
             }
@@ -458,10 +467,10 @@ private fun DetailPickPreview() {
         userName = "짱구",
         favoriteCount = 0,
         isMusicVideoAvailable = true,
-        playerViewModel = PlayerViewModel(),
         onProfileClick = {},
+        playerServiceViewModel = hiltViewModel(),
         onBackClick = {},
-        onActionClick = {}
+        onActionClick = {},
     )
 }
 

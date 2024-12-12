@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -18,19 +17,16 @@ import java.util.concurrent.TimeUnit
 
 @Composable
 internal fun PlayBar(
-    modifier: Modifier = Modifier,
     duration: Long,
-    currentTime: () -> Long,
-    bufferPercentage: () -> Int,
+    currentTime: Long,
+    bufferPercentage: Int,
+    isPlaying: Boolean,
     onSeekChanged: (timeMs: Float) -> Unit,
-    isPlaying: () -> Boolean,
     onReplayClick: () -> Unit,
     onPauseToggle: () -> Unit,
     onForwardClick: () -> Unit,
+    modifier: Modifier = Modifier,
 ) {
-    val playTime = remember(currentTime()) { currentTime() }
-    val buffer = remember(bufferPercentage()) { bufferPercentage() }
-
     Column(modifier = modifier) {
         Box(
             modifier = Modifier
@@ -38,9 +34,9 @@ internal fun PlayBar(
                 .padding(top = 12.dp)
         ) {
             PlayProgressIndicator(
-                currentTime = { playTime.toFloat() },
+                currentTime = currentTime.toFloat(),
                 duration = duration.toFloat(),
-                bufferPercentage = { buffer.toFloat() },
+                bufferPercentage = bufferPercentage.toFloat(),
                 onSeekChanged = onSeekChanged
             )
         }
@@ -52,7 +48,7 @@ internal fun PlayBar(
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             Text(
-                text = playTime.formatMinSec(),
+                text = currentTime.formatMinSec(),
                 color = Gray
             )
             Box(modifier = Modifier.weight(2f)) {
@@ -91,10 +87,10 @@ private fun PlayBarPreview() {
         PlayBar(
             modifier = Modifier.fillMaxWidth(),
             duration = 10000L,
-            currentTime = { 5000L },
-            bufferPercentage = { 50 },
+            currentTime = 5000L,
+            bufferPercentage = 50,
             onSeekChanged = {},
-            isPlaying = { true },
+            isPlaying = true,
             onReplayClick = {},
             onPauseToggle = {},
             onForwardClick = {}

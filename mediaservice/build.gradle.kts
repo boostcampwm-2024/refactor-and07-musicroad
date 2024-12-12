@@ -6,7 +6,7 @@ plugins {
 }
 
 android {
-    namespace = "com.squirtles.domain"
+    namespace = "com.squirtles.mediaservice"
     compileSdk = 34
 
     defaultConfig {
@@ -33,7 +33,6 @@ android {
 
 dependencies {
 
-    implementation(project(":mediaservice"))
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
     implementation(libs.material)
@@ -45,10 +44,10 @@ dependencies {
     implementation(libs.hilt.android)
     ksp(libs.hilt.android.compiler)
     androidTestImplementation(libs.hilt.android.testing)
-
     implementation(libs.inject)
-    implementation(libs.androidx.paging.runtime)
 
-    implementation(libs.androidx.media3.common)
+    //media3
+    implementation(libs.androidx.media3.exoplayer)
+    implementation(libs.androidx.media3.exoplayer.dash)
     implementation(libs.androidx.media3.session)
 }

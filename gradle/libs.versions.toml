@@ -23,6 +23,8 @@ junit = "4.13.2"
 junitVersion = "1.2.1"
 kotlin = "1.9.0"
 kotlinxCoroutinesPlayServices = "1.9.0"
+kotlinxCoroutinesCore = "1.9.0"
+kotlinxCoroutinesGuava = "1.9.0"
 kotlinxSerializationJson = "1.6.0"
 ksp = "1.9.0-1.0.12"
 lifecycleRuntimeKtx = "2.8.7"
@@ -54,6 +56,8 @@ androidx-media3-exoplayer = { module = "androidx.media3:media3-exoplayer", versi
 androidx-media3-exoplayer-dash = { module = "androidx.media3:media3-exoplayer-dash", version.ref = "media3Ui" }
 androidx-media3-ui = { module = "androidx.media3:media3-ui", version.ref = "media3Ui" }
 androidx-paging-runtime = { module = "androidx.paging:paging-runtime", version.ref = "pagingRuntime" }
+androidx-media3-session = { group = "androidx.media3", name = "media3-session", version.ref = "media3Ui" }
+androidx-media3-common = { group = "androidx.media3", name = "media3-common", version.ref = "media3Ui" } # for media3-common
 androidx-ui = { group = "androidx.compose.ui", name = "ui" }
 androidx-ui-graphics = { group = "androidx.compose.ui", name = "ui-graphics" }
 androidx-ui-tooling = { group = "androidx.compose.ui", name = "ui-tooling" }
@@ -65,6 +69,8 @@ androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version
 androidx-navigation-compose = { module = "androidx.navigation:navigation-compose", version.ref = "navigationCompose" }
 androidx-core-splashscreen = { module = "androidx.core:core-splashscreen", version.ref = "splashscreen" }
 androidx-compose-material = { group = "androidx.wear.compose", name = "compose-material", version.ref = "composeMaterial" }
+kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlinxCoroutinesCore" }
+kotlinx-coroutines-guava = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-guava", version.ref = "kotlinxCoroutinesGuava" }
 
 # Firebase
 firebase-analytics = { module = "com.google.firebase:firebase-analytics" }

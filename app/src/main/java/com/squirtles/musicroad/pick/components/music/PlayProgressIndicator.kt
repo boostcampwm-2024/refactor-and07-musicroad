@@ -16,14 +16,14 @@ import com.squirtles.musicroad.ui.theme.White
 @Composable
 internal fun PlayProgressIndicator(
     modifier: Modifier = Modifier,
-    currentTime: () -> Float,
-    bufferPercentage: () -> Float,
+    currentTime: Float,
+    bufferPercentage: Float,
     duration: Float,
     onSeekChanged: (Float) -> Unit
 ) {
     Box(modifier = modifier) {
         LinearProgressIndicator(
-            progress = { bufferPercentage() / 100f },
+            progress = { bufferPercentage / 100f },
             modifier = Modifier.fillMaxWidth(),
             color = DarkGray,
             trackColor = Color.DarkGray,
@@ -32,7 +32,7 @@ internal fun PlayProgressIndicator(
         )
 
         LinearProgressIndicator(
-            progress = { currentTime() / duration },
+            progress = { currentTime / duration },
             modifier = Modifier.fillMaxWidth(),
             color = White,
             trackColor = Color.Transparent,

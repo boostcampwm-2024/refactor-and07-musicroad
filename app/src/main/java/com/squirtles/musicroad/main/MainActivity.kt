@@ -38,7 +38,6 @@ import kotlinx.coroutines.withTimeout
 class MainActivity : AppCompatActivity() {
     private val mainViewModel by viewModels<MainViewModel>()
 
-
     override fun onCreate(savedInstanceState: Bundle?) {
         val splashScreen = installSplashScreen()
         super.onCreate(savedInstanceState)
