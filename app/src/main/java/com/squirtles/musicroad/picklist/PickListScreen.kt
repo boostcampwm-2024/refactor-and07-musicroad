@@ -1,6 +1,7 @@
 package com.squirtles.musicroad.picklist
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -9,16 +10,22 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -43,6 +50,7 @@ fun PickListScreen(
     pickListViewModel: PickListViewModel = hiltViewModel()
 ) {
     val uiState by pickListViewModel.pickListUiState.collectAsStateWithLifecycle()
+    var showSortListSheet by rememberSaveable { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
         if (isFavoritePicks) {
@@ -67,6 +75,7 @@ fun PickListScreen(
                 .fillMaxSize()
                 .background(Brush.verticalGradient(colorStops = COLOR_STOPS))
                 .padding(innerPadding)
+//                .displayCutoutPadding() // FIXME: 가로모드에서만 적용하기. 아니면 세로모드일 때 이만큼 목록이 내려옴
         ) {
             when (uiState) {
                 PickListUiState.Loading -> {
@@ -80,6 +89,7 @@ fun PickListScreen(
 
                 is PickListUiState.Success -> {
                     val pickList = (uiState as PickListUiState.Success).pickList
+                    val order = (uiState as PickListUiState.Success).order
 
                     Column(
                         modifier = Modifier.fillMaxSize()
@@ -96,13 +106,34 @@ fun PickListScreen(
                                 defaultColor = White,
                             )
 
-                            Text(
-                                text = stringResource(
-                                    if (isFavoritePicks) R.string.latest_favorite_order else R.string.latest_create_order
-                                ),
-                                color = White,
-                                style = MaterialTheme.typography.bodyMedium
-                            )
+                            Box(
+                                modifier = Modifier
+                                    .wrapContentSize()
+                                    .clip(CircleShape)
+                                    .clickable { showSortListSheet = true }
+                            ) {
+                                Text(
+                                    text = "${
+                                        stringResource(
+                                            when (order) {
+                                                Order.LATEST ->
+                                                    if (isFavoritePicks) R.string.latest_favorite_order else R.string.latest_create_order
+
+                                                Order.OLDEST ->
+                                                    if (isFavoritePicks) R.string.oldest_favorite_order else R.string.oldest_create_order
+
+                                                Order.FAVORITE_DESC -> R.string.favorite_count_desc
+                                            }
+                                        )
+                                    }  ▼",
+                                    modifier = Modifier.padding(
+                                        horizontal = DEFAULT_PADDING / 2,
+                                        vertical = DEFAULT_PADDING / 4
+                                    ),
+                                    color = White,
+                                    style = MaterialTheme.typography.bodyMedium
+                                )
+                            }
                         }
 
                         VerticalSpacer(8)
@@ -154,5 +185,13 @@ fun PickListScreen(
                 }
             }
         }
+    }
+
+    if (showSortListSheet) {
+        SortListBottomSheet(
+            isFavoritePicks = isFavoritePicks,
+            onDismissRequest = { showSortListSheet = false },
+            onOrderClick = { order -> pickListViewModel.setListOrder(order) },
+        )
     }
 }
