@@ -6,6 +6,7 @@ import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import com.squirtles.domain.datasource.LocalDataSource
+import com.squirtles.domain.model.Order
 import com.squirtles.domain.model.User
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -25,6 +26,12 @@ class LocalDataSourceImpl @Inject constructor(
 
     private var _currentLocation: MutableStateFlow<Location?> = MutableStateFlow(null)
     override val lastLocation: StateFlow<Location?> = _currentLocation.asStateFlow()
+
+    private var _favoriteListOrder = Order.LATEST
+    override val favoriteListOrder get() = _favoriteListOrder
+
+    private var _myListOrder = Order.LATEST
+    override val myListOrder get() = _myListOrder
 
     override fun readUserId(): Flow<String?> {
         val dataStoreKey = stringPreferencesKey(USER_ID_KEY)
@@ -46,6 +53,14 @@ class LocalDataSourceImpl @Inject constructor(
 
     override suspend fun saveCurrentLocation(location: Location) {
         _currentLocation.emit(location)
+    }
+
+    override suspend fun saveFavoriteListOrder(order: Order) {
+        _favoriteListOrder = order
+    }
+
+    override suspend fun saveMyListOrder(order: Order) {
+        _myListOrder = order
     }
 
     companion object {

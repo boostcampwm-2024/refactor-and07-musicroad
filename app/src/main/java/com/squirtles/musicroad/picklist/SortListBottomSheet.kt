@@ -17,6 +17,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
+import com.squirtles.domain.model.Order
 import com.squirtles.musicroad.R
 import com.squirtles.musicroad.common.Constants.DEFAULT_PADDING
 import com.squirtles.musicroad.ui.theme.Dark

@@ -32,6 +32,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.wear.compose.material.CircularProgressIndicator
+import com.squirtles.domain.model.Order
 import com.squirtles.musicroad.R
 import com.squirtles.musicroad.common.Constants.COLOR_STOPS
 import com.squirtles.musicroad.common.Constants.DEFAULT_PADDING
@@ -191,7 +192,9 @@ fun PickListScreen(
         SortListBottomSheet(
             isFavoritePicks = isFavoritePicks,
             onDismissRequest = { showSortListSheet = false },
-            onOrderClick = { order -> pickListViewModel.setListOrder(order) },
+            onOrderClick = { order ->
+                pickListViewModel.setListOrder(isFavoritePicks, order)
+            },
         )
     }
 }
