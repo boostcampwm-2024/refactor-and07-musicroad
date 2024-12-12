@@ -191,6 +191,7 @@ fun PickListScreen(
     if (showSortListSheet) {
         SortListBottomSheet(
             isFavoritePicks = isFavoritePicks,
+            currentOrder = (uiState as PickListUiState.Success).order,
             onDismissRequest = { showSortListSheet = false },
             onOrderClick = { order ->
                 pickListViewModel.setListOrder(isFavoritePicks, order)

@@ -56,6 +56,7 @@
     <string name="oldest_favorite_order">과거 담은순</string>
     <string name="oldest_create_order">과거 등록순</string>
     <string name="favorite_count_desc">담기 많은순</string>
+    <string name="selected_icon_description">체크 아이콘</string>
     <string name="close_button_text">닫기</string>
 
     <!-- Search Music -->
