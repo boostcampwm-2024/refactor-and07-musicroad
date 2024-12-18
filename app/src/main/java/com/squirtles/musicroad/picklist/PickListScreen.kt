@@ -1,11 +1,13 @@
 package com.squirtles.musicroad.picklist
 
+import android.content.res.Configuration
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.displayCutoutPadding
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -27,6 +29,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -50,6 +53,7 @@ fun PickListScreen(
     onItemClick: (String) -> Unit,
     pickListViewModel: PickListViewModel = hiltViewModel()
 ) {
+    val isLandscape = LocalConfiguration.current.orientation == Configuration.ORIENTATION_LANDSCAPE
     val uiState by pickListViewModel.pickListUiState.collectAsStateWithLifecycle()
     var showOrderBottomSheet by rememberSaveable { mutableStateOf(false) }
 
@@ -76,7 +80,7 @@ fun PickListScreen(
                 .fillMaxSize()
                 .background(Brush.verticalGradient(colorStops = COLOR_STOPS))
                 .padding(innerPadding)
-//                .displayCutoutPadding() // FIXME: 가로모드에서만 적용하기. 아니면 세로모드일 때 이만큼 목록이 내려옴
+                .then(if (isLandscape) Modifier.displayCutoutPadding() else Modifier)
         ) {
             when (uiState) {
                 PickListUiState.Loading -> {
