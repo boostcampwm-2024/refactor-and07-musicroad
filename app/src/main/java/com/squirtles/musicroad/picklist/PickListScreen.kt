@@ -51,7 +51,7 @@ fun PickListScreen(
     pickListViewModel: PickListViewModel = hiltViewModel()
 ) {
     val uiState by pickListViewModel.pickListUiState.collectAsStateWithLifecycle()
-    var showSortListSheet by rememberSaveable { mutableStateOf(false) }
+    var showOrderBottomSheet by rememberSaveable { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
         if (isFavoritePicks) {
@@ -111,7 +111,7 @@ fun PickListScreen(
                                 modifier = Modifier
                                     .wrapContentSize()
                                     .clip(CircleShape)
-                                    .clickable { showSortListSheet = true }
+                                    .clickable { showOrderBottomSheet = true }
                             ) {
                                 Text(
                                     text = "${
@@ -188,11 +188,11 @@ fun PickListScreen(
         }
     }
 
-    if (showSortListSheet) {
-        SortListBottomSheet(
+    if (showOrderBottomSheet) {
+        OrderBottomSheet(
             isFavoritePicks = isFavoritePicks,
             currentOrder = (uiState as PickListUiState.Success).order,
-            onDismissRequest = { showSortListSheet = false },
+            onDismissRequest = { showOrderBottomSheet = false },
             onOrderClick = { order ->
                 pickListViewModel.setListOrder(isFavoritePicks, order)
             },

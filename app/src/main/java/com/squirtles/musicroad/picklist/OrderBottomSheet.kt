@@ -33,7 +33,7 @@ import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SortListBottomSheet(
+fun OrderBottomSheet(
     isFavoritePicks: Boolean,
     currentOrder: Order,
     onDismissRequest: () -> Unit,
