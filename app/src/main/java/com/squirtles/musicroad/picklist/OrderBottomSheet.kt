@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.displayCutoutPadding
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.material.icons.Icons
@@ -13,6 +14,7 @@ import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
@@ -52,10 +54,11 @@ fun OrderBottomSheet(
         modifier = Modifier
             .fillMaxWidth()
             .wrapContentHeight()
-            .displayCutoutPadding(),
-        // FIXME: navigationBarsPadding을 가로모드에서만 적용하기. 세로모드일 때도 적용하면 바텀 시트가 더 올라와서 이상해보임
+            .displayCutoutPadding()
+            .navigationBarsPadding(),
         sheetState = sheetState,
         containerColor = Dark,
+        scrimColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.32f),
     ) {
         Column(
             modifier = Modifier.fillMaxWidth(),
