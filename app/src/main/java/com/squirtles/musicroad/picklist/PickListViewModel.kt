@@ -70,25 +70,19 @@ class PickListViewModel @Inject constructor(
 
     private fun setList(order: Order) {
         defaultList?.let { pickList ->
-            when (order) {
-                Order.LATEST ->
-                    _pickListUiState.value = PickListUiState.Success(
-                        pickList = pickList,
-                        order = order
-                    )
+            val sortedList = when (order) {
+                Order.LATEST -> pickList
 
-                Order.OLDEST ->
-                    _pickListUiState.value = PickListUiState.Success(
-                        pickList = pickList.reversed(),
-                        order = order
-                    )
+                Order.OLDEST -> pickList.reversed()
 
                 Order.FAVORITE_DESC ->
-                    _pickListUiState.value = PickListUiState.Success(
-                        pickList = pickList.sortedByDescending { it.favoriteCount },
-                        order = order
-                    )
+                    pickList.sortedByDescending { it.favoriteCount }
             }
+
+            _pickListUiState.value = PickListUiState.Success(
+                pickList = sortedList,
+                order = order
+            )
         }
     }
 }
